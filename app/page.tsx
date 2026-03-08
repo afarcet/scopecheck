@@ -23,13 +23,27 @@ function Note({ text, rotate = -1.5, link }: { text: string; rotate?: number; li
   return <span style={style}>{text}</span>;
 }
 
+function SignInButton() {
+  const handleSignIn = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: window.location.origin },
+    });
+  };
+  return (
+    <button onClick={handleSignIn} style={{ background: "none", border: "none", color: "var(--white-mid)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "5px 0", cursor: "pointer", letterSpacing: "0.06em", whiteSpace: "nowrap", textDecoration: "none" }}>
+      sign in
+    </button>
+  );
+}
+
 function SignOutButton() {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     window.location.reload();
   };
   return (
-    <button onClick={handleSignOut} style={{ background: "none", border: "1px solid var(--border2)", color: "var(--white-dim)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "5px 10px", cursor: "pointer", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>
+    <button onClick={handleSignOut} style={{ background: "none", border: "none", color: "var(--white-dim)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "5px 10px", cursor: "pointer", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>
       sign out
     </button>
   );
@@ -74,7 +88,6 @@ export default function LandingPage() {
           <a href="#how" className="btn-secondary" style={{ padding: "5px 12px", fontSize: "10px", whiteSpace: "nowrap" }}>how it works</a>
           {authed && sessionUser ? (
             <>
-              <span style={{ fontSize: "10px", color: "var(--white-dim)", letterSpacing: "0.06em", maxWidth: "160px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sessionUser.email}</span>
               {(sessionUser.role === "investor" || sessionUser.role === "both") && (
                 <a href="/dashboard" className="btn-secondary" style={{ padding: "5px 12px", fontSize: "10px", whiteSpace: "nowrap" }}>pipeline →</a>
               )}
@@ -84,10 +97,17 @@ export default function LandingPage() {
               {sessionUser.role === null && (
                 <a href="/scope" className="btn-primary" style={{ padding: "5px 12px", fontSize: "10px", whiteSpace: "nowrap" }}>define scope →</a>
               )}
-              <SignOutButton />
+              {/* Email + sign out grouped as one unit */}
+              <div style={{ display: "flex", alignItems: "center", gap: "0", border: "1px solid var(--border2)", background: "var(--bg2)" }}>
+                <span style={{ fontSize: "10px", color: "var(--white-dim)", letterSpacing: "0.04em", padding: "5px 10px", maxWidth: "150px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", borderRight: "1px solid var(--border2)" }}>{sessionUser.email}</span>
+                <SignOutButton />
+              </div>
             </>
           ) : (
-            <a href="/scope" className="btn-primary" style={{ padding: "5px 12px", fontSize: "10px", whiteSpace: "nowrap" }}>get started →</a>
+            <>
+              <SignInButton />
+              <a href="/scope" className="btn-primary" style={{ padding: "5px 12px", fontSize: "10px", whiteSpace: "nowrap" }}>get started →</a>
+            </>
           )}
         </div>
       </nav>

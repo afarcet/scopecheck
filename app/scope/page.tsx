@@ -46,36 +46,27 @@ export default function ScopePage() {
   };
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        setUser({
-          id: session.user.id,
-          email: session.user.email!,
-          name: session.user.user_metadata?.full_name || "",
-        });
-        setForm(f => ({
-          ...f,
-          name: session.user.user_metadata?.full_name || "",
-          handle: (session.user.email?.split("@")[0] || "").toLowerCase().replace(/[^a-z0-9]/g, ""),
-        }));
-        setStep("form");
+    const handleSession = async (session: { user: { id: string; email?: string; user_metadata?: Record<string, string> } } | null) => {
+      if (!session?.user) return;
+      // Check if investor profile already exists → redirect to dashboard
+      const { data: existing } = await supabase.from("investors").select("handle").eq("user_id", session.user.id).maybeSingle();
+      if (existing?.handle) {
+        router.push("/dashboard");
+        return;
       }
-    });
+      setUser({ id: session.user.id, email: session.user.email!, name: session.user.user_metadata?.full_name || "" });
+      setForm(f => ({
+        ...f,
+        name: session.user.user_metadata?.full_name || "",
+        handle: (session.user.email?.split("@")[0] || "").toLowerCase().replace(/[^a-z0-9]/g, ""),
+      }));
+      setStep("form");
+    };
+
+    supabase.auth.getSession().then(({ data: { session } }) => handleSession(session?.user ? session : null));
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setUser({
-          id: session.user.id,
-          email: session.user.email!,
-          name: session.user.user_metadata?.full_name || "",
-        });
-        setForm(f => ({
-          ...f,
-          name: session.user.user_metadata?.full_name || "",
-          handle: (session.user.email?.split("@")[0] || "").toLowerCase().replace(/[^a-z0-9]/g, ""),
-        }));
-        setStep("form");
-      }
+      handleSession(session?.user ? session : null);
     });
 
     return () => subscription.unsubscribe();
