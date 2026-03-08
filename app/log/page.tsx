@@ -8,6 +8,33 @@ import Link from "next/link";
 
 const LOG_ENTRIES = [
   {
+    id: "021",
+    date: "2026-03-08",
+    time: "18:00",
+    tag: "product",
+    title: "The inline apply flow is the killer feature — and it's invisible on the homepage",
+    body: `Ended today's session with a clear product question for tomorrow: how do you show that a founder can apply to an investor directly from their scope page?\n\nRight now the homepage explains what the product does, but doesn't demonstrate the moment of value. That moment is: a founder lands on an investor's scope, sees that they match, and hits send — without leaving the page, without signing up first, without a separate application form.\n\nThat's not a feature. That's the product. Everything else — passports, kanban, /for-llm — is infrastructure that makes that moment better over time.\n\nThe homepage currently treats investors and founders symmetrically. The inline apply flow breaks that symmetry in the most useful way: it makes the investor's scope page the acquisition channel for founders. Every scope is a landing page. Every send intro is a founder onboarded.\n\nThe question for Monday: how do you make that visible before someone clicks.`,
+    meta: "homepage strategy · inline apply · acquisition mechanic",
+  },
+  {
+    id: "020",
+    date: "2026-03-08",
+    time: "17:30",
+    tag: "build",
+    title: "UX polish session: sign out, copy icon, owner view, nav identity",
+    body: `A focused session on the logged-in experience:\n\nSign out: added to the homepage nav and both dashboards. Previously you had to clear cookies to switch accounts.\n\nCopy icon: replaced the text-label "copy" button with a Google-style two-stacked-pages SVG icon. Flips to a checkmark (amber) for 2 seconds on click. Clean, no label needed.\n\nOwner view on scope page: when you visit your own /i/handle signed in, you no longer see the "send intro" button. Instead you see your profile URL with a copy icon, plus pipeline and edit scope links. The page now knows if you're the owner.\n\nNav identity: email and sign out are now grouped as a single bordered unit — \`email | sign out\`. Cleaner than having the email floating between two buttons.\n\nEdit scope pre-fills: clicking "edit scope" now loads your existing data into the form. Previously it showed a blank form.`,
+    meta: "ux · sign out · copy icon · owner view · nav identity",
+  },
+  {
+    id: "019",
+    date: "2026-03-08",
+    time: "17:00",
+    tag: "build",
+    title: "Live example on homepage: real QR, real /for-llm, real scope",
+    body: `The example investor card on the homepage was pointing to a static demo. Replaced with the live /i/raspberrysyndicate scope — Alex Farcet / Raspberry Ventures.\n\nThe reasoning: a demo that works is better than a demo that looks like it works. A founder landing on the homepage can now click "send intro" on the example card and actually send an intro. That intro will land in the real kanban. The demo is the product.\n\nAlso replaced the dead QR and /for-llm buttons with live versions. The QR renders the actual URL. The /for-llm link opens the machine-readable criteria page. Both are real infrastructure, not mockups.\n\nSmall copy change in "how it works": removed the line about finding investors on ScopeCheck. Founders share their passport — they don't need to find investors here first. The product works when founders bring the link to investors, not just the other way round.`,
+    meta: "homepage · live example · real QR · copy update",
+  },
+    {
     id: "016",
     date: "2026-03-08",
     time: "15:00",
@@ -322,7 +349,7 @@ export default function LogPage() {
       {/* Footer */}
       <footer style={{ borderTop: "1px solid var(--border)", padding: "14px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", maxWidth: "720px", margin: "0 auto" }}>
         <span style={{ fontSize: "11px", color: "var(--white-mid)" }}>
-          scopecheck.ai · by <a href="https://raspberry.ventures" target="_blank" rel="noopener" style={{ color: "var(--rasp)", textDecoration: "none" }}>raspberry.ventures</a>
+          scopecheck.ai · built by <a href="https://alexfarcet.com" target="_blank" rel="noopener" style={{ color: "var(--rasp)", textDecoration: "none" }}>Alex Farcet</a>
         </span>
         <span style={{ fontSize: "10px", color: "var(--white-dim)" }}>// built in public with AI · 2026</span>
       </footer>
