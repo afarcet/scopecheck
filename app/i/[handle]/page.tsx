@@ -115,7 +115,27 @@ export default function InvestorProfilePage({
       return;
     }
 
-    setPassportUrl(`https://scopecheck.ai/f/${passportHandle}`);
+    const finalPassportUrl = `https://scopecheck.ai/f/${passportHandle}`;
+    setPassportUrl(finalPassportUrl);
+
+    // Trigger notification emails (fire and forget — don't block UI on this)
+    fetch("/api/send-intro", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        investorHandle: handle,
+        founderName: form.founder_name,
+        companyName: form.company_name,
+        oneLiner: form.one_liner,
+        stage: form.stage,
+        sector: form.sector,
+        traction: form.traction,
+        deckUrl: form.deck_url || null,
+        passportHandle,
+        founderEmail: session?.email,
+      }),
+    }).catch(console.error); // non-blocking
+
     setIntroStep("done");
     setIntroLoading(false);
   };

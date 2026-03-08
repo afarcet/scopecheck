@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" fill="#0d0d0d"/>
+  <!-- S mark — two horizontal bars + diagonal, minimal -->
+  <rect x="8" y="7" width="16" height="3" rx="1" fill="#d4286a"/>
+  <rect x="8" y="14.5" width="16" height="3" rx="1" fill="#d4286a"/>
+  <rect x="8" y="22" width="16" height="3" rx="1" fill="#d4286a"/>
+  <!-- scope tick — small amber dot bottom right -->
+  <circle cx="26" cy="26" r="3" fill="#f0a500"/>
+</svg>

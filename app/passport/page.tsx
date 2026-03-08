@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { CopyButton } from "@/components/CopyButton";
 
 const STAGES = ["Pre-seed", "Seed", "Early-A", "Series A", "Series B+"];
 const SECTORS = ["Applied AI", "ClimateTech", "FinTech", "HealthTech", "DeepTech", "SaaS", "Consumer", "Web3", "Other"];
@@ -328,9 +329,16 @@ export default function PassportPage() {
           <div style={{ textAlign: "center", padding: "60px 0", animation: "fadeUp 0.3s ease both" }}>
             <div style={{ fontSize: "32px", marginBottom: "16px", color: "var(--amber)" }}>✓</div>
             <h2 style={{ fontSize: "22px", fontWeight: 700, marginBottom: "8px" }}>Startup passport created.</h2>
-            <p style={{ fontSize: "12px", color: "var(--white-mid)" }}>
-              Redirecting to <span style={{ color: "var(--amber)" }}>scopecheck.ai/f/{form.handle}</span>
+            <p style={{ fontSize: "12px", color: "var(--white-mid)", marginBottom: "16px" }}>
+              Your passport is live at:
             </p>
+            <div style={{ display: "flex", alignItems: "center", gap: "0", maxWidth: "400px", margin: "0 auto 16px" }}>
+              <div style={{ flex: 1, background: "var(--bg3)", border: "1px solid var(--border2)", borderLeft: "2px solid var(--amber)", borderRight: "none", padding: "9px 14px", fontSize: "12px", color: "var(--amber)", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>
+                scopecheck.ai/f/{form.handle}
+              </div>
+              <CopyButton text={`https://scopecheck.ai/f/${form.handle}`} style={{ borderLeft: "none" }} />
+            </div>
+            <p style={{ fontSize: "11px", color: "var(--white-dim)" }}>Redirecting to your passport...</p>
           </div>
         )}
       </div>

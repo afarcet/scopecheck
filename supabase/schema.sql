@@ -126,3 +126,39 @@ create policy "Users can insert their own founder profile"
 
 create policy "Anyone can insert to waitlist"
   on waitlist for insert with check (true);
+
+-- ─────────────────────────────────────────────
+-- MIGRATIONS — run these if you already have the table
+-- ─────────────────────────────────────────────
+
+-- Add view_count to founders (passport views tracker)
+alter table founders add column if not exists view_count integer default 0;
+
+-- Add status to founders (active/paused)
+alter table founders add column if not exists status text default 'active' check (status in ('active', 'paused'));
+
+-- Function to increment view count safely
+create or replace function increment_view_count(founder_id uuid)
+returns void as $$
+  update founders set view_count = coalesce(view_count, 0) + 1 where id = founder_id;
+$$ language sql security definer;
+
+-- Allow anyone to call the increment function (founders increment their own view count when visited)
+grant execute on function increment_view_count(uuid) to anon, authenticated;
+
+-- Email preferences table (for unsubscribe management)
+create table if not exists email_preferences (
+  id uuid primary key default gen_random_uuid(),
+  email text not null unique,
+  unsubscribe_intros boolean default false,
+  unsubscribe_onboarding boolean default false,
+  unsubscribe_digest boolean default false,
+  unsubscribed_all boolean default false,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+alter table email_preferences enable row level security;
+
+create policy "Anyone can manage their email preferences"
+  on email_preferences for all using (true) with check (true);

@@ -2,11 +2,17 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ScopeCheck — The smarter way to share deal flow",
-  description: "Investors define their criteria once. Founders build their pitch passport once. The infrastructure layer for modern deal flow.",
+  title: "ScopeCheck — Deal flow infrastructure for the AI era",
+  description: "Investors define their criteria once. Founders build their passport once. The infrastructure layer for modern deal flow.",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon-32.png", type: "image/png", sizes: "32x32" },
+    ],
+  },
   openGraph: {
     title: "ScopeCheck",
-    description: "The smarter link for deal flow. For investors, founders, and everyone in between.",
+    description: "Deal flow infrastructure for the AI era.",
     url: "https://scopecheck.ai",
     siteName: "ScopeCheck",
     type: "website",
@@ -14,7 +20,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "ScopeCheck",
-    description: "The smarter link for deal flow.",
+    description: "Deal flow infrastructure for the AI era.",
   },
 };
 

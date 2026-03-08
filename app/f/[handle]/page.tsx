@@ -23,6 +23,9 @@ export default async function FounderPassportPage({
 
   if (!founder) notFound();
 
+  // Increment view count (fire and forget)
+  try { await supabase.rpc('increment_view_count', { founder_id: founder.id }); } catch { /* non-blocking */ }
+
   const profileUrl = `https://scopecheck.ai/f/${handle}`;
   const roundSize = founder.round_size || 0;
   const committed = founder.committed || 0;

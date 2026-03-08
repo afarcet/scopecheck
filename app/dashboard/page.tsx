@@ -46,12 +46,17 @@ export default function Dashboard() {
   const [apps, setApps] = useState<Application[]>(MOCK_APPLICATIONS);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+  const [investorHandle, setInvestorHandle] = useState("");
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!session?.user) {
         router.push("/scope");
       } else {
+        setUserEmail(session.user.email || "");
+        const { data: inv } = await supabase.from("investors").select("handle").eq("user_id", session.user.id).maybeSingle();
+        if (inv) setInvestorHandle(inv.handle);
         setAuthChecked(true);
       }
     });
@@ -85,9 +90,16 @@ export default function Dashboard() {
           </span>
         </div>
         <div style={{ display: "flex", gap: "0.8rem", alignItems: "center" }}>
-          <Link href="/scope" className="btn-secondary" style={{ padding: "0.45rem 1rem", fontSize: "0.7rem" }}>
-            My scope ↗
-          </Link>
+          {userEmail && (
+            <span style={{ fontSize: "0.68rem", color: "var(--slate)", letterSpacing: "0.06em", maxWidth: "180px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {userEmail}
+            </span>
+          )}
+          {investorHandle && (
+            <a href={`/i/${investorHandle}`} className="btn-secondary" style={{ padding: "0.45rem 1rem", fontSize: "0.7rem", whiteSpace: "nowrap" }}>
+              My scope ↗
+            </a>
+          )}
           <Link href="/" className="btn-secondary" style={{ padding: "0.45rem 1rem", fontSize: "0.7rem" }}>
             Home
           </Link>

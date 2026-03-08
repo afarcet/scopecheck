@@ -25,10 +25,27 @@ function Note({ text, rotate = -1.5, link }: { text: string; rotate?: number; li
 
 export default function LandingPage() {
   const [authed, setAuthed] = useState(false);
+  const [sessionUser, setSessionUser] = useState<{ email: string; role: string | null } | null>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => setAuthed(!!session?.user));
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => setAuthed(!!session?.user));
+    const resolveSession = async (userId: string, email: string) => {
+      const [{ data: inv }, { data: founder }] = await Promise.all([
+        supabase.from("investors").select("handle").eq("user_id", userId).maybeSingle(),
+        supabase.from("founders").select("handle").eq("user_id", userId).maybeSingle(),
+      ]);
+      const role = inv && founder ? "both" : inv ? "investor" : founder ? "founder" : null;
+      setSessionUser({ email, role });
+    };
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setAuthed(!!session?.user);
+      if (session?.user) resolveSession(session.user.id, session.user.email!);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      setAuthed(!!session?.user);
+      if (session?.user) resolveSession(session.user.id, session.user.email!);
+      else setSessionUser(null);
+    });
     return () => subscription.unsubscribe();
   }, []);
 
@@ -43,13 +60,21 @@ export default function LandingPage() {
         </div>
         <div style={{ display: "flex", gap: "6px", alignItems: "center", flexShrink: 0 }}>
           <a href="#how" className="btn-secondary" style={{ padding: "5px 12px", fontSize: "10px", whiteSpace: "nowrap" }}>how it works</a>
-          {authed ? (
+          {authed && sessionUser ? (
             <>
-              <a href="/dashboard" className="btn-secondary" style={{ padding: "5px 12px", fontSize: "10px", whiteSpace: "nowrap" }}>dashboard</a>
-              <a href="/scope" className="btn-primary" style={{ padding: "5px 12px", fontSize: "10px", whiteSpace: "nowrap" }}>my scope →</a>
+              <span style={{ fontSize: "10px", color: "var(--white-dim)", letterSpacing: "0.06em", maxWidth: "160px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sessionUser.email}</span>
+              {(sessionUser.role === "investor" || sessionUser.role === "both") && (
+                <a href="/dashboard" className="btn-secondary" style={{ padding: "5px 12px", fontSize: "10px", whiteSpace: "nowrap" }}>pipeline →</a>
+              )}
+              {(sessionUser.role === "founder" || sessionUser.role === "both") && (
+                <a href="/founder-dashboard" className="btn-secondary" style={{ padding: "5px 12px", fontSize: "10px", whiteSpace: "nowrap" }}>my passport →</a>
+              )}
+              {sessionUser.role === null && (
+                <a href="/scope" className="btn-primary" style={{ padding: "5px 12px", fontSize: "10px", whiteSpace: "nowrap" }}>define scope →</a>
+              )}
             </>
           ) : (
-            <a href="/scope" className="btn-primary" style={{ padding: "5px 12px", fontSize: "10px", whiteSpace: "nowrap" }}>get access →</a>
+            <a href="/scope" className="btn-primary" style={{ padding: "5px 12px", fontSize: "10px", whiteSpace: "nowrap" }}>get started →</a>
           )}
         </div>
       </nav>
@@ -99,7 +124,7 @@ export default function LandingPage() {
                 Define once, share proactively. Every founder who reaches out already knows your criteria — structured inbound, no back-and-forth.
               </p>
               <div style={{ background: "var(--bg3)", border: "1px solid var(--border)", borderLeft: "2px solid var(--rasp)", padding: "7px 12px", fontSize: "11px", color: "var(--rasp)", marginBottom: "14px", letterSpacing: "0.02em" }}>
-                scopecheck.ai/i/<span style={{ color: "var(--white-mid)" }}>yourhandle</span>
+                <a href="/i/demo" style={{ textDecoration: "none", color: "inherit" }}>scopecheck.ai/i/<span style={{ color: "var(--white-mid)" }}>yourhandle</span></a>
               </div>
               {/* Fan-out visual */}
               <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
@@ -129,7 +154,7 @@ export default function LandingPage() {
                 Build your passport once. Share it with any investor — on ScopeCheck or anywhere else. Apply in seconds without repeating yourself.
               </p>
               <div style={{ background: "var(--bg3)", border: "1px solid var(--border)", borderLeft: "2px solid var(--amber)", padding: "7px 12px", fontSize: "11px", color: "var(--amber)", marginBottom: "14px", letterSpacing: "0.02em" }}>
-                scopecheck.ai/f/<span style={{ color: "var(--white-mid)" }}>yourcompany</span>
+                <a href="/f/acme" style={{ textDecoration: "none", color: "inherit" }}>scopecheck.ai/f/<span style={{ color: "var(--white-mid)" }}>yourcompany</span></a>
               </div>
               {/* Fan-out visual */}
               <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
@@ -188,7 +213,7 @@ export default function LandingPage() {
               <div style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: "20px" }}>// founder</div>
               {[
                 { step: "today", label: "Build your passport once. Find an investor on ScopeCheck, send your intro in seconds — fields auto-fill on every return visit." },
-                { step: "next", label: "See your fit score before you send. Know your chances before committing the conversation." },
+                { step: "next", label: "Know your chances, and customise, before sending your passport." },
                 { step: "soon", label: "We surface the right investors for your stage and sector. Warm, relevant introductions — without cold outreach." },
               ].map(({ step, label }) => (
                 <div key={step} style={{ display: "flex", gap: "14px", marginBottom: "18px", alignItems: "flex-start" }}>
