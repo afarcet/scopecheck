@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import { QRButton } from "./qr-button";
+import { CopyRow } from "@/components/CopyButton";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -222,7 +223,7 @@ export default function InvestorProfilePage({
                   <div style={{ padding: "9px 14px", background: "var(--bg3)", fontSize: "10px", color: "var(--white-mid)", borderRight: "1px solid var(--border)", letterSpacing: "0.06em" }}>sectors</div>
                   <div style={{ padding: "9px 14px", fontSize: "12px" }}>
                     {(inv.sectors as string[]).map((s: string, i: number) => (
-                      <span key={s}><span style={{ color: "var(--amber)" }}>{s}</span>{i < (inv.sectors as string[]).length - 1 ? " · " : ""}</span>
+                      <span key={s}><span style={{ color: "var(--rasp)" }}>{s}</span>{i < (inv.sectors as string[]).length - 1 ? " · " : ""}</span>
                     ))}
                   </div>
                 </div>
@@ -247,17 +248,34 @@ export default function InvestorProfilePage({
               )}
             </div>
 
-            <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
-              <button
-                onClick={() => { setShowIntro(true); if (session) setIntroStep("form"); else setIntroStep("auth"); }}
-                style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center", background: "var(--rasp)", color: "#fff", border: "1px solid var(--rasp)", fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", fontWeight: 700, letterSpacing: "0.06em", padding: "9px 16px", cursor: "pointer" }}>
-                $ send intro →
-              </button>
-              <QRButton url={profileUrl} />
-              <Link href={`/i/${handle}/for-llm`} style={{ background: "var(--bg3)", color: "var(--white-mid)", border: "1px solid var(--border2)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "9px 12px", textDecoration: "none" }}>
-                /for-llm
-              </Link>
-            </div>
+            {/* Owner bar vs visitor bar */}
+            {session && (inv as { user_id?: string }).user_id === session.id ? (
+              // Owner view — edit + copy
+              <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
+                <CopyRow url={profileUrl} color="var(--rasp)" />
+                <div style={{ display: "flex", gap: "6px", marginTop: "0" }}>
+                  <Link href="/dashboard" style={{ background: "var(--bg3)", color: "var(--white-mid)", border: "1px solid var(--border2)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "9px 12px", textDecoration: "none", whiteSpace: "nowrap" }}>
+                    pipeline ↗
+                  </Link>
+                  <Link href="/scope" style={{ background: "var(--rasp)", color: "#fff", border: "1px solid var(--rasp)", fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", fontWeight: 700, letterSpacing: "0.06em", padding: "9px 16px", textDecoration: "none", whiteSpace: "nowrap" }}>
+                    edit scope →
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              // Visitor view — send intro
+              <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
+                <button
+                  onClick={() => { setShowIntro(true); if (session) setIntroStep("form"); else setIntroStep("auth"); }}
+                  style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center", background: "var(--rasp)", color: "#fff", border: "1px solid var(--rasp)", fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", fontWeight: 700, letterSpacing: "0.06em", padding: "9px 16px", cursor: "pointer" }}>
+                  $ send intro →
+                </button>
+                <QRButton url={profileUrl} />
+                <Link href={`/i/${handle}/for-llm`} style={{ background: "var(--bg3)", color: "var(--white-mid)", border: "1px solid var(--border2)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "9px 12px", textDecoration: "none" }}>
+                  /for-llm
+                </Link>
+              </div>
+            )}
           </div>
         </div>
 

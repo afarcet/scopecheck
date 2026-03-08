@@ -1,7 +1,26 @@
 "use client";
 import { useState } from "react";
 
-// Icon-only clipboard copy button — Google-style
+// Google-style two-stacked-pages copy icon
+function CopyIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      {/* Back page */}
+      <rect x="8" y="2" width="12" height="15" rx="1.5" />
+      {/* Front page */}
+      <rect x="4" y="7" width="12" height="15" rx="1.5" fill="var(--bg2)" />
+    </svg>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}
+
 export function CopyButton({
   text,
   style = {},
@@ -36,25 +55,12 @@ export function CopyButton({
         ...style,
       }}
     >
-      {copied ? (
-        // Checkmark
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
-      ) : (
-        // Clipboard icon
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="9" y="2" width="6" height="4" rx="1" />
-          <path d="M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2" />
-          <line x1="12" y1="11" x2="12" y2="17" />
-          <line x1="9" y1="14" x2="15" y2="14" />
-        </svg>
-      )}
+      {copied ? <CheckIcon /> : <CopyIcon />}
     </button>
   );
 }
 
-// URL row with copy icon inline
+// URL row with copy icon inline — full width bar
 export function CopyRow({
   url,
   color = "var(--rasp)",
@@ -63,7 +69,7 @@ export function CopyRow({
   color?: string;
 }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "0", marginTop: "8px", border: "1px solid var(--border2)", background: "var(--bg3)" }}>
+    <div style={{ display: "flex", alignItems: "stretch", width: "100%", border: "1px solid var(--border2)", background: "var(--bg3)" }}>
       <div
         style={{
           flex: 1,
@@ -74,11 +80,13 @@ export function CopyRow({
           overflow: "hidden",
           whiteSpace: "nowrap",
           textOverflow: "ellipsis",
+          display: "flex",
+          alignItems: "center",
         }}
       >
         {url}
       </div>
-      <CopyButton text={url} style={{ borderLeft: "1px solid var(--border2)", padding: "6px 10px" }} />
+      <CopyButton text={url} style={{ borderLeft: "1px solid var(--border2)", padding: "6px 12px" }} />
     </div>
   );
 }
