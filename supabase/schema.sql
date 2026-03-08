@@ -116,3 +116,13 @@ create trigger founders_updated_at before update on founders
 
 create trigger applications_updated_at before update on applications
   for each row execute function update_updated_at();
+
+-- INSERT policies (required for onboarding forms to save data)
+create policy "Users can insert their own investor profile"
+  on investors for insert with check (auth.uid() = user_id);
+
+create policy "Users can insert their own founder profile"
+  on founders for insert with check (auth.uid() = user_id);
+
+create policy "Anyone can insert to waitlist"
+  on waitlist for insert with check (true);

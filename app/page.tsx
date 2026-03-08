@@ -1,23 +1,22 @@
 "use client";
-import { useState } from "react";
 import Link from "next/link";
 
-// Sticky note annotation component — handwritten, human, "building in public" layer
+// Build-in-public annotation — amber outline box, handwritten font, slight tilt
 function Note({ text, rotate = -1.5, link }: { text: string; rotate?: number; link?: string }) {
   const style: React.CSSProperties = {
     display: "inline-block",
-    background: "#fef3a0",
-    color: "#2a1f00",
+    background: "rgba(240, 165, 0, 0.06)",
+    color: "#f0a500",
     fontFamily: "'Caveat', cursive",
-    fontSize: "14px",
+    fontSize: "15px",
     lineHeight: 1.3,
-    padding: "4px 10px 5px",
+    padding: "3px 9px 4px",
     transform: `rotate(${rotate}deg)`,
-    boxShadow: "1px 2px 6px rgba(0,0,0,0.35)",
+    border: "1px solid rgba(240,165,0,0.55)",
     cursor: link ? "pointer" : "default",
     textDecoration: "none",
     whiteSpace: "nowrap",
-    borderBottom: "1px solid rgba(0,0,0,0.08)",
+    transition: "border-color 0.15s, background 0.15s",
   };
 
   if (link) {
@@ -27,19 +26,6 @@ function Note({ text, rotate = -1.5, link }: { text: string; rotate?: number; li
 }
 
 export default function LandingPage() {
-  const [email, setEmail] = useState("");
-  const [role, setRole] = useState<"investor" | "founder" | null>(null);
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !role) return;
-    setLoading(true);
-    await new Promise(r => setTimeout(r, 800));
-    setSubmitted(true);
-    setLoading(false);
-  };
 
   return (
     <main style={{ minHeight: "100vh", background: "var(--bg)" }}>
@@ -52,7 +38,7 @@ export default function LandingPage() {
         <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
           <Link href="/log" style={{ fontSize: "10px", color: "var(--white-mid)", letterSpacing: "0.1em", textDecoration: "none", marginRight: "4px" }}>// build log</Link>
           <a href="#how" className="btn-secondary" style={{ padding: "5px 12px", fontSize: "10px" }}>how it works</a>
-          <a href="#access" className="btn-primary" style={{ padding: "5px 12px", fontSize: "10px" }}>get access →</a>
+          <a href="/scope" className="btn-primary" style={{ padding: "5px 12px", fontSize: "10px" }}>get access →</a>
         </div>
       </nav>
 
@@ -94,8 +80,8 @@ export default function LandingPage() {
           {/* CTAs with note annotation */}
           <div className="animate-d4" style={{ marginBottom: "28px" }}>
             <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center", marginBottom: "8px" }}>
-              <a href="#access" className="btn-primary">$ create investor profile →</a>
-              <a href="#access" className="btn-secondary">$ create founder passport →</a>
+              <a href="/scope" className="btn-primary">$ create investor profile →</a>
+              <a href="/passport" className="btn-secondary">$ create founder passport →</a>
               {/* Handwritten annotation */}
               <Note text="✓ buttons now visible!" rotate={-2} link="/log#007" />
             </div>
@@ -194,7 +180,7 @@ export default function LandingPage() {
               </div>
 
               <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-                <a href="#" className="btn-primary" style={{ flex: 1, justifyContent: "center" }}>$ apply →</a>
+                <a href="/alex/apply" className="btn-primary" style={{ flex: 1, justifyContent: "center" }}>$ apply →</a>
                 <button className="btn-secondary" style={{ padding: "7px 10px" }}>▣ QR</button>
                 <button className="btn-secondary" style={{ padding: "7px 10px", fontSize: "10px" }}>/for-llm</button>
                 {/* Annotation on /for-llm */}
@@ -204,48 +190,29 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* WAITLIST */}
+        {/* GET STARTED */}
         <section id="access">
           <div className="section-header">
-            <span className="section-label"><span className="section-num">03</span> early access</span>
+            <span className="section-label"><span className="section-num">03</span> get started</span>
           </div>
 
-          {submitted ? (
-            <div style={{ background: "var(--bg2)", border: "1px solid var(--border2)", borderLeft: "2px solid var(--rasp)", padding: "28px", textAlign: "center" }}>
-              <div style={{ fontSize: "24px", marginBottom: "10px" }}>✓</div>
-              <h3 style={{ fontSize: "15px", fontWeight: 500, marginBottom: "6px" }}>You&apos;re on the list</h3>
-              <p style={{ fontSize: "12px", color: "var(--white-mid)" }}>We&apos;ll be in touch when your access is ready. Early users shape the product.</p>
-            </div>
-          ) : (
-            <div style={{ background: "var(--bg2)", border: "1px solid var(--border2)", padding: "24px" }}>
-              <p style={{ fontSize: "12px", color: "var(--white-mid)", marginBottom: "4px" }}>Building in public. First users shape the product.</p>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
-                <p style={{ fontSize: "11px", color: "var(--white-dim)" }}>// investor profiles and founder passports now open for early access</p>
-                <Note text="read the build log →" rotate={-1} link="/log" />
-              </div>
-
-              <form onSubmit={handleSubmit}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px", marginBottom: "8px" }}>
-                  {[
-                    { key: "investor", label: "I'm an investor", sub: "solo GP · syndicate lead · angel", color: "var(--rasp)" },
-                    { key: "founder", label: "I'm a founder", sub: "currently fundraising", color: "var(--amber)" },
-                  ].map(r => (
-                    <button key={r.key} type="button" onClick={() => setRole(r.key as "investor" | "founder")}
-                      style={{ background: "var(--bg3)", border: `1px solid ${role === r.key ? r.color : "var(--border2)"}`, padding: "12px", cursor: "pointer", textAlign: "left", transition: "all 0.15s" }}>
-                      <div style={{ fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", color: r.color, marginBottom: "3px" }}>{r.label}</div>
-                      <div style={{ fontSize: "11px", color: "var(--white-mid)" }}>{r.sub}</div>
-                    </button>
-                  ))}
-                </div>
-                <div style={{ display: "flex", gap: "6px" }}>
-                  <input type="email" className="input" placeholder="your@email.com" value={email} onChange={e => setEmail(e.target.value)} required style={{ flex: 1 }} />
-                  <button type="submit" className="btn-primary" disabled={!email || !role || loading} style={{ opacity: !email || !role ? 0.5 : 1, whiteSpace: "nowrap" }}>
-                    {loading ? "..." : "$ request access →"}
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+            <a href="/scope" style={{ background: "var(--bg2)", border: "1px solid var(--border2)", borderTop: "2px solid var(--rasp)", padding: "24px", textDecoration: "none", display: "block" }}>
+              <div style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--rasp)", marginBottom: "10px" }}>// investor</div>
+              <div style={{ fontSize: "15px", fontWeight: 700, marginBottom: "8px", color: "var(--white)" }}>Create your investor profile</div>
+              <div style={{ fontSize: "11px", color: "var(--white-mid)", lineHeight: 1.7, marginBottom: "16px" }}>Define your criteria once. Share one link. Founders apply in a structured format.</div>
+              <div style={{ fontSize: "11px", color: "var(--rasp)", fontWeight: 700, letterSpacing: "0.06em" }}>$ get started →</div>
+            </a>
+            <a href="/passport" style={{ background: "var(--bg2)", border: "1px solid var(--border2)", borderTop: "2px solid var(--amber)", padding: "24px", textDecoration: "none", display: "block" }}>
+              <div style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: "10px" }}>// founder</div>
+              <div style={{ fontSize: "15px", fontWeight: 700, marginBottom: "8px", color: "var(--white)" }}>Create your founder passport</div>
+              <div style={{ fontSize: "11px", color: "var(--white-mid)", lineHeight: 1.7, marginBottom: "16px" }}>Fill in once. Auto-populates investor applications. Share via QR at events.</div>
+              <div style={{ fontSize: "11px", color: "var(--amber)", fontWeight: 700, letterSpacing: "0.06em" }}>$ get started →</div>
+            </a>
+          </div>
+          <p style={{ fontSize: "11px", color: "var(--white-dim)", textAlign: "center", marginTop: "14px" }}>
+            Already have a profile? <a href="/dashboard" style={{ color: "var(--rasp)", textDecoration: "none" }}>sign in →</a>
+          </p>
         </section>
       </div>
 
