@@ -92,6 +92,9 @@ export default function FounderDashboard() {
           <span style={{ fontSize: "10px", color: "var(--white-dim)", letterSpacing: "0.08em" }}>signed in as {userEmail}</span>
           <Link href={`/f/${founder.handle}`} className="btn-secondary" style={{ padding: "5px 12px", fontSize: "10px" }}>view passport ↗</Link>
           <Link href="/passport" className="btn-primary" style={{ padding: "5px 12px", fontSize: "10px" }}>edit passport →</Link>
+          <button onClick={async () => { const { supabase } = await import("@/lib/supabase"); await supabase.auth.signOut(); window.location.href = "/"; }} style={{ background: "none", border: "1px solid var(--border2)", color: "var(--white-dim)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "5px 10px", cursor: "pointer", letterSpacing: "0.06em" }}>
+            sign out
+          </button>
         </div>
       </nav>
 

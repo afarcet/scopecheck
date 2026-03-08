@@ -57,7 +57,7 @@ export default function DemoInvestorPage() {
             <div style={{ border: "1px solid var(--border2)", marginBottom: "16px" }}>
               {[
                 { k: "ticket_size", v: <><span style={{ color: "var(--rasp)" }}>€{DEMO_INVESTOR.ticket_min}K → €{DEMO_INVESTOR.ticket_max}K</span></> },
-                { k: "sectors", v: DEMO_INVESTOR.sectors.map((s, i) => <span key={s}><span style={{ color: "var(--amber)" }}>{s}</span>{i < DEMO_INVESTOR.sectors.length - 1 ? " · " : ""}</span>) },
+                { k: "sectors", v: DEMO_INVESTOR.sectors.map((s, i) => <span key={s}><span style={{ color: "var(--rasp)" }}>{s}</span>{i < DEMO_INVESTOR.sectors.length - 1 ? " · " : ""}</span>) },
                 { k: "geography", v: <span style={{ color: "var(--white)" }}>{DEMO_INVESTOR.geographies.join(" · ")}</span> },
                 { k: "wont_invest", v: <span style={{ color: "var(--white-mid)" }}>{DEMO_INVESTOR.wont_invest_in}</span> },
                 { k: "how_we_work", v: <span style={{ color: "var(--white-mid)", fontStyle: "italic" }}>{DEMO_INVESTOR.how_we_work}</span> },

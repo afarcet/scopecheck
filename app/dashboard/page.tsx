@@ -100,9 +100,9 @@ export default function Dashboard() {
               My scope ↗
             </a>
           )}
-          <Link href="/" className="btn-secondary" style={{ padding: "0.45rem 1rem", fontSize: "0.7rem" }}>
-            Home
-          </Link>
+          <button onClick={async () => { const { supabase } = await import("@/lib/supabase"); await supabase.auth.signOut(); window.location.href = "/"; }} style={{ background: "none", border: "1px solid rgba(100,116,139,0.3)", color: "var(--slate)", fontFamily: "DM Mono, monospace", fontSize: "0.68rem", padding: "0.45rem 1rem", cursor: "pointer", letterSpacing: "0.06em" }}>
+            sign out
+          </button>
         </div>
       </nav>
 

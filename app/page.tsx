@@ -23,6 +23,18 @@ function Note({ text, rotate = -1.5, link }: { text: string; rotate?: number; li
   return <span style={style}>{text}</span>;
 }
 
+function SignOutButton() {
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    window.location.reload();
+  };
+  return (
+    <button onClick={handleSignOut} style={{ background: "none", border: "1px solid var(--border2)", color: "var(--white-dim)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "5px 10px", cursor: "pointer", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>
+      sign out
+    </button>
+  );
+}
+
 export default function LandingPage() {
   const [authed, setAuthed] = useState(false);
   const [sessionUser, setSessionUser] = useState<{ email: string; role: string | null } | null>(null);
@@ -72,6 +84,7 @@ export default function LandingPage() {
               {sessionUser.role === null && (
                 <a href="/scope" className="btn-primary" style={{ padding: "5px 12px", fontSize: "10px", whiteSpace: "nowrap" }}>define scope →</a>
               )}
+              <SignOutButton />
             </>
           ) : (
             <a href="/scope" className="btn-primary" style={{ padding: "5px 12px", fontSize: "10px", whiteSpace: "nowrap" }}>get started →</a>
@@ -174,7 +187,7 @@ export default function LandingPage() {
               &ldquo;Hey John, met Harry at Web Summit — was impressed. Here&apos;s his passport.&rdquo;
             </p>
             <div style={{ background: "var(--bg3)", border: "1px solid var(--border)", padding: "6px 12px", fontSize: "11px", color: "var(--amber)", whiteSpace: "nowrap" }}>
-              scopecheck.ai/f/harryfounder
+              scopecheck.ai/f/harrypassport
             </div>
           </div>
         </section>
@@ -249,7 +262,7 @@ export default function LandingPage() {
               <div className="criteria-table" style={{ marginBottom: "14px" }}>
                 {[
                   { k: "ticket_size", v: <><span style={{ color: "var(--rasp)" }}>€50K → €650K</span> <span style={{ color: "var(--white-dim)", fontSize: "10px" }}>// via single SPV</span></> },
-                  { k: "sectors", v: <><span style={{ color: "var(--amber)" }}>ClimateTech</span> · <span style={{ color: "var(--amber)" }}>Applied AI</span></> },
+                  { k: "sectors", v: <><span style={{ color: "var(--rasp)" }}>ClimateTech</span> · <span style={{ color: "var(--rasp)" }}>Applied AI</span></> },
                   { k: "geography", v: "Europe · Israel · Africa · US (select)" },
                   { k: "wont_invest", v: <span style={{ color: "var(--white-mid)" }}>pre-seed · crypto · gaming · consumer apps</span> },
                 ].map((row, i) => (
