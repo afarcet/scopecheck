@@ -226,8 +226,9 @@ export default function LandingPage() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: "var(--border)", border: "1px solid var(--border)" }}>
 
             {/* Investor column */}
-            <div style={{ background: "var(--bg2)", padding: "24px" }}>
+            <div style={{ background: "var(--bg2)", padding: "24px", display: "flex", flexDirection: "column" }}>
               <div style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--rasp)", marginBottom: "20px" }}>// investor</div>
+              <div style={{ flex: 1 }}>
               {[
                 { step: "today", label: "Define your scope once. Every founder who reaches out already knows your criteria — structured, fast, no back-and-forth." },
                 { step: "next", label: "Every inbound is scored for fit before you open it. Know in seconds if it's worth your time." },
@@ -238,12 +239,14 @@ export default function LandingPage() {
                   <p style={{ fontSize: "11px", color: step === "today" ? "var(--white)" : "var(--white-mid)", lineHeight: 1.7, margin: 0 }}>{label}</p>
                 </div>
               ))}
+              </div>
               <a href="/scope" className="btn-primary" style={{ display: "block", textAlign: "center", fontSize: "11px", padding: "9px" }}>$ define your scope →</a>
             </div>
 
             {/* Founder column */}
-            <div style={{ background: "var(--bg2)", padding: "24px" }}>
+            <div style={{ background: "var(--bg2)", padding: "24px", display: "flex", flexDirection: "column" }}>
               <div style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: "20px" }}>// founder</div>
+              <div style={{ flex: 1 }}>
               {[
                 { step: "today", label: "Build your passport once. Find an investor on ScopeCheck, send your intro in seconds — fields auto-fill on every return visit." },
                 { step: "next", label: "Know your chances, and customise, before sending your passport." },
@@ -254,6 +257,7 @@ export default function LandingPage() {
                   <p style={{ fontSize: "11px", color: step === "today" ? "var(--white)" : "var(--white-mid)", lineHeight: 1.7, margin: 0 }}>{label}</p>
                 </div>
               ))}
+              </div>
               <a href="/passport" style={{ display: "block", textAlign: "center", fontSize: "11px", padding: "9px", background: "var(--amber)", color: "#000", border: "1px solid var(--amber)", fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, letterSpacing: "0.06em", textDecoration: "none" }}>$ build your passport →</a>
             </div>
           </div>
