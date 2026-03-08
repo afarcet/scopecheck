@@ -71,8 +71,8 @@ export default function DemoInvestorPage() {
 
             <CopyRow url={profileUrl} color="var(--rasp)" />
 
-            <div style={{ marginTop: "16px", background: "var(--bg3)", border: "1px solid var(--amber)", borderLeft: "2px solid var(--amber)", padding: "14px 16px" }}>
-              <p style={{ fontSize: "11px", color: "var(--amber)", margin: "0 0 6px", letterSpacing: "0.08em" }}>// this is a demo profile</p>
+            <div style={{ marginTop: "16px", background: "var(--bg3)", border: "1px solid var(--border2)", borderLeft: "2px solid var(--rasp)", padding: "14px 16px" }}>
+              <p style={{ fontSize: "11px", color: "var(--rasp)", margin: "0 0 6px", letterSpacing: "0.08em" }}>// this is a demo profile</p>
               <p style={{ fontSize: "11px", color: "var(--white-mid)", margin: 0, lineHeight: 1.7 }}>
                 Define your own investor scope at{" "}
                 <Link href="/scope" style={{ color: "var(--rasp)", textDecoration: "none" }}>scopecheck.ai/scope →</Link>

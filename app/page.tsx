@@ -1,4 +1,5 @@
 "use client";
+import { QRCodeCanvas } from "qrcode.react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
@@ -248,7 +249,7 @@ export default function LandingPage() {
               <div style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: "20px" }}>// founder</div>
               <div style={{ flex: 1 }}>
               {[
-                { step: "today", label: "Build your passport once. Find an investor on ScopeCheck, send your intro in seconds — fields auto-fill on every return visit." },
+                { step: "today", label: "Build your passport once. Share it with any investor — fields auto-fill on every return visit. Structured, fast, no back-and-forth." },
                 { step: "next", label: "Know your chances, and customise, before sending your passport." },
                 { step: "soon", label: "We surface the right investors for your stage and sector. Warm, relevant introductions — without cold outreach." },
               ].map(({ step, label }) => (
@@ -270,7 +271,7 @@ export default function LandingPage() {
           </div>
           <div style={{ border: "1px solid var(--border2)", background: "var(--bg2)" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderBottom: "1px solid var(--border)", background: "var(--bg3)" }}>
-              <span style={{ fontSize: "11px", color: "var(--rasp)" }}>scopecheck.ai/i/raspberry</span>
+              <span style={{ fontSize: "11px", color: "var(--rasp)" }}>scopecheck.ai/i/raspberrysyndicate</span>
               <span className="tag tag-rasp"><span style={{ animation: "blink 2s ease infinite", display: "inline-block" }}>●</span> open to inbound</span>
             </div>
             <div style={{ padding: "20px" }}>
@@ -297,9 +298,9 @@ export default function LandingPage() {
                 ))}
               </div>
               <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-                <a href="/i/raspberry" className="btn-primary" style={{ flex: 1, justifyContent: "center" }}>$ send intro →</a>
-                <button className="btn-secondary" style={{ padding: "7px 10px" }}>▣ QR</button>
-                <button className="btn-secondary" style={{ padding: "7px 10px", fontSize: "10px" }}>/for-llm</button>
+                <a href="/i/raspberrysyndicate" className="btn-primary" style={{ flex: 1, justifyContent: "center" }}>$ send intro →</a>
+                <QRCodeCanvas value="https://scopecheck.ai/i/raspberrysyndicate" size={32} bgColor="transparent" fgColor="#ffffff" style={{ border: "1px solid var(--border2)", padding: "3px" }} />
+                <a href="/i/raspberrysyndicate/for-llm" target="_blank" className="btn-secondary" style={{ padding: "7px 10px", fontSize: "10px", textDecoration: "none" }}>/for-llm</a>
                 <Note text="AI can read this!" rotate={2} link="/log#005" />
               </div>
             </div>
@@ -308,7 +309,7 @@ export default function LandingPage() {
           {/* Pull quote */}
           <div style={{ marginTop: "1px", background: "var(--bg2)", border: "1px solid var(--border)", borderTop: "none", padding: "16px 20px", borderLeft: "3px solid var(--rasp)" }}>
             <p style={{ fontSize: "12px", color: "var(--white-mid)", fontStyle: "italic", lineHeight: 1.7, margin: "0 0 6px" }}>
-              &ldquo;I literally write: see my ScopeCheck, if you think we&apos;re a fit, email me your passport. Takes 2 seconds to respond. Filters inbound. Stays responsive.&rdquo;
+              &ldquo;I literally write: see my ScopeCheck, if you think we&apos;re a fit, send me your passport. Takes 2 seconds to respond. Filters inbound. Stays responsive.&rdquo;
             </p>
             <span style={{ fontSize: "10px", color: "var(--rasp)", letterSpacing: "0.08em" }}>— Alex Farcet, Raspberry Ventures · investor #001</span>
           </div>
@@ -398,7 +399,7 @@ export default function LandingPage() {
       </div>
 
       <footer style={{ borderTop: "1px solid var(--border)", padding: "14px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", maxWidth: "820px", margin: "0 auto" }}>
-        <span style={{ fontSize: "11px", color: "var(--white-mid)" }}>scopecheck.ai · by <a href="https://raspberry.ventures" target="_blank" rel="noopener" style={{ color: "var(--rasp)", textDecoration: "none" }}>raspberry.ventures</a></span>
+        <span style={{ fontSize: "11px", color: "var(--white-mid)" }}>scopecheck.ai · built by <a href="https://alexfarcet.com" target="_blank" rel="noopener" style={{ color: "var(--rasp)", textDecoration: "none" }}>Alex Farcet</a></span>
         <span style={{ fontSize: "10px", color: "var(--white-dim)" }}>// built in public with AI · 2026</span>
       </footer>
     </main>
