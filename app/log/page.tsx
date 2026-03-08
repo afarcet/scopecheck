@@ -8,6 +8,42 @@ import Link from "next/link";
 
 const LOG_ENTRIES = [
   {
+    id: "011",
+    date: "2026-03-08",
+    time: "01:30",
+    tag: "build",
+    title: "OAuth was redirecting to localhost. Fixed.",
+    body: `Classic OAuth gotcha. After setting up Google Sign-In, successful auth was bouncing users back to localhost instead of scopecheck.ai.\n\nTwo fixes: set Site URL in Supabase to https://scopecheck.ai, and add it to the allowed redirect URLs. Thirty seconds once you know where to look.\n\nAlso caught a subtler bug — session detection on /scope and /passport was using useState instead of useEffect, so the post-OAuth redirect wasn't being caught. Swapped in useEffect with onAuthStateChange. Clean flow now.`,
+    meta: "supabase url config + useEffect fix",
+  },
+  {
+    id: "010",
+    date: "2026-03-08",
+    time: "01:15",
+    tag: "build",
+    title: "Google OAuth: 40 minutes of plumbing for one button",
+    body: `Proper Google Sign-In requires touching four systems: Google Cloud Console (project, consent screen, OAuth credentials), Supabase (enable provider, paste credentials), DNS (done), and codebase (done).\n\nThe consent screen setup has four steps and asks Internal vs External. External is right — you want any Google account to work, not just raspberry.ventures users.\n\nOne gotcha: the Supabase callback URL must be registered in Google Cloud, otherwise auth silently fails. Worth noting for anyone setting this up.`,
+    meta: "google cloud console · supabase auth providers",
+  },
+  {
+    id: "009",
+    date: "2026-03-08",
+    time: "00:55",
+    tag: "product",
+    title: "Removed the waitlist. Deliver value immediately.",
+    body: `Early version had a waitlist gate — submit your email, wait to be let in. Classic early-stage instinct: control quality, avoid spam.\n\nBut at zero users, that logic is backwards. Every extra step is a reason to leave. The waitlist implied scarcity we didn't have yet.\n\nReplaced both CTAs with direct onboarding: /scope for investors, /passport for founders. No gate. Sign in with Google, fill in your criteria, get your link.\n\nThe word "join" was also wrong for investors. Busy, senior people don't join things. They define their scope. Hence /scope.`,
+    meta: "ux decision · removed friction",
+  },
+  {
+    id: "008",
+    date: "2026-03-08",
+    time: "00:30",
+    tag: "build",
+    title: "scopecheck.ai is live",
+    body: `Deployed. GitHub to Vercel to Cloudflare DNS to SSL certificate generated. The full chain in under an hour.\n\nVercel auto-detects Next.js, pulls from GitHub on every push, redeploys in ~60 seconds. Cloudflare holds the domain — key thing is setting DNS records to proxy-off (grey cloud, not orange) so Vercel handles SSL itself. Orange cloud breaks the SSL handshake.\n\nAt this point profiles are static demo data. The next session makes them data-driven so real users see their own content.`,
+    meta: "github · vercel · cloudflare",
+  },
+  {
     id: "007",
     date: "2026-03-07",
     time: "21:30",

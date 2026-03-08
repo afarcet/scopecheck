@@ -116,11 +116,11 @@ export default function Dashboard() {
           </span>
         </div>
         <div style={{ display: "flex", gap: "0.8rem", alignItems: "center" }}>
-          <Link href="/alex" className="btn-secondary" style={{ padding: "0.45rem 1rem", fontSize: "0.7rem" }}>
-            My profile ↗
+          <Link href="/scope" className="btn-secondary" style={{ padding: "0.45rem 1rem", fontSize: "0.7rem" }}>
+            My scope ↗
           </Link>
-          <Link href="/settings" className="btn-primary" style={{ padding: "0.45rem 1rem", fontSize: "0.7rem" }}>
-            Settings
+          <Link href="/" className="btn-secondary" style={{ padding: "0.45rem 1rem", fontSize: "0.7rem" }}>
+            Home
           </Link>
         </div>
       </nav>
@@ -159,11 +159,13 @@ export default function Dashboard() {
                 key={app.id}
                 style={{
                   background: expanded === app.id ? "rgba(26,34,54,0.8)" : "var(--navy-mid)",
-                  border: `1px solid ${expanded === app.id ? col.color : "var(--navy-border)"}`,
+                  border: `1px solid ${expanded === app.id ? col.color : "rgba(100,116,139,0.4)"}`,
+                  borderLeft: `3px solid ${col.color}`,
                   padding: "1rem",
                   marginBottom: "0.8rem",
                   cursor: "pointer",
                   transition: "all 0.2s ease",
+                  borderRadius: "2px",
                 }}
                 onClick={() => setExpanded(expanded === app.id ? null : app.id)}
               >

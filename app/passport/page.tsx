@@ -30,6 +30,12 @@ export default function PassportPage() {
     what_we_want: "",
   });
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setStep("auth");
+  };
+
   const handleGoogleSignIn = async () => {
     setLoading(true);
     const { error } = await supabase.auth.signInWithOAuth({
@@ -145,14 +151,14 @@ export default function PassportPage() {
           <div style={{ animation: "fadeUp 0.3s ease both" }}>
             <div style={{ fontSize: "10px", letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--amber)", marginBottom: "12px" }}>// step 1 of 2</div>
             <h1 style={{ fontSize: "28px", fontWeight: 700, marginBottom: "10px", letterSpacing: "-0.02em" }}>
-              Create your<br /><span style={{ color: "var(--amber)" }}>founder passport.</span>
+              Create your<br /><span style={{ color: "var(--amber)" }}>startup passport.</span>
             </h1>
             <p style={{ fontSize: "12px", color: "var(--white-mid)", lineHeight: 1.8, marginBottom: "32px", maxWidth: "400px" }}>
               Fill in once. Share one link. Auto-populates investor applications. Show up at events with a QR code instead of a pitch deck.
             </p>
 
             <div style={{ background: "var(--bg2)", border: "1px solid var(--border2)", padding: "24px", marginBottom: "16px" }}>
-              <div style={{ fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--white-mid)", marginBottom: "16px" }}>// your passport will live at</div>
+              <div style={{ fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--white-mid)", marginBottom: "16px" }}>// your startup passport will live at</div>
               <div style={{ background: "var(--bg3)", border: "1px solid var(--border)", borderLeft: "2px solid var(--amber)", padding: "10px 14px", fontSize: "13px", color: "var(--amber)", marginBottom: "20px", letterSpacing: "0.02em" }}>
                 scopecheck.ai/f/<span style={{ color: "var(--white-mid)" }}>yourcompany</span>
               </div>
@@ -174,7 +180,7 @@ export default function PassportPage() {
           <form onSubmit={handleSubmit} style={{ animation: "fadeUp 0.3s ease both" }}>
             <div style={{ fontSize: "10px", letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--amber)", marginBottom: "12px" }}>// step 2 of 2</div>
             <h1 style={{ fontSize: "28px", fontWeight: 700, marginBottom: "6px", letterSpacing: "-0.02em" }}>
-              Your company.<br /><span style={{ color: "var(--amber)" }}>Your story.</span>
+              Your startup.<br /><span style={{ color: "var(--amber)" }}>Your passport.</span>
             </h1>
             <p style={{ fontSize: "12px", color: "var(--white-mid)", marginBottom: "28px" }}>Signed in as <span style={{ color: "var(--white)" }}>{user?.email}</span></p>
 
@@ -308,7 +314,7 @@ export default function PassportPage() {
 
               <button type="submit" disabled={loading || !form.handle || !form.company_name || !form.stage}
                 style={{ background: "var(--amber)", color: "#000", border: "none", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", fontWeight: 700, letterSpacing: "0.06em", padding: "13px", cursor: "pointer", opacity: loading || !form.handle || !form.company_name || !form.stage ? 0.5 : 1 }}>
-                {loading ? "creating your passport..." : "$ create my founder passport →"}
+                {loading ? "creating your startup passport..." : "$ create my startup passport →"}
               </button>
 
               <p style={{ fontSize: "11px", color: "var(--white-dimmer)", textAlign: "center" }}>
@@ -321,7 +327,7 @@ export default function PassportPage() {
         {step === "done" && (
           <div style={{ textAlign: "center", padding: "60px 0", animation: "fadeUp 0.3s ease both" }}>
             <div style={{ fontSize: "32px", marginBottom: "16px", color: "var(--amber)" }}>✓</div>
-            <h2 style={{ fontSize: "22px", fontWeight: 700, marginBottom: "8px" }}>Passport created.</h2>
+            <h2 style={{ fontSize: "22px", fontWeight: 700, marginBottom: "8px" }}>Startup passport created.</h2>
             <p style={{ fontSize: "12px", color: "var(--white-mid)" }}>
               Redirecting to <span style={{ color: "var(--amber)" }}>scopecheck.ai/f/{form.handle}</span>
             </p>

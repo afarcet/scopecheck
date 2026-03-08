@@ -7,7 +7,7 @@ const STAGES = ["Pre-seed", "Seed", "Early-A", "Series A", "Series B+"];
 const SECTORS = ["Applied AI", "ClimateTech", "FinTech", "HealthTech", "DeepTech", "SaaS", "Consumer", "Web3", "Other"];
 const GEOS = ["Europe", "UK", "US", "Israel", "Africa", "LATAM", "Asia", "Global"];
 
-export default function JoinPage() {
+export default function ScopePage() {
   const router = useRouter();
   const [step, setStep] = useState<"auth" | "form" | "done">("auth");
   const [loading, setLoading] = useState(false);
@@ -38,7 +38,12 @@ export default function JoinPage() {
     setLoading(false);
   };
 
-  // Check for existing session (post-OAuth redirect)
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setStep("auth");
+  };
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
@@ -84,7 +89,6 @@ export default function JoinPage() {
     setLoading(true);
     setError("");
 
-    // Check handle availability
     const { data: existing } = await supabase
       .from("investors")
       .select("handle")
@@ -121,7 +125,7 @@ export default function JoinPage() {
     }
 
     setStep("done");
-    setTimeout(() => router.push(`/${form.handle}`), 1500);
+    setTimeout(() => router.push(`/i/${form.handle}`), 1500);
   };
 
   const inputStyle = {
@@ -146,7 +150,14 @@ export default function JoinPage() {
     <main style={{ minHeight: "100vh", background: "var(--bg)" }}>
       <nav style={{ borderBottom: "1px solid var(--border)", padding: "10px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <a href="/" style={{ color: "var(--rasp)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.04em", textDecoration: "none" }}>&gt; scopecheck.ai</a>
-        <span style={{ fontSize: "10px", color: "var(--white-mid)", letterSpacing: "0.1em" }}>// investor onboarding</span>
+        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+          <span style={{ fontSize: "10px", color: "var(--white-mid)", letterSpacing: "0.1em" }}>// investor scope setup</span>
+          {user && (
+            <button onClick={handleSignOut} style={{ fontSize: "10px", color: "var(--white-dim)", letterSpacing: "0.08em", background: "none", border: "none", cursor: "pointer", fontFamily: "'JetBrains Mono', monospace" }}>
+              sign out
+            </button>
+          )}
+        </div>
       </nav>
 
       <div style={{ maxWidth: "560px", margin: "0 auto", padding: "48px 24px 80px" }}>
@@ -155,16 +166,16 @@ export default function JoinPage() {
           <div style={{ animation: "fadeUp 0.3s ease both" }}>
             <div style={{ fontSize: "10px", letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--rasp)", marginBottom: "12px" }}>// step 1 of 2</div>
             <h1 style={{ fontSize: "28px", fontWeight: 700, marginBottom: "10px", letterSpacing: "-0.02em" }}>
-              Create your<br /><span style={{ color: "var(--rasp)" }}>investor profile.</span>
+              Create your<br /><span style={{ color: "var(--rasp)" }}>investor scope.</span>
             </h1>
             <p style={{ fontSize: "12px", color: "var(--white-mid)", lineHeight: 1.8, marginBottom: "32px", maxWidth: "400px" }}>
               Define your criteria once. Share one link. Founders apply in a structured format — no more unstructured inbound.
             </p>
 
             <div style={{ background: "var(--bg2)", border: "1px solid var(--border2)", padding: "24px", marginBottom: "16px" }}>
-              <div style={{ fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--white-mid)", marginBottom: "16px" }}>// your profile will live at</div>
+              <div style={{ fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--white-mid)", marginBottom: "16px" }}>// your scope will live at</div>
               <div style={{ background: "var(--bg3)", border: "1px solid var(--border)", borderLeft: "2px solid var(--rasp)", padding: "10px 14px", fontSize: "13px", color: "var(--rasp)", marginBottom: "20px", letterSpacing: "0.02em" }}>
-                scopecheck.ai/<span style={{ color: "var(--white-mid)" }}>yourhandle</span>
+                scopecheck.ai/i/<span style={{ color: "var(--white-mid)" }}>yourhandle</span>
               </div>
               <button onClick={handleGoogleSignIn} disabled={loading}
                 style={{ width: "100%", background: "var(--rasp)", color: "#fff", border: "none", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", fontWeight: 700, letterSpacing: "0.06em", padding: "12px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}>
@@ -174,7 +185,7 @@ export default function JoinPage() {
             </div>
 
             <p style={{ fontSize: "11px", color: "var(--white-dimmer)", textAlign: "center" }}>
-              Already have a profile? <a href="/dashboard" style={{ color: "var(--rasp)", textDecoration: "none" }}>go to dashboard →</a>
+              Already have a scope? <a href="/dashboard" style={{ color: "var(--rasp)", textDecoration: "none" }}>go to dashboard →</a>
             </p>
             {error && <p style={{ color: "var(--rasp)", fontSize: "11px", marginTop: "10px" }}>{error}</p>}
           </div>
@@ -190,12 +201,11 @@ export default function JoinPage() {
 
             <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
 
-              {/* Handle */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
                 <div>
                   <label style={labelStyle}>your handle *</label>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0" }}>
-                    <span style={{ background: "var(--bg3)", border: "1px solid var(--border2)", borderRight: "none", padding: "9px 10px", fontSize: "11px", color: "var(--rasp)", whiteSpace: "nowrap" }}>scopecheck.ai/</span>
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <span style={{ background: "var(--bg3)", border: "1px solid var(--border2)", borderRight: "none", padding: "9px 10px", fontSize: "11px", color: "var(--rasp)", whiteSpace: "nowrap" }}>scopecheck.ai/i/</span>
                     <input required style={{ ...inputStyle, borderLeft: "none" }} value={form.handle}
                       onChange={e => setForm(f => ({ ...f, handle: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "") }))}
                       placeholder="alexvc" />
@@ -218,7 +228,6 @@ export default function JoinPage() {
                 </div>
               </div>
 
-              {/* Ticket size */}
               <div>
                 <label style={labelStyle}>ticket size (€K)</label>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: "8px", alignItems: "center" }}>
@@ -228,7 +237,6 @@ export default function JoinPage() {
                 </div>
               </div>
 
-              {/* Stages */}
               <div>
                 <label style={labelStyle}>stages *</label>
                 <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
@@ -241,7 +249,6 @@ export default function JoinPage() {
                 </div>
               </div>
 
-              {/* Sectors */}
               <div>
                 <label style={labelStyle}>sectors *</label>
                 <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
@@ -254,7 +261,6 @@ export default function JoinPage() {
                 </div>
               </div>
 
-              {/* Geographies */}
               <div>
                 <label style={labelStyle}>geographies *</label>
                 <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
@@ -267,7 +273,6 @@ export default function JoinPage() {
                 </div>
               </div>
 
-              {/* Won't invest */}
               <div>
                 <label style={labelStyle}>won&apos;t invest in</label>
                 <input className="input" value={form.wont_invest_in}
@@ -275,7 +280,6 @@ export default function JoinPage() {
                   placeholder="e.g. crypto, pre-seed, gaming" />
               </div>
 
-              {/* How we work */}
               <div>
                 <label style={labelStyle}>how you work / what founders can expect</label>
                 <textarea className="input" value={form.how_we_work}
@@ -292,7 +296,7 @@ export default function JoinPage() {
 
               <button type="submit" disabled={loading || !form.handle || !form.name || form.stages.length === 0}
                 style={{ background: "var(--rasp)", color: "#fff", border: "none", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", fontWeight: 700, letterSpacing: "0.06em", padding: "13px", cursor: "pointer", opacity: loading || !form.handle || !form.name || form.stages.length === 0 ? 0.5 : 1 }}>
-                {loading ? "creating your profile..." : "$ create my investor profile →"}
+                {loading ? "creating your scope..." : "$ create my investor scope →"}
               </button>
 
               <p style={{ fontSize: "11px", color: "var(--white-dimmer)", textAlign: "center" }}>
@@ -305,9 +309,9 @@ export default function JoinPage() {
         {step === "done" && (
           <div style={{ textAlign: "center", padding: "60px 0", animation: "fadeUp 0.3s ease both" }}>
             <div style={{ fontSize: "32px", marginBottom: "16px", color: "var(--rasp)" }}>✓</div>
-            <h2 style={{ fontSize: "22px", fontWeight: 700, marginBottom: "8px" }}>Profile created.</h2>
+            <h2 style={{ fontSize: "22px", fontWeight: 700, marginBottom: "8px" }}>Scope created.</h2>
             <p style={{ fontSize: "12px", color: "var(--white-mid)" }}>
-              Redirecting to <span style={{ color: "var(--rasp)" }}>scopecheck.ai/{form.handle}</span>
+              Redirecting to <span style={{ color: "var(--rasp)" }}>scopecheck.ai/i/{form.handle}</span>
             </p>
           </div>
         )}
