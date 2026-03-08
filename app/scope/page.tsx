@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
@@ -39,7 +39,7 @@ export default function JoinPage() {
   };
 
   // Check for existing session (post-OAuth redirect)
-  useState(() => {
+  useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser({
@@ -55,7 +55,25 @@ export default function JoinPage() {
         setStep("form");
       }
     });
-  });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email!,
+          name: session.user.user_metadata?.full_name || "",
+        });
+        setForm(f => ({
+          ...f,
+          name: session.user.user_metadata?.full_name || "",
+          handle: (session.user.email?.split("@")[0] || "").toLowerCase().replace(/[^a-z0-9]/g, ""),
+        }));
+        setStep("form");
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const toggleArray = (arr: string[], val: string) =>
     arr.includes(val) ? arr.filter(v => v !== val) : [...arr, val];
