@@ -107,7 +107,6 @@ export default function InvestorProfilePage({
       committed: form.committed ? parseInt(form.committed.replace(/[^0-9]/g, "")) : null,
       traction_summary: form.traction,
       deck_url: form.deck_url || null,
-      status: "active",
     }, { onConflict: "user_id" });
 
     if (founderErr) {

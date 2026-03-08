@@ -96,7 +96,7 @@ export default function LandingPage() {
               <div style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--rasp)", marginBottom: "14px" }}>// for investors</div>
               <div style={{ fontSize: "13px", fontWeight: 600, marginBottom: "10px", color: "var(--white)" }}>Define once.<br />Reach many founders.</div>
               <p style={{ fontSize: "11px", color: "var(--white-mid)", lineHeight: 1.7, marginBottom: "16px" }}>
-                Share one link. Every founder who clicks it gets your criteria. No more repeating what you look for.
+                Define once, share proactively. Every founder who reaches out already knows your criteria — structured inbound, no back-and-forth.
               </p>
               <div style={{ background: "var(--bg3)", border: "1px solid var(--border)", borderLeft: "2px solid var(--rasp)", padding: "7px 12px", fontSize: "11px", color: "var(--rasp)", marginBottom: "14px", letterSpacing: "0.02em" }}>
                 scopecheck.ai/i/<span style={{ color: "var(--white-mid)" }}>yourhandle</span>
@@ -112,9 +112,12 @@ export default function LandingPage() {
             </div>
 
             {/* Centre divider */}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 12px", gap: "8px" }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 8px", gap: "0" }}>
               <div style={{ width: "1px", flex: 1, background: "var(--border)" }} />
-              <div style={{ fontSize: "18px", color: "var(--border2)", lineHeight: 1 }}>⇄</div>
+              <div style={{ padding: "12px 4px", display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
+                <span style={{ fontSize: "20px", color: "var(--rasp)", lineHeight: 1 }}>→</span>
+                <span style={{ fontSize: "20px", color: "var(--amber)", lineHeight: 1 }}>←</span>
+              </div>
               <div style={{ width: "1px", flex: 1, background: "var(--border)" }} />
             </div>
 
@@ -123,7 +126,7 @@ export default function LandingPage() {
               <div style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: "14px" }}>// for founders</div>
               <div style={{ fontSize: "13px", fontWeight: 600, marginBottom: "10px", color: "var(--white)" }}>Build once.<br />Apply to many investors.</div>
               <p style={{ fontSize: "11px", color: "var(--white-mid)", lineHeight: 1.7, marginBottom: "16px" }}>
-                Build your passport once. When you find an investor on ScopeCheck, send your intro in seconds.
+                Build your passport once. Share it with any investor — on ScopeCheck or anywhere else. Apply in seconds without repeating yourself.
               </p>
               <div style={{ background: "var(--bg3)", border: "1px solid var(--border)", borderLeft: "2px solid var(--amber)", padding: "7px 12px", fontSize: "11px", color: "var(--amber)", marginBottom: "14px", letterSpacing: "0.02em" }}>
                 scopecheck.ai/f/<span style={{ color: "var(--white-mid)" }}>yourcompany</span>
