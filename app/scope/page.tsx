@@ -48,18 +48,30 @@ export default function ScopePage() {
   useEffect(() => {
     const handleSession = async (session: { user: { id: string; email?: string; user_metadata?: Record<string, string> } } | null) => {
       if (!session?.user) return;
-      // Check if investor profile already exists → redirect to dashboard
-      const { data: existing } = await supabase.from("investors").select("handle").eq("user_id", session.user.id).maybeSingle();
-      if (existing?.handle) {
-        router.push("/dashboard");
-        return;
-      }
+      // Check if investor profile already exists → pre-fill form for editing
+      const { data: existing } = await supabase.from("investors").select("*").eq("user_id", session.user.id).maybeSingle();
       setUser({ id: session.user.id, email: session.user.email!, name: session.user.user_metadata?.full_name || "" });
-      setForm(f => ({
-        ...f,
-        name: session.user.user_metadata?.full_name || "",
-        handle: (session.user.email?.split("@")[0] || "").toLowerCase().replace(/[^a-z0-9]/g, ""),
-      }));
+      if (existing) {
+        setForm({
+          handle: existing.handle || "",
+          name: existing.name || "",
+          firm: existing.firm || "",
+          location: existing.location || "",
+          ticket_min: existing.ticket_min?.toString() || "",
+          ticket_max: existing.ticket_max?.toString() || "",
+          stages: existing.stages || [],
+          sectors: existing.sectors || [],
+          geographies: existing.geographies || [],
+          wont_invest_in: existing.wont_invest_in || "",
+          how_we_work: existing.how_we_work || "",
+        });
+      } else {
+        setForm(f => ({
+          ...f,
+          name: session.user.user_metadata?.full_name || "",
+          handle: (session.user.email?.split("@")[0] || "").toLowerCase().replace(/[^a-z0-9]/g, ""),
+        }));
+      }
       setStep("form");
     };
 

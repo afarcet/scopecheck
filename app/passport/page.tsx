@@ -48,28 +48,38 @@ export default function PassportPage() {
   };
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        setUser({
-          id: session.user.id,
-          email: session.user.email!,
-          name: session.user.user_metadata?.full_name || "",
+    const handleSession = async (su: { id: string; email?: string; user_metadata?: Record<string, string> } | null) => {
+      if (!su) return;
+      const { data: existing } = await supabase.from("founders").select("*").eq("user_id", su.id).maybeSingle();
+      setUser({ id: su.id, email: su.email!, name: su.user_metadata?.full_name || "" });
+      if (existing) {
+        setForm({
+          handle: existing.handle || "",
+          name: existing.name || su.user_metadata?.full_name || "",
+          company_name: existing.company_name || existing.company || "",
+          one_liner: existing.one_liner || "",
+          stage: existing.stage || "",
+          sector: Array.isArray(existing.sectors) ? existing.sectors.join(", ") : (existing.sector || ""),
+          geography: existing.geography || existing.based_in || "",
+          round_size: existing.round_size?.toString() || "",
+          committed: existing.committed?.toString() || "",
+          traction_summary: existing.traction_summary || "",
+          deck_url: existing.deck_url || "",
+          data_room_url: existing.data_room_url || "",
+          what_we_want: existing.what_we_want || "",
         });
-        setForm(f => ({ ...f, name: session.user.user_metadata?.full_name || "" }));
-        setStep("form");
+      } else {
+        setForm(f => ({ ...f, name: su.user_metadata?.full_name || "" }));
       }
+      setStep("form");
+    };
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) handleSession(session.user as { id: string; email?: string; user_metadata?: Record<string, string> });
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setUser({
-          id: session.user.id,
-          email: session.user.email!,
-          name: session.user.user_metadata?.full_name || "",
-        });
-        setForm(f => ({ ...f, name: session.user.user_metadata?.full_name || "" }));
-        setStep("form");
-      }
+      if (session?.user) handleSession(session.user as { id: string; email?: string; user_metadata?: Record<string, string> });
     });
 
     return () => subscription.unsubscribe();

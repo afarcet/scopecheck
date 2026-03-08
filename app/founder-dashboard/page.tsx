@@ -165,7 +165,7 @@ export default function FounderDashboard() {
           {applications.length === 0 ? (
             <div style={{ textAlign: "center", padding: "24px 0", color: "var(--white-dim)", fontSize: "12px" }}>
               <p style={{ margin: "0 0 12px" }}>No intros sent yet.</p>
-              <Link href="/" style={{ color: "var(--amber)", fontSize: "11px", textDecoration: "none" }}>Find investors on ScopeCheck →</Link>
+              <Link href="/" style={{ color: "var(--amber)", fontSize: "11px", textDecoration: "none" }}></Link>
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>

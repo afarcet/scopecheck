@@ -307,7 +307,7 @@ export default function InvestorProfilePage({
               <form onSubmit={handleSendIntro}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
                   <div>
-                    <div style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: "4px" }}>// your intro to {inv.name as string}</div>
+                    <div style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: "4px" }}>// your intro to {inv.name as string}{inv.firm ? ` at ${inv.firm as string}` : ""}</div>
                     <p style={{ fontSize: "11px", color: "var(--white-dim)" }}>Signed in as {session?.email}</p>
                   </div>
                   <button type="button" onClick={() => setShowIntro(false)} style={{ background: "none", border: "none", color: "var(--white-dim)", fontSize: "10px", cursor: "pointer", letterSpacing: "0.06em", fontFamily: "'JetBrains Mono', monospace" }}>cancel</button>
