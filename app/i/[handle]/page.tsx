@@ -39,6 +39,7 @@ export default function InvestorProfilePage({
   const [introLoading, setIntroLoading] = useState(false);
   const [introError, setIntroError] = useState("");
   const [session, setSession] = useState<{ id: string; email: string } | null>(null);
+  const [ownerEmail, setOwnerEmail] = useState<string>("");
   const [form, setForm] = useState(BLANK_INTRO);
   const [passportUrl, setPassportUrl] = useState("");
   const [copied, setCopied] = useState(false);
@@ -48,7 +49,10 @@ export default function InvestorProfilePage({
       setHandle(h);
       supabase.from("investors").select("*").eq("handle", h).single().then(({ data }) => {
         if (!data) setNotFound(true);
-        else setInvestor(data);
+        else {
+          setInvestor(data);
+          if (data.email) setOwnerEmail(data.email as string);
+        }
       });
     });
 
@@ -249,7 +253,7 @@ export default function InvestorProfilePage({
             </div>
 
             {/* Owner bar vs visitor bar */}
-            {session && (inv as { user_id?: string }).user_id === session.id ? (
+            {session && ((inv as { user_id?: string }).user_id === session.id || (ownerEmail && ownerEmail === session.email)) ? (
               // Owner view — edit + copy
               <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
                 <CopyRow url={profileUrl} color="var(--rasp)" />
