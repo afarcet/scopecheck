@@ -204,7 +204,7 @@ export default function LogPage() {
         {/* Stats bar */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1px", background: "var(--border)", border: "1px solid var(--border)", marginBottom: "40px" }}>
           {[
-            { label: "days building", value: "1" },
+            { label: "days building", value: "2" },
             { label: "log entries",   value: LOG_ENTRIES.length.toString() },
             { label: "lines of code", value: "~1.2K" },
           ].map((s, i) => (

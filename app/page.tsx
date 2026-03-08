@@ -58,14 +58,17 @@ export default function LandingPage() {
 
         {/* HERO */}
         <section style={{ padding: "64px 0 48px", textAlign: "center" }}>
-          <div className="animate-d1" style={{ fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--white-dim)", marginBottom: "20px" }}>
-            <span style={{ color: "var(--rasp)" }}>// </span>deal flow infrastructure for the AI era
-          </div>
-
-          <h1 className="animate-d2" style={{ fontSize: "clamp(28px, 5vw, 52px)", fontWeight: 700, lineHeight: 1.1, letterSpacing: "-0.025em", marginBottom: "20px" }}>
-            Define your scope.<br />
-            <span style={{ color: "var(--amber)" }}>Build your passport.</span>
+          <h1 className="animate-d1" style={{ fontSize: "clamp(32px, 5.5vw, 58px)", fontWeight: 700, lineHeight: 1.05, letterSpacing: "-0.03em", marginBottom: "16px" }}>
+            Deal flow infrastructure.<br />
+            <span style={{ color: "var(--rasp)" }}>Built for the AI era.</span>
           </h1>
+
+          <div className="animate-d2" style={{ fontSize: "clamp(14px, 2vw, 18px)", marginBottom: "24px", lineHeight: 1.5 }}>
+            <span style={{ color: "var(--rasp)", fontWeight: 600 }}>Investors</span>
+            <span style={{ color: "var(--white-mid)" }}> define their scope. </span>
+            <span style={{ color: "var(--amber)", fontWeight: 600 }}>Founders</span>
+            <span style={{ color: "var(--white-mid)" }}> build their passport.</span>
+          </div>
 
           <p className="animate-d3" style={{ fontSize: "14px", color: "var(--white-mid)", lineHeight: 1.8, maxWidth: "480px", margin: "0 auto 32px", }}>
             Investors define their criteria once — every founder who reaches out already knows the scope.
@@ -74,7 +77,7 @@ export default function LandingPage() {
 
           <div className="animate-d4" style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
             <a href="/scope" className="btn-primary" style={{ padding: "11px 24px", fontSize: "12px" }}>$ define your scope →</a>
-            <a href="/passport" className="btn-secondary" style={{ padding: "11px 24px", fontSize: "12px" }}>$ build your passport →</a>
+            <a href="/passport" style={{ padding: "11px 24px", fontSize: "12px", background: "var(--amber)", color: "#000", border: "1px solid var(--amber)", fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, letterSpacing: "0.06em", textDecoration: "none", display: "inline-flex", alignItems: "center" }}>$ build your passport →</a>
           </div>
 
           <div className="animate-d5" style={{ fontSize: "11px", color: "var(--white-dim)", letterSpacing: "0.08em" }}>
@@ -109,9 +112,9 @@ export default function LandingPage() {
             </div>
 
             {/* Centre divider */}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 20px", gap: "6px" }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 12px", gap: "8px" }}>
               <div style={{ width: "1px", flex: 1, background: "var(--border)" }} />
-              <div style={{ background: "var(--bg3)", border: "1px solid var(--border2)", padding: "6px 8px", fontSize: "9px", color: "var(--white-dim)", letterSpacing: "0.1em", textTransform: "uppercase", writingMode: "vertical-rl", textOrientation: "mixed", transform: "rotate(180deg)" }}>structured match</div>
+              <div style={{ fontSize: "18px", color: "var(--border2)", lineHeight: 1 }}>⇄</div>
               <div style={{ width: "1px", flex: 1, background: "var(--border)" }} />
             </div>
 
@@ -170,8 +173,8 @@ export default function LandingPage() {
                 { step: "soon", label: "We surface the right founders to you proactively. Relevant inbound, without the noise." },
               ].map(({ step, label }) => (
                 <div key={step} style={{ display: "flex", gap: "14px", marginBottom: "18px", alignItems: "flex-start" }}>
-                  <div style={{ fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase", color: step === "today" ? "var(--rasp)" : "var(--white-dimmer)", whiteSpace: "nowrap", paddingTop: "2px", minWidth: "36px" }}>{step}</div>
-                  <p style={{ fontSize: "11px", color: step === "today" ? "var(--white-mid)" : "var(--white-dimmer)", lineHeight: 1.7, margin: 0 }}>{label}</p>
+                  <div style={{ fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase", color: step === "today" ? "var(--rasp)" : "var(--white-dim)", whiteSpace: "nowrap", paddingTop: "2px", minWidth: "36px" }}>{step}</div>
+                  <p style={{ fontSize: "11px", color: step === "today" ? "var(--white)" : "var(--white-mid)", lineHeight: 1.7, margin: 0 }}>{label}</p>
                 </div>
               ))}
               <a href="/scope" className="btn-primary" style={{ display: "block", textAlign: "center", fontSize: "11px", padding: "9px" }}>$ define your scope →</a>
@@ -186,11 +189,11 @@ export default function LandingPage() {
                 { step: "soon", label: "We surface the right investors for your stage and sector. Warm, relevant introductions — without cold outreach." },
               ].map(({ step, label }) => (
                 <div key={step} style={{ display: "flex", gap: "14px", marginBottom: "18px", alignItems: "flex-start" }}>
-                  <div style={{ fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase", color: step === "today" ? "var(--amber)" : "var(--white-dimmer)", whiteSpace: "nowrap", paddingTop: "2px", minWidth: "36px" }}>{step}</div>
-                  <p style={{ fontSize: "11px", color: step === "today" ? "var(--white-mid)" : "var(--white-dimmer)", lineHeight: 1.7, margin: 0 }}>{label}</p>
+                  <div style={{ fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase", color: step === "today" ? "var(--amber)" : "var(--white-dim)", whiteSpace: "nowrap", paddingTop: "2px", minWidth: "36px" }}>{step}</div>
+                  <p style={{ fontSize: "11px", color: step === "today" ? "var(--white)" : "var(--white-mid)", lineHeight: 1.7, margin: 0 }}>{label}</p>
                 </div>
               ))}
-              <a href="/passport" className="btn-secondary" style={{ display: "block", textAlign: "center", fontSize: "11px", padding: "9px" }}>$ build your passport →</a>
+              <a href="/passport" style={{ display: "block", textAlign: "center", fontSize: "11px", padding: "9px", background: "var(--amber)", color: "#000", border: "1px solid var(--amber)", fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, letterSpacing: "0.06em", textDecoration: "none" }}>$ build your passport →</a>
             </div>
           </div>
         </section>
