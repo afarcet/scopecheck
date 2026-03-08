@@ -181,7 +181,7 @@ export default function PassportPage() {
             </div>
 
             <p style={{ fontSize: "11px", color: "var(--white-dimmer)", textAlign: "center" }}>
-              Already have a passport? <a href="/f" style={{ color: "var(--amber)", textDecoration: "none" }}>sign in →</a>
+              Already have a passport? <button onClick={handleGoogleSignIn} style={{ background: "none", border: "none", color: "var(--amber)", fontFamily: "inherit", fontSize: "inherit", cursor: "pointer", padding: 0, letterSpacing: "0.06em" }}>sign in →</button>
             </p>
             {error && <p style={{ color: "var(--rasp)", fontSize: "11px", marginTop: "10px" }}>{error}</p>}
           </div>

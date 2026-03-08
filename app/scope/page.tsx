@@ -189,7 +189,7 @@ export default function ScopePage() {
             </div>
 
             <p style={{ fontSize: "11px", color: "var(--white-dimmer)", textAlign: "center" }}>
-              Already have a scope? <a href="/dashboard" style={{ color: "var(--rasp)", textDecoration: "none" }}>go to dashboard →</a>
+              <button onClick={handleGoogleSignIn} style={{ background: "none", border: "none", color: "var(--rasp)", fontFamily: "inherit", fontSize: "inherit", cursor: "pointer", padding: 0, letterSpacing: "0.06em" }}>sign in →</button>
             </p>
             {error && <p style={{ color: "var(--rasp)", fontSize: "11px", marginTop: "10px" }}>{error}</p>}
           </div>

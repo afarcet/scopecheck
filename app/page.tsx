@@ -107,7 +107,7 @@ export default function LandingPage() {
           ) : (
             <>
               <SignInButton />
-              <a href="/scope" className="btn-primary" style={{ padding: "5px 12px", fontSize: "10px", whiteSpace: "nowrap" }}>get started →</a>
+              <a href="/#get-started" className="btn-secondary" style={{ padding: "5px 12px", fontSize: "10px", whiteSpace: "nowrap" }}>get started →</a>
             </>
           )}
         </div>
@@ -343,7 +343,7 @@ export default function LandingPage() {
         {/* GET STARTED */}
         <section id="access">
           <div className="section-header">
-            <span className="section-label"><span className="section-num">04</span> get started</span>
+            <span id="get-started" className="section-label"><span className="section-num">04</span> get started</span>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
             <a href="/scope" style={{ background: "var(--bg2)", border: "1px solid var(--border2)", borderTop: "2px solid var(--rasp)", padding: "24px", textDecoration: "none", display: "block" }}>
@@ -360,7 +360,7 @@ export default function LandingPage() {
             </a>
           </div>
           <p style={{ fontSize: "11px", color: "var(--white-dim)", textAlign: "center", marginTop: "14px" }}>
-            Already have a scope? <a href="/dashboard" style={{ color: "var(--rasp)", textDecoration: "none" }}>go to dashboard →</a>
+            sign in → <a href="/scope" style={{ color: "var(--rasp)", textDecoration: "none" }}>investor</a> · <a href="/passport" style={{ color: "var(--amber)", textDecoration: "none" }}>founder</a>
           </p>
         </section>
 
