@@ -269,6 +269,17 @@ export default function LandingPage() {
           <div className="section-header">
             <span className="section-label"><span className="section-num">02</span> example · investor scope</span>
           </div>
+
+          {/* Framing — Option C */}
+          <div style={{ marginBottom: "16px" }}>
+            <p style={{ fontSize: "13px", color: "var(--white-mid)", lineHeight: 1.75, marginBottom: "6px" }}>
+              An investor shares their scope. A founder stumbles across one. Either way —{" "}
+              <span style={{ color: "var(--white)" }}>what happens next takes 60 seconds.</span>
+            </p>
+            <span style={{ fontSize: "10px", color: "var(--white-dimmer)", letterSpacing: "0.06em" }}>
+              // this is a live scope · if you&apos;re a founder, you can apply right now
+            </span>
+          </div>
           <div style={{ border: "1px solid var(--border2)", background: "var(--bg2)" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderBottom: "1px solid var(--border)", background: "var(--bg3)" }}>
               <span style={{ fontSize: "11px", color: "var(--rasp)" }}>scopecheck.ai/i/raspberrysyndicate</span>
@@ -313,6 +324,80 @@ export default function LandingPage() {
             </p>
             <span style={{ fontSize: "10px", color: "var(--rasp)", letterSpacing: "0.08em" }}>— Alex Farcet, Raspberry Ventures · investor #001</span>
           </div>
+
+          {/* 3-panel walkthrough */}
+          <div style={{ marginTop: "24px" }}>
+            <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--white)", marginBottom: "14px", letterSpacing: "-0.01em" }}>
+              Structured intro. Sent in seconds.
+            </div>
+            <div className="how-it-works-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1px", background: "var(--border)" }}>
+
+              {/* Panel 1 — Discovery */}
+              <div style={{ background: "var(--bg2)", padding: "18px" }}>
+                <div style={{ fontSize: "9px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--white-dim)", marginBottom: "12px" }}>
+                  // 01 · a founder finds a scope
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "7px", marginBottom: "14px" }}>
+                  <div style={{ fontSize: "11px", color: "var(--white-mid)", display: "flex", gap: "8px", alignItems: "flex-start" }}>
+                    <span style={{ color: "var(--rasp)", flexShrink: 0 }}>→</span>
+                    <span>investor shares the link — email, LinkedIn, at an event</span>
+                  </div>
+                  <div style={{ fontSize: "11px", color: "var(--white-mid)", display: "flex", gap: "8px", alignItems: "flex-start" }}>
+                    <span style={{ color: "var(--rasp)", flexShrink: 0 }}>→</span>
+                    <span>or founder discovers the scope on ScopeCheck</span>
+                  </div>
+                </div>
+                <div style={{ border: "1px solid var(--border2)", padding: "8px 10px", fontSize: "10px", color: "var(--rasp)", letterSpacing: "0.04em" }}>
+                  scopecheck.ai/i/yourhandle
+                </div>
+              </div>
+
+              {/* Panel 2 — Inline form */}
+              <div style={{ background: "var(--bg2)", padding: "18px" }}>
+                <div style={{ fontSize: "9px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--white-dim)", marginBottom: "12px" }}>
+                  // 02 · form opens on the same page
+                </div>
+                <div style={{ border: "1px solid var(--border2)", padding: "10px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px", marginBottom: "10px" }}>
+                  <div>
+                    <div style={{ fontSize: "8px", color: "var(--rasp)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "5px" }}>// investor</div>
+                    {["ticket_size", "sectors", "geography"].map(k => (
+                      <div key={k} style={{ fontSize: "9px", color: "var(--white-dimmer)", borderBottom: "1px solid var(--border)", padding: "3px 0", marginBottom: "2px" }}>{k}</div>
+                    ))}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: "8px", color: "var(--amber)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "5px" }}>// founder</div>
+                    {["company", "round", "deck_url"].map(k => (
+                      <div key={k} style={{ fontSize: "9px", color: "var(--white-dimmer)", borderBottom: "1px solid var(--border)", padding: "3px 0", marginBottom: "2px" }}>{k}</div>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ fontSize: "10px", color: "var(--white-dim)" }}>no new tab · no account needed</div>
+              </div>
+
+              {/* Panel 3 — Passport created */}
+              <div style={{ background: "var(--bg2)", padding: "18px" }}>
+                <div style={{ fontSize: "9px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--white-dim)", marginBottom: "12px" }}>
+                  // 03 · intro sent. passport ready.
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "7px", marginBottom: "14px" }}>
+                  <div style={{ fontSize: "11px", color: "var(--white-mid)", display: "flex", gap: "8px", alignItems: "flex-start" }}>
+                    <span style={{ color: "var(--amber)", flexShrink: 0 }}>✓</span>
+                    <span>investor notified instantly</span>
+                  </div>
+                  <div style={{ fontSize: "11px", color: "var(--white-mid)", display: "flex", gap: "8px", alignItems: "flex-start" }}>
+                    <span style={{ color: "var(--amber)", flexShrink: 0 }}>✓</span>
+                    <span>your passport created as a side effect</span>
+                  </div>
+                </div>
+                <div style={{ border: "1px solid var(--border2)", borderLeft: "2px solid var(--amber)", padding: "8px 10px", fontSize: "10px", color: "var(--amber)", letterSpacing: "0.04em" }}>
+                  scopecheck.ai/f/yourcompany
+                  <span style={{ color: "var(--white-dim)", marginLeft: "6px" }}>// use it for the next investor</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
         </section>
 
         {/* COMING SOON */}
