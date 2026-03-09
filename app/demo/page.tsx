@@ -142,7 +142,7 @@ export default function DemoPage() {
           </div>
           <h1 className="animate-d1" style={{ fontSize: "clamp(22px, 3.5vw, 36px)", fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1.15, marginBottom: "12px" }}>
             An investor's scope. Your startup's fit.<br />
-            <span style={{ color: "var(--white-mid)", fontWeight: 400, fontSize: "0.75em" }}>Fill in your intro on the right — the score reacts as you type.</span>
+            <span style={{ color: "var(--white-mid)", fontWeight: 400, fontSize: "0.75em" }}>Complete your passport, get your live matching score.</span>
           </h1>
           <div style={{ display: "flex", gap: "20px", justifyContent: "center", fontSize: "11px", color: "var(--white-dimmer)" }}>
             <span><span style={{ color: "var(--rasp)" }}>←</span> real investor criteria</span>
@@ -154,7 +154,7 @@ export default function DemoPage() {
         </section>
 
         {/* TWO-COLUMN */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: "var(--border)", alignItems: "start" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: "var(--border)", alignItems: "stretch" }}>
 
           {/* LEFT — INVESTOR SCOPE */}
           <div style={{ background: "var(--bg2)" }}>
@@ -172,8 +172,11 @@ export default function DemoPage() {
             </div>
             <div style={{ padding: "20px" }}>
               <div style={{ marginBottom: "16px" }}>
-                <div style={{ fontSize: "20px", fontWeight: 700, letterSpacing: "-0.01em", marginBottom: "3px" }}>{INVESTOR.name}</div>
-                <div style={{ fontSize: "11px", color: "var(--white-mid)", marginBottom: "8px" }}>{INVESTOR.firm} · {INVESTOR.location} · {INVESTOR.type}</div>
+                <div style={{ fontSize: "14px", fontWeight: 700, letterSpacing: "-0.01em", marginBottom: "4px" }}>
+                  {INVESTOR.name}
+                  <span style={{ color: "var(--white-mid)", fontWeight: 400 }}> · {INVESTOR.firm}</span>
+                </div>
+                <div style={{ fontSize: "11px", color: "var(--white-dim)", marginBottom: "8px" }}>{INVESTOR.location} · {INVESTOR.type}</div>
                 <div style={{ display: "flex", gap: "5px" }}>
                   {INVESTOR.stages.map(s => <span key={s} className="tag">{s}</span>)}
                 </div>
@@ -208,7 +211,7 @@ export default function DemoPage() {
           </div>
 
           {/* RIGHT — FOUNDER FORM */}
-          <div style={{ background: "var(--bg2)" }}>
+          <div style={{ background: "var(--bg2)", display: "flex", flexDirection: "column" }}>
             {/* Header row — same height as left */}
             <div style={{ borderBottom: "2px solid var(--amber)", padding: "12px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", height: "46px" }}>
               <span style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)" }}>// your startup intro</span>
@@ -222,7 +225,7 @@ export default function DemoPage() {
               </span>
             </div>
             {/* FORM — no score here */}
-            <div style={{ padding: "20px" }}>
+            <div style={{ padding: "20px", flex: 1, display: "flex", flexDirection: "column" }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "10px" }}>
                 <div>
                   <label style={lbl}>your name *</label>
@@ -268,6 +271,7 @@ export default function DemoPage() {
                   <input style={inp} type="url" value={form.deck_url} onChange={e => setForm(f => ({ ...f, deck_url: e.target.value }))} placeholder="https://..." />
                 </div>
               </div>
+              <div style={{ marginTop: "auto" }}>
               <Link href="/i/raspberrysyndicate"
                 className={canSend ? "btn-primary" : ""}
                 style={{
@@ -288,6 +292,7 @@ export default function DemoPage() {
                   // takes you to the live scope · fields auto-fill on return visits
                 </div>
               )}
+              </div>
             </div>
           </div>
         </div>
