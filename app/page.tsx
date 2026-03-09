@@ -56,11 +56,15 @@ export default function LandingPage() {
 
   useEffect(() => {
     const resolveSession = async (userId: string, email: string) => {
-      const [{ data: inv }, { data: founder }] = await Promise.all([
+      // Query by user_id first
+      const [{ data: invById }, { data: founderById }] = await Promise.all([
         supabase.from("investors").select("handle").eq("user_id", userId).maybeSingle(),
         supabase.from("founders").select("handle").eq("user_id", userId).maybeSingle(),
       ]);
-      const role = inv && founder ? "both" : inv ? "investor" : founder ? "founder" : null;
+      // Email fallback — for profiles created before user_id was stored
+      const invData     = invById     ?? (await supabase.from("investors").select("handle").eq("email", email).maybeSingle()).data;
+      const founderData = founderById ?? (await supabase.from("founders").select("handle").eq("email", email).maybeSingle()).data;
+      const role = invData && founderData ? "both" : invData ? "investor" : founderData ? "founder" : null;
       setSessionUser({ email, role });
     };
 
@@ -68,17 +72,18 @@ export default function LandingPage() {
       setAuthed(!!session?.user);
       if (session?.user) resolveSession(session.user.id, session.user.email!);
     });
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
       setAuthed(!!session?.user);
       if (session?.user) resolveSession(session.user.id, session.user.email!);
       else setSessionUser(null);
     });
+
     return () => subscription.unsubscribe();
   }, []);
 
   return (
     <main style={{ minHeight: "100vh", background: "var(--bg)" }}>
-
       {/* NAV */}
       <nav style={{ borderBottom: "1px solid var(--border)", padding: "10px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, background: "var(--bg)", zIndex: 100 }}>
         <div style={{ display: "flex", alignItems: "center", gap: "16px", minWidth: 0 }}>
@@ -90,7 +95,7 @@ export default function LandingPage() {
           {authed && sessionUser ? (
             <>
               {(sessionUser.role === "investor" || sessionUser.role === "both") && (
-                <a href="/dashboard" className="btn-secondary" style={{ padding: "5px 12px", fontSize: "10px", whiteSpace: "nowrap" }}>pipeline →</a>
+                <a href="/dashboard" className="btn-primary" style={{ padding: "5px 12px", fontSize: "10px", whiteSpace: "nowrap" }}>pipeline →</a>
               )}
               {(sessionUser.role === "founder" || sessionUser.role === "both") && (
                 <a href="/founder-dashboard" className="btn-secondary" style={{ padding: "5px 12px", fontSize: "10px", whiteSpace: "nowrap" }}>my passport →</a>
@@ -114,31 +119,25 @@ export default function LandingPage() {
       </nav>
 
       <div className="page-content" style={{ maxWidth: "820px", margin: "0 auto", padding: "0 24px 80px" }}>
-
         {/* HERO */}
         <section className="hero-section" style={{ padding: "64px 0 48px", textAlign: "center" }}>
           <h1 className="animate-d1" style={{ fontSize: "clamp(32px, 5.5vw, 58px)", fontWeight: 700, lineHeight: 1.05, letterSpacing: "-0.03em", marginBottom: "16px" }}>
             Deal flow infrastructure.<br />
             <span style={{ color: "var(--rasp)" }}>Built for the AI era.</span>
           </h1>
-
           <div className="animate-d2" style={{ fontSize: "clamp(14px, 2vw, 18px)", marginBottom: "24px", lineHeight: 1.5 }}>
             <span style={{ color: "var(--rasp)", fontWeight: 600 }}>Investors</span>
             <span style={{ color: "var(--white-mid)" }}> define their scope. </span>
             <span style={{ color: "var(--amber)", fontWeight: 600 }}>Founders</span>
             <span style={{ color: "var(--white-mid)" }}> build their passport.</span>
           </div>
-
-          <p className="animate-d3" style={{ fontSize: "14px", color: "var(--white-mid)", lineHeight: 1.8, maxWidth: "480px", margin: "0 auto 32px", }}>
-            Investors define their criteria once — every founder who reaches out already knows the scope.
-            Founders build their passport once — it travels with them to every investor.
+          <p className="animate-d3" style={{ fontSize: "14px", color: "var(--white-mid)", lineHeight: 1.8, maxWidth: "480px", margin: "0 auto 32px" }}>
+            Investors define their criteria once — every founder who reaches out already knows the scope. Founders build their passport once — it travels with them to every investor.
           </p>
-
           <div className="animate-d4 hero-ctas" style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
             <a href="/scope" className="btn-primary" style={{ padding: "11px 24px", fontSize: "12px" }}>$ define your scope →</a>
             <a href="/passport" style={{ padding: "11px 24px", fontSize: "12px", background: "var(--amber)", color: "#000", border: "1px solid var(--amber)", fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, letterSpacing: "0.06em", textDecoration: "none", display: "inline-flex", alignItems: "center" }}>$ build your passport →</a>
           </div>
-
           <div className="animate-d5" style={{ fontSize: "11px", color: "var(--white-dim)", letterSpacing: "0.08em" }}>
             <span style={{ color: "var(--rasp)" }}>//</span> AI-native · /for-llm auto-generated · QR-ready · open format
           </div>
@@ -149,7 +148,6 @@ export default function LandingPage() {
         {/* ONE TO MANY */}
         <section style={{ marginBottom: "56px" }}>
           <div className="grid-two-col" style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: "0", alignItems: "stretch" }}>
-
             {/* Investor side */}
             <div style={{ background: "var(--bg2)", border: "1px solid var(--border2)", borderTop: "2px solid var(--rasp)", padding: "24px" }}>
               <div style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--rasp)", marginBottom: "14px" }}>// for investors</div>
@@ -160,7 +158,6 @@ export default function LandingPage() {
               <div style={{ background: "var(--bg3)", border: "1px solid var(--border)", borderLeft: "2px solid var(--rasp)", padding: "7px 12px", fontSize: "11px", color: "var(--rasp)", marginBottom: "14px", letterSpacing: "0.02em" }}>
                 <a href="/i/demo" style={{ textDecoration: "none", color: "inherit" }}>scopecheck.ai/i/<span style={{ color: "var(--white-mid)" }}>yourhandle</span></a>
               </div>
-              {/* Fan-out visual */}
               <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
                 {["founder A sends structured intro", "founder B sends structured intro", "founder C sends structured intro", "..."].map((f, i) => (
                   <div key={i} style={{ fontSize: "10px", color: i === 3 ? "var(--white-dimmer)" : "var(--white-mid)", display: "flex", alignItems: "center", gap: "6px" }}>
@@ -169,7 +166,6 @@ export default function LandingPage() {
                 ))}
               </div>
             </div>
-
             {/* Centre divider */}
             <div className="col-divider" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 8px", gap: "0" }}>
               <div style={{ width: "1px", flex: 1, background: "var(--border)" }} />
@@ -179,7 +175,6 @@ export default function LandingPage() {
               </div>
               <div style={{ width: "1px", flex: 1, background: "var(--border)" }} />
             </div>
-
             {/* Founder side */}
             <div style={{ background: "var(--bg2)", border: "1px solid var(--border2)", borderTop: "2px solid var(--amber)", padding: "24px" }}>
               <div style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: "14px" }}>// for founders</div>
@@ -190,7 +185,6 @@ export default function LandingPage() {
               <div style={{ background: "var(--bg3)", border: "1px solid var(--border)", borderLeft: "2px solid var(--amber)", padding: "7px 12px", fontSize: "11px", color: "var(--amber)", marginBottom: "14px", letterSpacing: "0.02em" }}>
                 <a href="/f/acme" style={{ textDecoration: "none", color: "inherit" }}>scopecheck.ai/f/<span style={{ color: "var(--white-mid)" }}>yourcompany</span></a>
               </div>
-              {/* Fan-out visual */}
               <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
                 {["sent to investor A", "sent to investor B", "sent to investor C", "..."].map((f, i) => (
                   <div key={i} style={{ fontSize: "10px", color: i === 3 ? "var(--white-dimmer)" : "var(--white-mid)", display: "flex", alignItems: "center", gap: "6px" }}>
@@ -200,7 +194,6 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-
           {/* Connector row */}
           <div style={{ marginTop: "1px", background: "var(--bg2)", border: "1px solid var(--border)", borderTop: "none", padding: "14px 20px", display: "flex", alignItems: "center", gap: "20px", flexWrap: "wrap" }}>
             <div style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--white-mid)", whiteSpace: "nowrap" }}>// for connectors</div>
@@ -222,42 +215,38 @@ export default function LandingPage() {
             <div style={{ flex: 1, height: "1px", background: "var(--border)" }} />
             <Note text="shipped day 1 →" rotate={1.5} link="/log#006" />
           </div>
-
-          {/* Symmetric two-column progression */}
           <div className="how-it-works-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: "var(--border)", border: "1px solid var(--border)" }}>
-
             {/* Investor column */}
             <div style={{ background: "var(--bg2)", padding: "24px", display: "flex", flexDirection: "column" }}>
               <div style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--rasp)", marginBottom: "20px" }}>// investor</div>
               <div style={{ flex: 1 }}>
-              {[
-                { step: "today", label: "Define your scope once. Every founder who reaches out already knows your criteria — structured, fast, no back-and-forth." },
-                { step: "next", label: "Every inbound is scored for fit before you open it. Know in seconds if it's worth your time." },
-                { step: "soon", label: "We surface the right founders to you proactively. Relevant inbound, without the noise." },
-              ].map(({ step, label }) => (
-                <div key={step} style={{ display: "flex", gap: "14px", marginBottom: "18px", alignItems: "flex-start" }}>
-                  <div style={{ fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase", color: step === "today" ? "var(--rasp)" : "var(--white-dim)", whiteSpace: "nowrap", paddingTop: "2px", minWidth: "36px" }}>{step}</div>
-                  <p style={{ fontSize: "11px", color: step === "today" ? "var(--white)" : "var(--white-mid)", lineHeight: 1.7, margin: 0 }}>{label}</p>
-                </div>
-              ))}
+                {[
+                  { step: "today", label: "Define your scope once. Every founder who reaches out already knows your criteria — structured, fast, no back-and-forth." },
+                  { step: "next",  label: "Every inbound is scored for fit before you open it. Know in seconds if it's worth your time." },
+                  { step: "soon",  label: "We surface the right founders to you proactively. Relevant inbound, without the noise." },
+                ].map(({ step, label }) => (
+                  <div key={step} style={{ display: "flex", gap: "14px", marginBottom: "18px", alignItems: "flex-start" }}>
+                    <div style={{ fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase", color: step === "today" ? "var(--rasp)" : "var(--white-dim)", whiteSpace: "nowrap", paddingTop: "2px", minWidth: "36px" }}>{step}</div>
+                    <p style={{ fontSize: "11px", color: step === "today" ? "var(--white)" : "var(--white-mid)", lineHeight: 1.7, margin: 0 }}>{label}</p>
+                  </div>
+                ))}
               </div>
               <a href="/scope" className="btn-primary" style={{ display: "block", textAlign: "center", fontSize: "11px", padding: "9px" }}>$ define your scope →</a>
             </div>
-
             {/* Founder column */}
             <div style={{ background: "var(--bg2)", padding: "24px", display: "flex", flexDirection: "column" }}>
               <div style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: "20px" }}>// founder</div>
               <div style={{ flex: 1 }}>
-              {[
-                { step: "today", label: "Build your passport once. Share it with any investor — fields auto-fill on every return visit. Structured, fast, no back-and-forth." },
-                { step: "next", label: "Know your chances, and customise, before sending your passport." },
-                { step: "soon", label: "We surface the right investors for your stage and sector. Warm, relevant introductions — without cold outreach." },
-              ].map(({ step, label }) => (
-                <div key={step} style={{ display: "flex", gap: "14px", marginBottom: "18px", alignItems: "flex-start" }}>
-                  <div style={{ fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase", color: step === "today" ? "var(--amber)" : "var(--white-dim)", whiteSpace: "nowrap", paddingTop: "2px", minWidth: "36px" }}>{step}</div>
-                  <p style={{ fontSize: "11px", color: step === "today" ? "var(--white)" : "var(--white-mid)", lineHeight: 1.7, margin: 0 }}>{label}</p>
-                </div>
-              ))}
+                {[
+                  { step: "today", label: "Build your passport once. Share it with any investor — fields auto-fill on every return visit. Structured, fast, no back-and-forth." },
+                  { step: "next",  label: "Know your chances, and customise, before sending your passport." },
+                  { step: "soon",  label: "We surface the right investors for your stage and sector. Warm, relevant introductions — without cold outreach." },
+                ].map(({ step, label }) => (
+                  <div key={step} style={{ display: "flex", gap: "14px", marginBottom: "18px", alignItems: "flex-start" }}>
+                    <div style={{ fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase", color: step === "today" ? "var(--amber)" : "var(--white-dim)", whiteSpace: "nowrap", paddingTop: "2px", minWidth: "36px" }}>{step}</div>
+                    <p style={{ fontSize: "11px", color: step === "today" ? "var(--white)" : "var(--white-mid)", lineHeight: 1.7, margin: 0 }}>{label}</p>
+                  </div>
+                ))}
               </div>
               <a href="/passport" style={{ display: "block", textAlign: "center", fontSize: "11px", padding: "9px", background: "var(--amber)", color: "#000", border: "1px solid var(--amber)", fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, letterSpacing: "0.06em", textDecoration: "none" }}>$ build your passport →</a>
             </div>
@@ -269,8 +258,6 @@ export default function LandingPage() {
           <div className="section-header">
             <span className="section-label"><span className="section-num">02</span> example · investor scope</span>
           </div>
-
-          {/* Framing — Option C */}
           <div style={{ marginBottom: "16px" }}>
             <p style={{ fontSize: "13px", color: "var(--white-mid)", lineHeight: 1.75, marginBottom: "6px" }}>
               An investor shares their scope. A founder stumbles across one. Either way —{" "}
@@ -298,8 +285,8 @@ export default function LandingPage() {
               <div className="criteria-table" style={{ marginBottom: "14px" }}>
                 {[
                   { k: "ticket_size", v: <><span style={{ color: "var(--rasp)" }}>€50K → €650K</span> <span style={{ color: "var(--white-dim)", fontSize: "10px" }}>// via single SPV</span></> },
-                  { k: "sectors", v: <><span style={{ color: "var(--rasp)" }}>ClimateTech</span> · <span style={{ color: "var(--rasp)" }}>Applied AI</span></> },
-                  { k: "geography", v: "Europe · Israel · Africa · US (select)" },
+                  { k: "sectors",     v: <><span style={{ color: "var(--rasp)" }}>ClimateTech</span> · <span style={{ color: "var(--rasp)" }}>Applied AI</span></> },
+                  { k: "geography",   v: "Europe · Israel · Africa · US (select)" },
                   { k: "wont_invest", v: <span style={{ color: "var(--white-mid)" }}>pre-seed · crypto · gaming · consumer apps</span> },
                 ].map((row, i) => (
                   <div key={i} className="criteria-row">
@@ -316,7 +303,6 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-
           {/* Pull quote */}
           <div style={{ marginTop: "1px", background: "var(--bg2)", border: "1px solid var(--border)", borderTop: "none", padding: "16px 20px", borderLeft: "3px solid var(--rasp)" }}>
             <p style={{ fontSize: "12px", color: "var(--white-mid)", fontStyle: "italic", lineHeight: 1.7, margin: "0 0 6px" }}>
@@ -324,39 +310,22 @@ export default function LandingPage() {
             </p>
             <span style={{ fontSize: "10px", color: "var(--rasp)", letterSpacing: "0.08em" }}>— Alex Farcet, Raspberry Ventures · investor #001</span>
           </div>
-
           {/* 3-panel walkthrough */}
           <div style={{ marginTop: "24px" }}>
             <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--white)", marginBottom: "14px", letterSpacing: "-0.01em" }}>
               Structured intro. Sent in seconds.
             </div>
             <div className="how-it-works-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1px", background: "var(--border)" }}>
-
-              {/* Panel 1 — Discovery */}
               <div style={{ background: "var(--bg2)", padding: "18px" }}>
-                <div style={{ fontSize: "9px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--white-dim)", marginBottom: "12px" }}>
-                  // 01 · a founder finds a scope
-                </div>
+                <div style={{ fontSize: "9px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--white-dim)", marginBottom: "12px" }}>// 01 · a founder finds a scope</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "7px", marginBottom: "14px" }}>
-                  <div style={{ fontSize: "11px", color: "var(--white-mid)", display: "flex", gap: "8px", alignItems: "flex-start" }}>
-                    <span style={{ color: "var(--rasp)", flexShrink: 0 }}>→</span>
-                    <span>investor shares the link — email, LinkedIn, at an event</span>
-                  </div>
-                  <div style={{ fontSize: "11px", color: "var(--white-mid)", display: "flex", gap: "8px", alignItems: "flex-start" }}>
-                    <span style={{ color: "var(--rasp)", flexShrink: 0 }}>→</span>
-                    <span>or founder discovers the scope on ScopeCheck</span>
-                  </div>
+                  <div style={{ fontSize: "11px", color: "var(--white-mid)", display: "flex", gap: "8px", alignItems: "flex-start" }}><span style={{ color: "var(--rasp)", flexShrink: 0 }}>→</span><span>investor shares the link — email, LinkedIn, at an event</span></div>
+                  <div style={{ fontSize: "11px", color: "var(--white-mid)", display: "flex", gap: "8px", alignItems: "flex-start" }}><span style={{ color: "var(--rasp)", flexShrink: 0 }}>→</span><span>or founder discovers the scope on ScopeCheck</span></div>
                 </div>
-                <div style={{ border: "1px solid var(--border2)", padding: "8px 10px", fontSize: "10px", color: "var(--rasp)", letterSpacing: "0.04em" }}>
-                  scopecheck.ai/i/yourhandle
-                </div>
+                <div style={{ border: "1px solid var(--border2)", padding: "8px 10px", fontSize: "10px", color: "var(--rasp)", letterSpacing: "0.04em" }}>scopecheck.ai/i/investorABC</div>
               </div>
-
-              {/* Panel 2 — Inline form */}
               <div style={{ background: "var(--bg2)", padding: "18px" }}>
-                <div style={{ fontSize: "9px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--white-dim)", marginBottom: "12px" }}>
-                  // 02 · form opens on the same page
-                </div>
+                <div style={{ fontSize: "9px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--white-dim)", marginBottom: "12px" }}>/ 02 · form opens inline</div>
                 <div style={{ border: "1px solid var(--border2)", padding: "10px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px", marginBottom: "10px" }}>
                   <div>
                     <div style={{ fontSize: "8px", color: "var(--rasp)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "5px" }}>// investor</div>
@@ -373,31 +342,18 @@ export default function LandingPage() {
                 </div>
                 <div style={{ fontSize: "10px", color: "var(--white-dim)" }}>no new tab · no account needed</div>
               </div>
-
-              {/* Panel 3 — Passport created */}
               <div style={{ background: "var(--bg2)", padding: "18px" }}>
-                <div style={{ fontSize: "9px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--white-dim)", marginBottom: "12px" }}>
-                  // 03 · intro sent. passport ready.
-                </div>
+                <div style={{ fontSize: "9px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--white-dim)", marginBottom: "12px" }}>// 03 · sent · passport created</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "7px", marginBottom: "14px" }}>
-                  <div style={{ fontSize: "11px", color: "var(--white-mid)", display: "flex", gap: "8px", alignItems: "flex-start" }}>
-                    <span style={{ color: "var(--amber)", flexShrink: 0 }}>✓</span>
-                    <span>investor notified instantly</span>
-                  </div>
-                  <div style={{ fontSize: "11px", color: "var(--white-mid)", display: "flex", gap: "8px", alignItems: "flex-start" }}>
-                    <span style={{ color: "var(--amber)", flexShrink: 0 }}>✓</span>
-                    <span>your passport created as a side effect</span>
-                  </div>
+                  <div style={{ fontSize: "11px", color: "var(--white-mid)", display: "flex", gap: "8px", alignItems: "flex-start" }}><span style={{ color: "var(--amber)", flexShrink: 0 }}>✓</span><span>investor notified instantly</span></div>
+                  <div style={{ fontSize: "11px", color: "var(--white-mid)", display: "flex", gap: "8px", alignItems: "flex-start" }}><span style={{ color: "var(--amber)", flexShrink: 0 }}>✓</span><span>your passport created as a side effect</span></div>
                 </div>
                 <div style={{ border: "1px solid var(--border2)", borderLeft: "2px solid var(--amber)", padding: "8px 10px", fontSize: "10px", color: "var(--amber)", letterSpacing: "0.04em" }}>
-                  scopecheck.ai/f/yourcompany
-                  <span style={{ color: "var(--white-dim)", marginLeft: "6px" }}>// use it for the next investor</span>
+                  scopecheck.ai/f/startupXYZ <span style={{ color: "var(--white-dim)", marginLeft: "6px" }}>// use it for the next investor</span>
                 </div>
               </div>
-
             </div>
           </div>
-
         </section>
 
         {/* COMING SOON */}
@@ -449,7 +405,7 @@ export default function LandingPage() {
           </p>
         </section>
 
-        {/* TERMINAL — demoted to atmosphere */}
+        {/* TERMINAL */}
         <section style={{ marginTop: "56px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
             <span style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--white-dimmer)" }}>
@@ -480,7 +436,6 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
-
       </div>
 
       <footer className="site-footer" style={{ borderTop: "1px solid var(--border)", padding: "14px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", maxWidth: "820px", margin: "0 auto" }}>

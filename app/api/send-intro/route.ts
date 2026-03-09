@@ -39,48 +39,67 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Investor not found" }, { status: 404 });
     }
 
-    const passportUrl = `https://scopecheck.ai/f/${passportHandle}`;
-    const dashboardUrl = "https://scopecheck.ai/dashboard";
+    // Persist intro to Supabase — this is the durable record of every inbound
+    await supabase.from("intros").insert({
+      investor_handle: investorHandle,
+      founder_handle:  passportHandle,
+      founder_name:    founderName,
+      founder_email:   founderEmail ?? null,
+      company_name:    companyName,
+      one_liner:       oneLiner,
+      stage:           stage ?? null,
+      sector:          sector ?? null,
+      traction:        traction ?? null,
+      deck_url:        deckUrl ?? null,
+      status:          "new",
+    });
+
+    const passportUrl    = `https://scopecheck.ai/f/${passportHandle}`;
+    const dashboardUrl   = "https://scopecheck.ai/dashboard";
     const unsubscribeUrl = `https://scopecheck.ai/unsubscribe?email=${encodeURIComponent(investor.email)}`;
 
     // Email 1: Notify investor
-    const investorHtml = await render(InvestorNotification({
-      investorName: investor.name.split(" ")[0],
-      founderName,
-      companyName,
-      oneLiner,
-      stage,
-      sector,
-      traction,
-      deckUrl,
-      passportUrl,
-      dashboardUrl,
-      unsubscribeUrl,
-    }));
+    const investorHtml = await render(
+      InvestorNotification({
+        investorName: investor.name.split(" ")[0],
+        founderName,
+        companyName,
+        oneLiner,
+        stage,
+        sector,
+        traction,
+        deckUrl,
+        passportUrl,
+        dashboardUrl,
+        unsubscribeUrl,
+      })
+    );
 
     await resend.emails.send({
-      from: "ScopeCheck <notifications@scopecheck.ai>",
-      to: investor.email,
+      from:    "ScopeCheck <notifications@scopecheck.ai>",
+      to:      investor.email,
       subject: `New intro: ${companyName} — ${oneLiner.slice(0, 60)}${oneLiner.length > 60 ? "..." : ""}`,
-      html: investorHtml,
+      html:    investorHtml,
     });
 
     // Email 2: Confirm to founder
     if (founderEmail) {
-      const founderHtml = await render(FounderConfirmation({
-        founderName: founderName.split(" ")[0],
-        companyName,
-        investorName: investor.name,
-        investorFirm: investor.firm || undefined,
-        passportUrl,
-        unsubscribeUrl: `https://scopecheck.ai/unsubscribe?email=${encodeURIComponent(founderEmail)}`,
-      }));
+      const founderHtml = await render(
+        FounderConfirmation({
+          founderName:  founderName.split(" ")[0],
+          companyName,
+          investorName: investor.name,
+          investorFirm: investor.firm || undefined,
+          passportUrl,
+          unsubscribeUrl: `https://scopecheck.ai/unsubscribe?email=${encodeURIComponent(founderEmail)}`,
+        })
+      );
 
       await resend.emails.send({
-        from: "ScopeCheck <notifications@scopecheck.ai>",
-        to: founderEmail,
+        from:    "ScopeCheck <notifications@scopecheck.ai>",
+        to:      founderEmail,
         subject: `Intro sent to ${investor.name} · Your passport is ready`,
-        html: founderHtml,
+        html:    founderHtml,
       });
     }
 

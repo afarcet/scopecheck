@@ -14,189 +14,285 @@ interface Application {
   one_liner: string;
   sector: string;
   stage: string;
-  round_size: number;
-  available: number;
   traction: string;
   deck_url: string;
   received: string;
   status: Status;
 }
 
-const MOCK_APPLICATIONS: Application[] = [
-  { id: "1", company: "Carbonade", founder: "Harry Founder", one_liner: "AI-optimised heat pumps for industrial decarbonisation.", sector: "ClimateTech", stage: "Seed", round_size: 2000000, available: 800000, traction: "€180K ARR · 3 enterprise pilots", deck_url: "https://fulldeal.ai/carbonade", received: "2 hours ago", status: "new" },
-  { id: "2", company: "GreenRoute", founder: "Sara Chen", one_liner: "Route optimisation for EV fleets reducing energy use by 40%.", sector: "ClimateTech", stage: "Early Series A", round_size: 4000000, available: 1500000, traction: "12 fleet operators, €420K ARR", deck_url: "#", received: "Yesterday", status: "new" },
-  { id: "3", company: "DataSage", founder: "Tom Morris", one_liner: "Applied AI for enterprise data cataloguing.", sector: "Applied AI", stage: "Seed", round_size: 1500000, available: 600000, traction: "5 enterprise clients, €90K ARR", deck_url: "#", received: "3 days ago", status: "considering" },
-  { id: "4", company: "CryptoX", founder: "Jake Smith", one_liner: "Web3 payments infrastructure.", sector: "Crypto", stage: "Seed", round_size: 3000000, available: 1000000, traction: "Beta users", deck_url: "#", received: "4 days ago", status: "passed" },
-];
-
-function formatCurrency(n: number) {
-  if (n >= 1000000) return `€${(n / 1000000).toFixed(1)}M`;
-  if (n >= 1000) return `€${(n / 1000).toFixed(0)}K`;
-  return `€${n}`;
+function formatRelativeTime(ts: string): string {
+  const diff = Date.now() - new Date(ts).getTime();
+  const mins  = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days  = Math.floor(diff / 86400000);
+  if (mins  < 60)  return `${mins}m ago`;
+  if (hours < 24)  return `${hours}h ago`;
+  if (days  < 7)   return `${days}d ago`;
+  return new Date(ts).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 }
 
 const COLUMNS: { key: Status; label: string; color: string }[] = [
-  { key: "new", label: "New inbound", color: "var(--amber)" },
-  { key: "considering", label: "Considering", color: "#60a5fa" },
-  { key: "passed", label: "Passed", color: "var(--slate)" },
+  { key: "new",         label: "New inbound", color: "var(--amber)"  },
+  { key: "considering", label: "Considering",  color: "#60a5fa"      },
+  { key: "passed",      label: "Passed",       color: "var(--slate)" },
 ];
 
 export default function Dashboard() {
   const router = useRouter();
-  const [apps, setApps] = useState<Application[]>(MOCK_APPLICATIONS);
-  const [expanded, setExpanded] = useState<string | null>(null);
-  const [authChecked, setAuthChecked] = useState(false);
-  const [userEmail, setUserEmail] = useState("");
+
+  const [apps,           setApps]           = useState<Application[]>([]);
+  const [expanded,       setExpanded]       = useState<string | null>(null);
+  const [authChecked,    setAuthChecked]    = useState(false);
+  const [loading,        setLoading]        = useState(true);
+  const [userEmail,      setUserEmail]      = useState("");
   const [investorHandle, setInvestorHandle] = useState("");
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!session?.user) {
         router.push("/scope");
-      } else {
-        setUserEmail(session.user.email || "");
-        const { data: inv } = await supabase.from("investors").select("handle").eq("user_id", session.user.id).maybeSingle();
-        if (inv) setInvestorHandle(inv.handle);
-        setAuthChecked(true);
+        return;
       }
+
+      const email  = session.user.email ?? "";
+      const userId = session.user.id;
+      setUserEmail(email);
+
+      // Resolve investor handle — user_id first, email fallback
+      let handle = "";
+      const { data: invById } = await supabase
+        .from("investors")
+        .select("handle")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (invById) {
+        handle = invById.handle;
+      } else {
+        const { data: invByEmail } = await supabase
+          .from("investors")
+          .select("handle")
+          .eq("email", email)
+          .maybeSingle();
+        if (invByEmail) handle = invByEmail.handle;
+      }
+
+      setInvestorHandle(handle);
+      setAuthChecked(true);
+
+      if (!handle) {
+        setLoading(false);
+        return;
+      }
+
+      // Load real intros for this investor
+      const { data: rows } = await supabase
+        .from("intros")
+        .select("*")
+        .eq("investor_handle", handle)
+        .order("created_at", { ascending: false });
+
+      if (rows) {
+        setApps(
+          rows.map((r) => ({
+            id:        r.id,
+            company:   r.company_name ?? "",
+            founder:   r.founder_name ?? "",
+            one_liner: r.one_liner    ?? "",
+            sector:    r.sector       ?? "",
+            stage:     r.stage        ?? "",
+            traction:  r.traction     ?? "",
+            deck_url:  r.deck_url     ?? "",
+            received:  formatRelativeTime(r.created_at),
+            status:    (r.status as Status) ?? "new",
+          }))
+        );
+      }
+
+      setLoading(false);
     });
   }, [router]);
 
-  const move = (id: string, status: Status) => {
-    setApps((prev) => prev.map((a) => a.id === id ? { ...a, status } : a));
+  // Persist status change to Supabase and update local state
+  const move = async (id: string, status: Status) => {
+    setApps((prev) => prev.map((a) => (a.id === id ? { ...a, status } : a)));
     setExpanded(null);
+    await supabase.from("intros").update({ status }).eq("id", id);
   };
 
   const byStatus = (status: Status) => apps.filter((a) => a.status === status);
 
-  if (!authChecked) {
+  if (!authChecked || loading) {
     return (
-      <main style={{ minHeight: "100vh", background: "var(--navy)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <span style={{ fontSize: "11px", color: "var(--slate)", letterSpacing: "0.08em", fontFamily: "DM Mono, monospace" }}>// checking session...</span>
+      <main style={{ minHeight: "100vh", background: "var(--bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <span style={{ fontSize: "11px", color: "var(--white-dim)", letterSpacing: "0.08em" }}>// loading pipeline...</span>
       </main>
     );
   }
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--navy)" }}>
-      <nav style={{ borderBottom: "1px solid var(--navy-border)", padding: "1rem 1.5rem", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, background: "var(--navy)", zIndex: 50 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
-          <Link href="/" style={{ textDecoration: "none" }}>
-            <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--rasp)", letterSpacing: "0.04em", fontFamily: "JetBrains Mono, monospace" }}>&gt; scopecheck.ai</span>
+    <main style={{ minHeight: "100vh", background: "var(--bg)" }}>
+
+      {/* NAV */}
+      <nav style={{
+        borderBottom: "1px solid var(--border)",
+        padding: "10px 20px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        position: "sticky",
+        top: 0,
+        background: "var(--bg)",
+        zIndex: 100,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <Link href="/" style={{ color: "var(--rasp)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.04em", textDecoration: "none" }}>
+            &gt; scopecheck.ai
           </Link>
-          <span style={{ color: "var(--navy-border)" }}>|</span>
-          <span style={{ fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--slate)", fontFamily: "DM Mono, monospace" }}>
-            Inbound pipeline
+          <span style={{ color: "var(--border2)" }}>|</span>
+          <span style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--white-dim)" }}>
+            inbound pipeline
           </span>
         </div>
-        <div style={{ display: "flex", gap: "0.8rem", alignItems: "center" }}>
+
+        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
           {userEmail && (
-            <span style={{ fontSize: "0.68rem", color: "var(--slate)", letterSpacing: "0.06em", maxWidth: "180px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            <span style={{ fontSize: "10px", color: "var(--white-dim)", letterSpacing: "0.04em", maxWidth: "160px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {userEmail}
             </span>
           )}
           {investorHandle && (
-            <a href={`/i/${investorHandle}`} className="btn-secondary" style={{ padding: "0.45rem 1rem", fontSize: "0.7rem", whiteSpace: "nowrap" }}>
-              My scope ↗
-            </a>
+            <Link
+              href={`/i/${investorHandle}`}
+              style={{ background: "var(--bg2)", color: "var(--white-mid)", border: "1px solid var(--border2)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "5px 10px", textDecoration: "none", whiteSpace: "nowrap" }}
+            >
+              my scope ↗
+            </Link>
           )}
-          <button onClick={async () => { const { supabase } = await import("@/lib/supabase"); await supabase.auth.signOut(); window.location.href = "/"; }} style={{ background: "none", border: "1px solid rgba(100,116,139,0.3)", color: "var(--slate)", fontFamily: "DM Mono, monospace", fontSize: "0.68rem", padding: "0.45rem 1rem", cursor: "pointer", letterSpacing: "0.06em" }}>
+          <button
+            onClick={async () => {
+              await supabase.auth.signOut();
+              window.location.href = "/";
+            }}
+            style={{ background: "none", border: "none", color: "var(--white-dim)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "5px 0", cursor: "pointer", letterSpacing: "0.06em" }}
+          >
             sign out
           </button>
         </div>
       </nav>
 
-      <div style={{ borderBottom: "1px solid var(--navy-border)", background: "var(--navy-mid)", padding: "0.8rem 1.5rem", display: "flex", gap: "2rem" }}>
+      {/* COLUMN SUMMARY BAR */}
+      <div style={{ borderBottom: "1px solid var(--border)", padding: "8px 20px", display: "flex", gap: "24px", background: "var(--bg2)" }}>
         {COLUMNS.map((col) => (
-          <div key={col.key} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: col.color, display: "inline-block" }} />
-            <span style={{ fontSize: "0.7rem", letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--slate)", fontFamily: "DM Mono, monospace" }}>{col.label}</span>
-            <span style={{ fontSize: "0.78rem", color: "var(--cream)", fontWeight: 500, fontFamily: "DM Mono, monospace" }}>{byStatus(col.key).length}</span>
+          <div key={col.key} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: col.color, display: "inline-block" }} />
+            <span style={{ fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--white-dim)" }}>{col.label}</span>
+            <span style={{ fontSize: "11px", color: "var(--white)", fontWeight: 600 }}>{byStatus(col.key).length}</span>
           </div>
         ))}
+        <div style={{ marginLeft: "auto", fontSize: "10px", color: "var(--white-dimmer)" }}>
+          {apps.length === 0 ? "// no intros yet" : `// ${apps.length} total`}
+        </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0", borderBottom: "1px solid var(--navy-border)", minHeight: "calc(100vh - 120px)" }}>
+      {/* KANBAN BOARD */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", minHeight: "calc(100vh - 100px)" }}>
         {COLUMNS.map((col, ci) => (
-          <div key={col.key} style={{ borderRight: ci < 2 ? "1px solid var(--navy-border)" : "none", padding: "1.5rem" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "1.2rem" }}>
-              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: col.color }} />
-              <span style={{ fontSize: "0.68rem", letterSpacing: "0.12em", textTransform: "uppercase", color: col.color, fontFamily: "DM Mono, monospace" }}>{col.label}</span>
-              <span style={{ background: "var(--navy-light)", border: "1px solid var(--navy-border)", borderRadius: "10px", padding: "0 0.4rem", fontSize: "0.68rem", color: "var(--slate)", fontFamily: "DM Mono, monospace" }}>
+          <div
+            key={col.key}
+            style={{ borderRight: ci < 2 ? "1px solid var(--border)" : "none", padding: "20px 16px" }}
+          >
+            {/* Column header */}
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "16px" }}>
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: col.color }} />
+              <span style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: col.color }}>{col.label}</span>
+              <span style={{ background: "var(--bg2)", border: "1px solid var(--border)", borderRadius: "10px", padding: "0 6px", fontSize: "10px", color: "var(--white-dim)" }}>
                 {byStatus(col.key).length}
               </span>
             </div>
 
+            {/* Cards */}
             {byStatus(col.key).map((app) => (
               <div
                 key={app.id}
-                style={{
-                  background: expanded === app.id ? "rgba(26,34,54,0.8)" : "var(--navy-mid)",
-                  border: "1px solid rgba(100,116,139,0.4)",
-                  borderLeft: `3px solid ${col.color}`,
-                  padding: "1rem",
-                  marginBottom: "0.8rem",
-                  cursor: "pointer",
-                  transition: "border-color 0.2s ease",
-                  borderRadius: "2px",
-                }}
                 onClick={() => setExpanded(expanded === app.id ? null : app.id)}
+                style={{
+                  background:   expanded === app.id ? "var(--bg3)" : "var(--bg2)",
+                  border:       "1px solid var(--border2)",
+                  borderLeft:   `3px solid ${col.color}`,
+                  padding:      "14px",
+                  marginBottom: "8px",
+                  cursor:       "pointer",
+                }}
               >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.4rem" }}>
-                  <span style={{ fontWeight: 400, fontSize: "0.92rem" }}>{app.company}</span>
-                  <span className="tag" style={{ fontSize: "0.64rem" }}>{app.sector}</span>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "4px" }}>
+                  <span style={{ fontWeight: 600, fontSize: "13px" }}>{app.company}</span>
+                  {app.sector && (
+                    <span style={{ fontSize: "9px", letterSpacing: "0.08em", padding: "2px 6px", border: "1px solid var(--border2)", color: "var(--white-dim)" }}>
+                      {app.sector}
+                    </span>
+                  )}
                 </div>
-                <p style={{ fontSize: "0.8rem", color: "var(--slate-light)", margin: "0 0 0.6rem", lineHeight: 1.5, fontWeight: 300 }}>
+                <p style={{ fontSize: "11px", color: "var(--white-mid)", margin: "0 0 8px", lineHeight: 1.5 }}>
                   {app.one_liner}
                 </p>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: "0.68rem", color: "var(--slate)", fontFamily: "DM Mono, monospace" }}>{app.received}</span>
-                  <span style={{ fontSize: "0.72rem", color: "var(--amber)", fontFamily: "DM Mono, monospace" }}>{formatCurrency(app.available)} avail.</span>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: "var(--white-dim)" }}>
+                  <span>{app.received}</span>
+                  {app.stage && <span style={{ color: "var(--amber)" }}>{app.stage}</span>}
                 </div>
 
+                {/* Expanded detail */}
                 {expanded === app.id && (
-                  <div style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid var(--navy-border)" }}>
-                    <div style={{ marginBottom: "0.8rem" }}>
-                      <div style={{ fontSize: "0.65rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--slate)", marginBottom: "0.2rem" }}>Traction</div>
-                      <p style={{ fontSize: "0.82rem", color: "var(--slate-light)", margin: 0 }}>{app.traction}</p>
-                    </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.6rem", marginBottom: "1rem" }}>
-                      <div>
-                        <div style={{ fontSize: "0.65rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--slate)", marginBottom: "0.2rem" }}>Round size</div>
-                        <span style={{ fontSize: "0.8rem", color: "var(--cream)", fontFamily: "DM Mono, monospace" }}>{formatCurrency(app.round_size)}</span>
+                  <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid var(--border)" }}>
+                    {app.traction && (
+                      <div style={{ marginBottom: "10px" }}>
+                        <div style={{ fontSize: "9px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--white-dim)", marginBottom: "3px" }}>traction</div>
+                        <p style={{ fontSize: "11px", color: "var(--white-mid)", margin: 0 }}>{app.traction}</p>
                       </div>
-                      <div>
-                        <div style={{ fontSize: "0.65rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--slate)", marginBottom: "0.2rem" }}>Stage</div>
-                        <span style={{ fontSize: "0.8rem", color: "var(--cream)" }}>{app.stage}</span>
+                    )}
+                    {app.founder && (
+                      <div style={{ marginBottom: "10px" }}>
+                        <div style={{ fontSize: "9px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--white-dim)", marginBottom: "3px" }}>founder</div>
+                        <p style={{ fontSize: "11px", color: "var(--white-mid)", margin: 0 }}>{app.founder}</p>
                       </div>
-                    </div>
-                    <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-                      <a href={app.deck_url} target="_blank" rel="noopener" className="btn-secondary"
-                        style={{ fontSize: "0.68rem", padding: "0.4rem 0.8rem", flex: 1, justifyContent: "center", textAlign: "center" }}
-                        onClick={(e) => e.stopPropagation()}>
-                        View deck ↗
-                      </a>
-                      {/* Allow movement to any other column — fully bidirectional */}
+                    )}
+                    <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "10px" }}>
+                      {app.deck_url && (
+                        <a
+                          href={app.deck_url}
+                          target="_blank"
+                          rel="noopener"
+                          onClick={(e) => e.stopPropagation()}
+                          style={{ flex: 1, textAlign: "center", background: "var(--bg3)", color: "var(--white-mid)", border: "1px solid var(--border2)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "7px 10px", textDecoration: "none", whiteSpace: "nowrap" }}
+                        >
+                          view deck ↗
+                        </a>
+                      )}
+                      <Link
+                        href={`/f/${app.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        style={{ flex: 1, textAlign: "center", background: "var(--bg3)", color: "var(--white-mid)", border: "1px solid var(--border2)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "7px 10px", textDecoration: "none", whiteSpace: "nowrap" }}
+                      >
+                        passport →
+                      </Link>
+                      {/* Bidirectional movement */}
                       {col.key !== "new" && (
-                        <button className="btn-secondary"
-                          style={{ fontSize: "0.68rem", padding: "0.4rem 0.8rem", flex: 1 }}
-                          onClick={(e) => { e.stopPropagation(); move(app.id, "new"); }}>
-                          ← New
-                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); move(app.id, "new"); }}
+                          style={{ background: "transparent", border: "1px solid var(--border2)", color: "var(--white-dim)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "7px 10px", cursor: "pointer" }}
+                        >← new</button>
                       )}
                       {col.key !== "considering" && (
-                        <button className="btn-primary"
-                          style={{ fontSize: "0.68rem", padding: "0.4rem 0.8rem", flex: 1 }}
-                          onClick={(e) => { e.stopPropagation(); move(app.id, "considering"); }}>
-                          👍 Consider
-                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); move(app.id, "considering"); }}
+                          style={{ background: "var(--rasp)", color: "#fff", border: "1px solid var(--rasp)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", fontWeight: 700, padding: "7px 10px", cursor: "pointer" }}
+                        >👍 consider</button>
                       )}
                       {col.key !== "passed" && (
                         <button
-                          style={{ background: "transparent", border: "1px solid rgba(239,68,68,0.3)", color: "var(--white-mid)", fontFamily: "DM Mono, monospace", fontSize: "0.68rem", padding: "0.4rem 0.8rem", cursor: "pointer", flex: 1, letterSpacing: "0.06em", textTransform: "uppercase" }}
-                          onClick={(e) => { e.stopPropagation(); move(app.id, "passed"); }}>
-                          👎 Pass
-                        </button>
+                          onClick={(e) => { e.stopPropagation(); move(app.id, "passed"); }}
+                          style={{ background: "transparent", border: "1px solid rgba(239,68,68,0.3)", color: "var(--white-mid)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "7px 10px", cursor: "pointer" }}
+                        >👎 pass</button>
                       )}
                     </div>
                   </div>
@@ -205,13 +301,14 @@ export default function Dashboard() {
             ))}
 
             {byStatus(col.key).length === 0 && (
-              <div style={{ textAlign: "center", padding: "2rem 1rem", color: "var(--slate)", fontSize: "0.82rem", fontWeight: 300 }}>
-                {col.key === "new" ? "No new inbound yet" : col.key === "considering" ? "Nothing here yet" : "No passed deals"}
+              <div style={{ textAlign: "center", padding: "32px 16px", color: "var(--white-dimmer)", fontSize: "11px" }}>
+                {col.key === "new" ? "// no new inbound yet" : col.key === "considering" ? "// nothing here yet" : "// no passed deals"}
               </div>
             )}
           </div>
         ))}
       </div>
+
     </main>
   );
 }
