@@ -86,7 +86,7 @@ export default function LandingPage() {
           <Link href="/log" style={{ fontSize: "10px", color: "var(--white-mid)", letterSpacing: "0.1em", textDecoration: "none", whiteSpace: "nowrap" }}>// build log</Link>
         </div>
         <div style={{ display: "flex", gap: "6px", alignItems: "center", flexShrink: 0 }}>
-          <a href="#how" className="btn-secondary" style={{ padding: "5px 12px", fontSize: "10px", whiteSpace: "nowrap" }}>how it works</a>
+          <a href="#how" className="btn-secondary nav-secondary" style={{ padding: "5px 12px", fontSize: "10px", whiteSpace: "nowrap" }}>how it works</a>
           {authed && sessionUser ? (
             <>
               {(sessionUser.role === "investor" || sessionUser.role === "both") && (
@@ -100,7 +100,7 @@ export default function LandingPage() {
               )}
               {/* Email + sign out grouped as one unit */}
               <div style={{ display: "flex", alignItems: "center", gap: "0", border: "1px solid var(--border2)", background: "var(--bg2)" }}>
-                <span style={{ fontSize: "10px", color: "var(--white-dim)", letterSpacing: "0.04em", padding: "5px 10px", maxWidth: "150px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", borderRight: "1px solid var(--border2)" }}>{sessionUser.email}</span>
+                <span className="nav-email" style={{ fontSize: "10px", color: "var(--white-dim)", letterSpacing: "0.04em", padding: "5px 10px", maxWidth: "150px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", borderRight: "1px solid var(--border2)" }}>{sessionUser.email}</span>
                 <SignOutButton />
               </div>
             </>
@@ -113,10 +113,10 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      <div style={{ maxWidth: "820px", margin: "0 auto", padding: "0 24px 80px" }}>
+      <div className="page-content" style={{ maxWidth: "820px", margin: "0 auto", padding: "0 24px 80px" }}>
 
         {/* HERO */}
-        <section style={{ padding: "64px 0 48px", textAlign: "center" }}>
+        <section className="hero-section" style={{ padding: "64px 0 48px", textAlign: "center" }}>
           <h1 className="animate-d1" style={{ fontSize: "clamp(32px, 5.5vw, 58px)", fontWeight: 700, lineHeight: 1.05, letterSpacing: "-0.03em", marginBottom: "16px" }}>
             Deal flow infrastructure.<br />
             <span style={{ color: "var(--rasp)" }}>Built for the AI era.</span>
@@ -134,7 +134,7 @@ export default function LandingPage() {
             Founders build their passport once — it travels with them to every investor.
           </p>
 
-          <div className="animate-d4" style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
+          <div className="animate-d4 hero-ctas" style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
             <a href="/scope" className="btn-primary" style={{ padding: "11px 24px", fontSize: "12px" }}>$ define your scope →</a>
             <a href="/passport" style={{ padding: "11px 24px", fontSize: "12px", background: "var(--amber)", color: "#000", border: "1px solid var(--amber)", fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, letterSpacing: "0.06em", textDecoration: "none", display: "inline-flex", alignItems: "center" }}>$ build your passport →</a>
           </div>
@@ -148,7 +148,7 @@ export default function LandingPage() {
 
         {/* ONE TO MANY */}
         <section style={{ marginBottom: "56px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: "0", alignItems: "stretch" }}>
+          <div className="grid-two-col" style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: "0", alignItems: "stretch" }}>
 
             {/* Investor side */}
             <div style={{ background: "var(--bg2)", border: "1px solid var(--border2)", borderTop: "2px solid var(--rasp)", padding: "24px" }}>
@@ -171,7 +171,7 @@ export default function LandingPage() {
             </div>
 
             {/* Centre divider */}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 8px", gap: "0" }}>
+            <div className="col-divider" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 8px", gap: "0" }}>
               <div style={{ width: "1px", flex: 1, background: "var(--border)" }} />
               <div style={{ padding: "12px 4px", display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
                 <span style={{ fontSize: "20px", color: "var(--rasp)", lineHeight: 1 }}>→</span>
@@ -224,7 +224,7 @@ export default function LandingPage() {
           </div>
 
           {/* Symmetric two-column progression */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: "var(--border)", border: "1px solid var(--border)" }}>
+          <div className="how-it-works-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: "var(--border)", border: "1px solid var(--border)" }}>
 
             {/* Investor column */}
             <div style={{ background: "var(--bg2)", padding: "24px", display: "flex", flexDirection: "column" }}>
@@ -297,11 +297,11 @@ export default function LandingPage() {
                   </div>
                 ))}
               </div>
-              <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+              <div className="example-actions" style={{ display: "flex", gap: "6px", alignItems: "center" }}>
                 <a href="/i/raspberrysyndicate" className="btn-primary" style={{ flex: 1, justifyContent: "center" }}>$ send intro →</a>
-                <QRCodeCanvas value="https://scopecheck.ai/i/raspberrysyndicate" size={32} bgColor="transparent" fgColor="#ffffff" style={{ border: "1px solid var(--border2)", padding: "3px" }} />
+                <QRCodeCanvas className="hide-mobile" value="https://scopecheck.ai/i/raspberrysyndicate" size={32} bgColor="transparent" fgColor="#ffffff" style={{ border: "1px solid var(--border2)", padding: "3px" }} />
                 <a href="/i/raspberrysyndicate/for-llm" target="_blank" className="btn-secondary" style={{ padding: "7px 10px", fontSize: "10px", textDecoration: "none" }}>/for-llm</a>
-                <Note text="AI can read this!" rotate={2} link="/log#005" />
+                <span className="hide-mobile"><Note text="AI can read this!" rotate={2} link="/log#005" /></span>
               </div>
             </div>
           </div>
@@ -320,7 +320,7 @@ export default function LandingPage() {
           <div className="section-header">
             <span className="section-label"><span className="section-num">03</span> what&apos;s coming</span>
           </div>
-          <div style={{ background: "var(--bg2)", border: "1px solid var(--border2)", padding: "20px 24px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+          <div className="coming-grid" style={{ background: "var(--bg2)", border: "1px solid var(--border2)", padding: "20px 24px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
             <div>
               <div style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--rasp)", marginBottom: "10px" }}>// for investors</div>
               {["fit scoring on every inbound // coming soon", "proactive founder matching // later", "competitor scan on any passport // later"].map((f, i) => (
@@ -345,7 +345,7 @@ export default function LandingPage() {
           <div className="section-header">
             <span id="get-started" className="section-label"><span className="section-num">04</span> get started</span>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+          <div className="get-started-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
             <a href="/scope" style={{ background: "var(--bg2)", border: "1px solid var(--border2)", borderTop: "2px solid var(--rasp)", padding: "24px", textDecoration: "none", display: "block" }}>
               <div style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--rasp)", marginBottom: "10px" }}>// investor</div>
               <div style={{ fontSize: "15px", fontWeight: 700, marginBottom: "8px", color: "var(--white)" }}>Define your investor scope</div>
@@ -398,7 +398,7 @@ export default function LandingPage() {
 
       </div>
 
-      <footer style={{ borderTop: "1px solid var(--border)", padding: "14px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", maxWidth: "820px", margin: "0 auto" }}>
+      <footer className="site-footer" style={{ borderTop: "1px solid var(--border)", padding: "14px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", maxWidth: "820px", margin: "0 auto" }}>
         <span style={{ fontSize: "11px", color: "var(--white-mid)" }}>scopecheck.ai · built by <a href="https://alexfarcet.com" target="_blank" rel="noopener" style={{ color: "var(--rasp)", textDecoration: "none" }}>Alex Farcet</a></span>
         <span style={{ fontSize: "10px", color: "var(--white-dim)" }}>// built in public with AI · 2026</span>
       </footer>

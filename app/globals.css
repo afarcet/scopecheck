@@ -209,3 +209,71 @@ body::after {
   vertical-align: middle;
   margin-left: 2px;
 }
+
+/* ============================================================
+   MOBILE — single breakpoint at 640px
+   ============================================================ */
+@media (max-width: 640px) {
+
+  /* Nav: hide secondary links, keep logo + key action */
+  .nav-secondary { display: none !important; }
+  .nav-email { max-width: 90px !important; }
+
+  /* Main content padding */
+  .page-content { padding: 0 14px 60px !important; }
+
+  /* Hero */
+  .hero-section { padding: 40px 0 32px !important; }
+  .hero-title { font-size: 32px !important; }
+  .hero-subtitle { font-size: 12px !important; }
+  .hero-body { font-size: 12px !important; }
+  .hero-ctas a, .hero-ctas button {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    justify-content: center !important;
+  }
+
+  /* Two-column → single column */
+  .grid-two-col {
+    grid-template-columns: 1fr !important;
+    gap: 0 !important;
+  }
+
+  /* Investor/founder intro cards — hide the centre arrow divider on mobile */
+  .col-divider { display: none !important; }
+
+  /* How it works — stack columns, add border between */
+  .how-it-works-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .how-it-works-grid > div:last-child {
+    border-top: 1px solid var(--border) !important;
+  }
+
+  /* Example card action bar — wrap, hide QR and note */
+  .example-actions { flex-wrap: wrap !important; }
+  .example-actions .hide-mobile { display: none !important; }
+  .example-actions a:first-child { width: 100% !important; }
+
+  /* What's coming and get-started grids */
+  .coming-grid, .get-started-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .coming-grid > div:last-child {
+    border-top: 1px solid var(--border) !important;
+    padding-top: 16px !important;
+  }
+
+  /* Footer: stack vertically */
+  .site-footer {
+    flex-direction: column !important;
+    gap: 6px !important;
+    align-items: flex-start !important;
+  }
+
+  /* Section header — allow wrap */
+  .section-header { flex-wrap: wrap !important; gap: 6px !important; }
+
+  /* criteria-key column narrower on mobile */
+  .criteria-key { min-width: 90px !important; font-size: 9px !important; }
+}

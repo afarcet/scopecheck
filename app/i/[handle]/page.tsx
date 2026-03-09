@@ -255,7 +255,7 @@ export default function InvestorProfilePage({
             {/* Owner bar vs visitor bar */}
             {session && ((inv as { user_id?: string }).user_id === session.id || (ownerEmail && ownerEmail === session.email)) ? (
               // Owner view — edit + copy
-              <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
+              <div className="example-actions" style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
                 <CopyRow url={profileUrl} color="var(--rasp)" />
                 <div style={{ display: "flex", gap: "6px", marginTop: "0" }}>
                   <Link href="/dashboard" style={{ background: "var(--bg3)", color: "var(--white-mid)", border: "1px solid var(--border2)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "9px 12px", textDecoration: "none", whiteSpace: "nowrap" }}>
@@ -268,10 +268,10 @@ export default function InvestorProfilePage({
               </div>
             ) : (
               // Visitor view — send intro
-              <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
+              <div className="example-actions" style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
                 <button
                   onClick={() => { setShowIntro(true); if (session) setIntroStep("form"); else setIntroStep("auth"); }}
-                  style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center", background: "var(--rasp)", color: "#fff", border: "1px solid var(--rasp)", fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", fontWeight: 700, letterSpacing: "0.06em", padding: "9px 16px", cursor: "pointer" }}>
+                  className="example-actions" style={{ display: "flex", justifyContent: "center", alignItems: "center", background: "var(--rasp)", color: "#fff", border: "1px solid var(--rasp)", fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", fontWeight: 700, letterSpacing: "0.06em", padding: "9px 16px", cursor: "pointer" }}>
                   $ send intro →
                 </button>
                 <QRButton url={profileUrl} />
