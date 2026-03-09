@@ -1,12 +1,46 @@
 "use client";
-
 import Link from "next/link";
 
 // This will eventually pull from Supabase so Alex can add entries via a simple form
 // For now, entries are hardcoded — easiest to update by editing this file
 // Format: newest first
-
 const LOG_ENTRIES = [
+  {
+    id: "025",
+    date: "2026-03-09",
+    time: "21:00",
+    tag: "build",
+    title: "/demo: form first, score as bridge — the layout that makes sense",
+    body: `The first /demo layout put the score at the top of the right column. But an empty donut at 0/100 tells a founder nothing. They have to figure out they need to scroll down and start typing before anything happens.\n\nRedesigned around one principle: act first, see reward second. The form is now at the top of the right column — you land on the page and can immediately start filling in your startup. The fit score moves to a full-width panel below both columns. It bridges the two sides visually, because that's what it does functionally: it's the relationship between the investor criteria and your passport.\n\nOther polish: investor name is now inline with firm at 14px ("Alex Farcet · Raspberry Ventures") — less prominent, and generalises correctly whether the investor is an individual, a syndicate, or a fund. The CTA button is locked/grey until name, company, one-liner, and stage are filled — then flips to amber and unlocks. The hero subtitle changed to: "Complete your passport, get your live matching score." — instructional, not descriptive.\n\nThe grey box that was appearing at the bottom left (grid background showing through when the right column was shorter) is fixed — right column is now flex column, CTA pins to bottom.`,
+    meta: "demo layout · form-first · score bridge · grey box fix",
+  },
+  {
+    id: "024",
+    date: "2026-03-09",
+    time: "19:00",
+    tag: "build",
+    title: "/demo: watch an investor's scope meet your startup in real time",
+    body: `Entry #021 ended with a question: how do you show the inline apply flow is the killer feature before someone clicks?\n\nThe answer isn't an animation or a video — it's a page where you can experience it yourself. /demo puts a real investor scope (Raspberry Ventures) on the left and a founder form on the right. As you fill in your startup, a fit score reacts in real time — sector match, stage, geography, traction — broken into six categories with a donut and progress bars.\n\nThe score is mocked for now. Sector match against "ClimateTech / Applied AI" lifts it. Seed/Early-A stage lifts it. European geography lifts it. Wrong answers show amber or grey bars honestly — it doesn't pretend everything fits. The label says "★ AI scoring · coming soon" because that's the truth.\n\nWhen name, company, one-liner, and stage are filled, the CTA unlocks: "send real intro to Alex Farcet →". It takes you to the live scope. Founders who complete the demo have already drafted their intro — clicking through takes 10 seconds.\n\nThe passport URL previews live in the header as the company name is typed. Small detail, but it makes the "you're building something" feeling immediate.`,
+    meta: "demo page · reactive fit score · founder value prop · /demo",
+  },
+  {
+    id: "023",
+    date: "2026-03-09",
+    time: "16:00",
+    tag: "build",
+    title: "Founder-side fixes: upsert, role-aware nav, passport pre-fill",
+    body: `Tested the full founder journey as af@rainmaking.io and found three bugs.\n\nFirst: upsert was throwing a constraint error on return visits. The founders table had no unique constraint on user_id, so ON CONFLICT (user_id) had nothing to conflict on. Fix: ALTER TABLE founders ADD CONSTRAINT founders_user_id_key UNIQUE (user_id). One line of SQL.\n\nSecond: the nav on /i/[handle] was showing "dashboard" regardless of who was signed in. A founder who's never created an investor scope shouldn't see a pipeline link. Fixed loadUserContext() to detect investor/founder/both role using the same email fallback pattern as the homepage. The nav now renders the right button for the right person.\n\nThird: returning founders saw a blank form. The form was always initialised to empty state — it never fetched the existing passport. Now loadUserContext() pulls the full founder record from Supabase on session load and populates every field. The button label changes to "send intro (pre-filled) →" when you're signed in. Second visit is genuinely faster than the first.`,
+    meta: "upsert fix · role-aware nav · form pre-fill · returning founders",
+  },
+  {
+    id: "022",
+    date: "2026-03-09",
+    time: "14:00",
+    tag: "build",
+    title: "Nav showing wrong role + founder intros not reaching the database",
+    body: `Two bugs discovered in the same session.\n\nBug 1: the homepage nav was showing "define scope →" instead of "pipeline →" even when signed in as the investor. Root cause: resolveSession was querying the investors table by user_id only. The raspberrysyndicate row in Supabase was created before user_id was stored — so the lookup returned null, role resolved to null, wrong button appeared. Fix: added email fallback — if user_id lookup returns nothing, try matching by email. Also found three duplicate rows in the investors table from earlier iterations; cleaned to one.\n\nBug 2: founder applications were landing in email but not in the database. The send-intro API route was sending the notification email but had no Supabase write. The dashboard was displaying MOCK_APPLICATIONS — a constant that was never replaced with a real query. Fix: send-intro now inserts to an intros table (new, with RLS). Dashboard fetches real data. The mock constant is gone.\n\nBoth bugs were invisible in normal use — the email notification made it feel like things were working. The database was the silent gap.`,
+    meta: "nav role detection · email fallback · intros table · real dashboard data",
+  },
   {
     id: "021",
     date: "2026-03-08",
@@ -34,13 +68,13 @@ const LOG_ENTRIES = [
     body: `The example investor card on the homepage was pointing to a static demo. Replaced with the live /i/raspberrysyndicate scope — Alex Farcet / Raspberry Ventures.\n\nThe reasoning: a demo that works is better than a demo that looks like it works. A founder landing on the homepage can now click "send intro" on the example card and actually send an intro. That intro will land in the real kanban. The demo is the product.\n\nAlso replaced the dead QR and /for-llm buttons with live versions. The QR renders the actual URL. The /for-llm link opens the machine-readable criteria page. Both are real infrastructure, not mockups.\n\nSmall copy change in "how it works": removed the line about finding investors on ScopeCheck. Founders share their passport — they don't need to find investors here first. The product works when founders bring the link to investors, not just the other way round.`,
     meta: "homepage · live example · real QR · copy update",
   },
-    {
+  {
     id: "016",
     date: "2026-03-08",
     time: "15:00",
     tag: "build",
     title: "Inline intro flow: the scope page is now a complete transaction",
-    body: `The killer insight from today\'s product session: a founder visiting an investor scope shouldn\'t have to navigate away to apply. The scope page is now a complete transaction.\n\nClick "send intro", a form slides open inline. Investor criteria on one side, your response fields on the other. Hit send — three things happen simultaneously: intro lands in the investor\'s kanban, investor gets notified, and your startup passport is created at scopecheck.ai/f/yourcompany.\n\nYou get the passport link right there to copy and share with the next investor. Fields pre-fill on every subsequent scope you visit.\n\nThe passport isn\'t a prerequisite for applying. It\'s the reward for applying.`,
+    body: `The killer insight from today's product session: a founder visiting an investor scope shouldn't have to navigate away to apply. The scope page is now a complete transaction.\n\nClick "send intro", a form slides open inline. Investor criteria on one side, your response fields on the other. Hit send — three things happen simultaneously: intro lands in the investor's kanban, investor gets notified, and your startup passport is created at scopecheck.ai/f/yourcompany.\n\nYou get the passport link right there to copy and share with the next investor. Fields pre-fill on every subsequent scope you visit.\n\nThe passport isn't a prerequisite for applying. It's the reward for applying.`,
     meta: "scope page → inline form → passport created as side effect",
   },
   {
@@ -49,7 +83,7 @@ const LOG_ENTRIES = [
     time: "14:30",
     tag: "product",
     title: "Define once, reach many — the one-to-many reframe",
-    body: `A cynical view of the MVP: this is a lot of infrastructure for something you could do with a Google Form.\n\nThe answer: Google Forms can\'t score fit. Can\'t pre-fill fields from a saved passport. Can\'t build match intelligence from structured data over time. The schema is the moat.\n\nBut the more important reframe is the multiplier. A founder doesn\'t send one intro — they send thirty. A good investor scope doesn\'t filter one founder — it filters two hundred. The value is in the one-to-many, on both sides simultaneously.\n\nThis also clarifies the product arc: structured data now → fit scoring next → proactive matching later. Each layer is only possible because the previous one exists.`,
+    body: `A cynical view of the MVP: this is a lot of infrastructure for something you could do with a Google Form.\n\nThe answer: Google Forms can't score fit. Can't pre-fill fields from a saved passport. Can't build match intelligence from structured data over time. The schema is the moat.\n\nBut the more important reframe is the multiplier. A founder doesn't send one intro — they send thirty. A good investor scope doesn't filter one founder — it filters two hundred. The value is in the one-to-many, on both sides simultaneously.\n\nThis also clarifies the product arc: structured data now → fit scoring next → proactive matching later. Each layer is only possible because the previous one exists.`,
     meta: "product strategy · one-to-many multiplier · three-layer arc",
   },
   {
@@ -58,7 +92,7 @@ const LOG_ENTRIES = [
     time: "14:00",
     tag: "product",
     title: "Define your scope. Build your passport.",
-    body: `Spent time today on language. The original CTAs said \"create investor profile\" and \"create founder passport\" — both used \"create\", which is neutral to the point of saying nothing.\n\nInvestors define. They\'re drawing a boundary around what they look for. It\'s a filtering act.\nFounders build. They\'re assembling a story, putting together something that represents them.\n\nDifferent verbs, different audiences, same rhythm. "Define your scope. Build your passport." That became the new tagline — and it writes the CTAs for free.`,
+    body: `Spent time today on language. The original CTAs said "create investor profile" and "create founder passport" — both used "create", which is neutral to the point of saying nothing.\n\nInvestors define. They're drawing a boundary around what they look for. It's a filtering act.\nFounders build. They're assembling a story, putting together something that represents them.\n\nDifferent verbs, different audiences, same rhythm. "Define your scope. Build your passport." That became the new tagline — and it writes the CTAs for free.`,
     meta: "copywriting · define vs build · verbal identity",
   },
   {
@@ -76,10 +110,10 @@ const LOG_ENTRIES = [
     time: "13:00",
     tag: "build",
     title: "Day 2: startup passport, investor scope, and a nav that works on mobile",
-    body: `A few naming and navigation fixes from user testing (user #001 = me):\n\n\"Founder passport\" → \"startup passport\". The passport belongs to the startup and its fundraising round, not the individual founder. Subtle but it matters for Series A+ where there are multiple co-founders.\n\n\"Create investor profile\" → \"Define your investor scope\". The button now says what the action actually does.\n\nNav: when signed in, the top nav now shows Dashboard and My Scope links. Previously you had to scroll to section 03 to find your way back in. Obvious in retrospect.\n\nSign out: added to /scope and /passport so you can switch accounts without clearing cookies manually.`,
+    body: `A few naming and navigation fixes from user testing (user #001 = me):\n\n"Founder passport" → "startup passport". The passport belongs to the startup and its fundraising round, not the individual founder. Subtle but it matters for Series A+ where there are multiple co-founders.\n\n"Create investor profile" → "Define your investor scope". The button now says what the action actually does.\n\nNav: when signed in, the top nav now shows Dashboard and My Scope links. Previously you had to scroll to section 03 to find your way back in. Obvious in retrospect.\n\nSign out: added to /scope and /passport so you can switch accounts without clearing cookies manually.`,
     meta: "naming · nav · sign out flow",
   },
-    {
+  {
     id: "011",
     date: "2026-03-08",
     time: "01:30",
@@ -181,31 +215,29 @@ const LOG_ENTRIES = [
 ];
 
 const TAG_COLOURS: Record<string, { color: string; bg: string; border: string }> = {
-  origin:   { color: "var(--rasp)",   bg: "var(--rasp-dim)",   border: "var(--rasp-border)" },
-  product:  { color: "var(--amber)",  bg: "var(--amber-dim)",  border: "var(--amber-border)" },
-  build:    { color: "#60a5fa",       bg: "rgba(96,165,250,0.1)", border: "rgba(96,165,250,0.3)" },
-  strategy: { color: "#a78bfa",       bg: "rgba(167,139,250,0.1)", border: "rgba(167,139,250,0.3)" },
-  design:   { color: "var(--pink)",   bg: "var(--pink-dim)",   border: "var(--pink-border)" },
-  insight:  { color: "#34d399",       bg: "rgba(52,211,153,0.1)", border: "rgba(52,211,153,0.3)" },
+  origin:   { color: "var(--rasp)",  bg: "var(--rasp-dim)",  border: "var(--rasp-border)"  },
+  product:  { color: "var(--amber)", bg: "var(--amber-dim)", border: "var(--amber-border)" },
+  build:    { color: "#60a5fa", bg: "rgba(96,165,250,0.1)",  border: "rgba(96,165,250,0.3)"  },
+  strategy: { color: "#a78bfa", bg: "rgba(167,139,250,0.1)", border: "rgba(167,139,250,0.3)" },
+  design:   { color: "var(--pink)",  bg: "var(--pink-dim)",  border: "var(--pink-border)"  },
+  insight:  { color: "#34d399", bg: "rgba(52,211,153,0.1)",  border: "rgba(52,211,153,0.3)"  },
 };
 
 export default function LogPage() {
   return (
     <main style={{ minHeight: "100vh", background: "var(--bg)" }}>
-
       {/* Nav */}
       <nav style={{ borderBottom: "1px solid var(--border)", padding: "10px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, background: "var(--bg)", zIndex: 100 }}>
         <Link href="/" style={{ textDecoration: "none" }}>
           <span style={{ color: "var(--rasp)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.04em" }}>&gt; scopecheck.ai</span>
         </Link>
         <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-          <Link href="/log" style={{ fontSize: "10px", color: "var(--rasp)", letterSpacing: "0.1em", textDecoration: "none" }}>// build log</Link>
+          <Link href="/log"  style={{ fontSize: "10px", color: "var(--rasp)", letterSpacing: "0.1em", textDecoration: "none" }}>// build log</Link>
           <Link href="/#access" className="btn-primary" style={{ padding: "5px 12px", fontSize: "10px" }}>get access →</Link>
         </div>
       </nav>
 
       <div style={{ maxWidth: "720px", margin: "0 auto", padding: "0 24px 80px" }}>
-
         {/* Header */}
         <div style={{ padding: "48px 0 32px" }}>
           <div style={{ fontSize: "10px", letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--rasp)", marginBottom: "12px" }}>
@@ -231,9 +263,9 @@ export default function LogPage() {
         {/* Stats bar */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1px", background: "var(--border)", border: "1px solid var(--border)", marginBottom: "40px" }}>
           {[
-            { label: "days building", value: "2" },
+            { label: "days building", value: "3" },
             { label: "log entries",   value: LOG_ENTRIES.length.toString() },
-            { label: "lines of code", value: "~1.2K" },
+            { label: "lines of code", value: "~1.8K" },
           ].map((s, i) => (
             <div key={i} style={{ background: "var(--bg2)", padding: "14px 16px" }}>
               <div style={{ fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--white-dim)", marginBottom: "4px" }}>{s.label}</div>
@@ -254,23 +286,19 @@ export default function LogPage() {
 
         {/* Log entries */}
         <div style={{ position: "relative" }}>
-
           {/* Timeline line */}
           <div style={{ position: "absolute", left: "11px", top: 0, bottom: 0, width: "1px", background: "var(--border)" }} />
 
-          {LOG_ENTRIES.map((entry, i) => {
+          {LOG_ENTRIES.map((entry) => {
             const tagStyle = TAG_COLOURS[entry.tag] || TAG_COLOURS.insight;
             return (
               <div key={entry.id} style={{ display: "flex", gap: "20px", marginBottom: "40px", position: "relative" }}>
-
                 {/* Timeline dot */}
                 <div style={{ flexShrink: 0, width: "24px", paddingTop: "2px", zIndex: 1 }}>
                   <div style={{ width: "10px", height: "10px", borderRadius: "50%", border: `2px solid ${tagStyle.color}`, background: "var(--bg)", marginLeft: "7px" }} />
                 </div>
-
                 {/* Entry */}
                 <div style={{ flex: 1, paddingBottom: "8px" }}>
-
                   {/* Meta row */}
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px", flexWrap: "wrap" }}>
                     <span style={{ fontSize: "10px", color: "var(--white-dim)", letterSpacing: "0.06em", fontFamily: "JetBrains Mono, monospace" }}>
@@ -283,12 +311,10 @@ export default function LogPage() {
                       #{entry.id}
                     </span>
                   </div>
-
                   {/* Title */}
                   <h2 style={{ fontSize: "16px", fontWeight: 700, marginBottom: "10px", lineHeight: 1.3, letterSpacing: "-0.01em" }}>
                     {entry.title}
                   </h2>
-
                   {/* Body */}
                   <div style={{ fontSize: "12px", color: "var(--white-mid)", lineHeight: 1.85, marginBottom: "12px" }}>
                     {entry.body.split("\n\n").map((para, j) => (
@@ -304,13 +330,10 @@ export default function LogPage() {
                       </p>
                     ))}
                   </div>
-
                   {/* Meta tag */}
                   <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "var(--bg3)", border: "1px solid var(--border2)", padding: "4px 10px", fontSize: "10px", color: "var(--white-dim)", letterSpacing: "0.06em" }}>
-                    <span style={{ color: tagStyle.color }}>▸</span>
-                    {entry.meta}
+                    <span style={{ color: tagStyle.color }}>▸</span> {entry.meta}
                   </div>
-
                 </div>
               </div>
             );
@@ -328,7 +351,6 @@ export default function LogPage() {
               <span style={{ display: "inline-block", width: "7px", height: "12px", background: "var(--rasp)", animation: "blink 1.1s step-end infinite", verticalAlign: "middle", marginLeft: "4px" }} />
             </div>
           </div>
-
         </div>
 
         {/* Follow CTA */}
@@ -343,7 +365,6 @@ export default function LogPage() {
             follow on LinkedIn →
           </a>
         </div>
-
       </div>
 
       {/* Footer */}
@@ -353,7 +374,6 @@ export default function LogPage() {
         </span>
         <span style={{ fontSize: "10px", color: "var(--white-dim)" }}>// built in public with AI · 2026</span>
       </footer>
-
     </main>
   );
 }
