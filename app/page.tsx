@@ -89,6 +89,7 @@ export default function LandingPage() {
         <div style={{ display: "flex", alignItems: "center", gap: "16px", minWidth: 0 }}>
           <span style={{ color: "var(--rasp)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.04em", whiteSpace: "nowrap" }}>&gt; scopecheck.ai</span>
           <Link href="/log" style={{ fontSize: "10px", color: "var(--white-mid)", letterSpacing: "0.1em", textDecoration: "none", whiteSpace: "nowrap" }}>// build log</Link>
+            <Link href="/demo" style={{ fontSize: "10px", color: "var(--amber)", letterSpacing: "0.1em", textDecoration: "none", whiteSpace: "nowrap" }}>// demo</Link>
         </div>
         <div style={{ display: "flex", gap: "6px", alignItems: "center", flexShrink: 0 }}>
           <a href="#how" className="btn-secondary nav-secondary" style={{ padding: "5px 12px", fontSize: "10px", whiteSpace: "nowrap" }}>how it works</a>
@@ -137,6 +138,7 @@ export default function LandingPage() {
           <div className="animate-d4 hero-ctas" style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap", marginBottom: "24px" }}>
             <a href="/scope" className="btn-primary" style={{ padding: "11px 24px", fontSize: "12px" }}>$ define your scope →</a>
             <a href="/passport" style={{ padding: "11px 24px", fontSize: "12px", background: "var(--amber)", color: "#000", border: "1px solid var(--amber)", fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, letterSpacing: "0.06em", textDecoration: "none", display: "inline-flex", alignItems: "center" }}>$ build your passport →</a>
+            <a href="/demo" style={{ padding: "11px 24px", fontSize: "12px", background: "var(--bg2)", color: "var(--white-mid)", border: "1px solid var(--border2)", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.06em", textDecoration: "none", display: "inline-flex", alignItems: "center" }}>// see live demo →</a>
           </div>
           <div className="animate-d5" style={{ fontSize: "11px", color: "var(--white-dim)", letterSpacing: "0.08em" }}>
             <span style={{ color: "var(--rasp)" }}>//</span> AI-native · /for-llm auto-generated · QR-ready · open format
