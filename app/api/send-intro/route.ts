@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
     );
 
     await resend.emails.send({
-      from:    "ScopeCheck <notifications@scopecheck.ai>",
+      from:    "ScopeCheck <onboarding@resend.dev>",
       to:      investor.email,
       subject: `New intro: ${companyName} — ${oneLiner.slice(0, 60)}${oneLiner.length > 60 ? "..." : ""}`,
       html:    investorHtml,
@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
       );
 
       await resend.emails.send({
-        from:    "ScopeCheck <notifications@scopecheck.ai>",
+        from:    "ScopeCheck <onboarding@resend.dev>",
         to:      founderEmail,
         subject: `Intro sent to ${investor.name} · Your passport is ready`,
         html:    founderHtml,
