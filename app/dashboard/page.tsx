@@ -16,6 +16,7 @@ interface Application {
   stage: string;
   traction: string;
   deck_url: string;
+  passport_handle: string;
   received: string;
   status: Status;
 }
@@ -58,7 +59,7 @@ export default function Dashboard() {
       const userId = session.user.id;
       setUserEmail(email);
 
-      // Resolve investor handle — user_id first, email fallback
+      // Resolve investor handle â user_id first, email fallback
       let handle = "";
       const { data: invById } = await supabase
         .from("investors")
@@ -103,6 +104,7 @@ export default function Dashboard() {
             stage:     r.stage        ?? "",
             traction:  r.traction     ?? "",
             deck_url:  r.deck_url     ?? "",
+            passport_handle: r.founder_handle ?? "",
             received:  formatRelativeTime(r.created_at),
             status:    (r.status as Status) ?? "new",
           }))
@@ -166,7 +168,7 @@ export default function Dashboard() {
               href={`/i/${investorHandle}`}
               style={{ background: "var(--bg2)", color: "var(--white-mid)", border: "1px solid var(--border2)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "5px 10px", textDecoration: "none", whiteSpace: "nowrap" }}
             >
-              my scope ↗
+              my scope â
             </Link>
           )}
           <button
@@ -265,34 +267,34 @@ export default function Dashboard() {
                           onClick={(e) => e.stopPropagation()}
                           style={{ flex: 1, textAlign: "center", background: "var(--bg3)", color: "var(--white-mid)", border: "1px solid var(--border2)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "7px 10px", textDecoration: "none", whiteSpace: "nowrap" }}
                         >
-                          view deck ↗
+                          view deck â
                         </a>
                       )}
                       <Link
-                        href={`/f/${app.id}`}
+                        href={`/f/${app.passport_handle}`}
                         onClick={(e) => e.stopPropagation()}
                         style={{ flex: 1, textAlign: "center", background: "var(--bg3)", color: "var(--white-mid)", border: "1px solid var(--border2)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "7px 10px", textDecoration: "none", whiteSpace: "nowrap" }}
                       >
-                        passport →
+                        passport â
                       </Link>
                       {/* Bidirectional movement */}
                       {col.key !== "new" && (
                         <button
                           onClick={(e) => { e.stopPropagation(); move(app.id, "new"); }}
                           style={{ background: "transparent", border: "1px solid var(--border2)", color: "var(--white-dim)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "7px 10px", cursor: "pointer" }}
-                        >← new</button>
+                        >â new</button>
                       )}
                       {col.key !== "considering" && (
                         <button
                           onClick={(e) => { e.stopPropagation(); move(app.id, "considering"); }}
                           style={{ background: "var(--rasp)", color: "#fff", border: "1px solid var(--rasp)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", fontWeight: 700, padding: "7px 10px", cursor: "pointer" }}
-                        >👍 consider</button>
+                        >ð consider</button>
                       )}
                       {col.key !== "passed" && (
                         <button
                           onClick={(e) => { e.stopPropagation(); move(app.id, "passed"); }}
                           style={{ background: "transparent", border: "1px solid rgba(239,68,68,0.3)", color: "var(--white-mid)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "7px 10px", cursor: "pointer" }}
-                        >👎 pass</button>
+                        >ð pass</button>
                       )}
                     </div>
                   </div>
