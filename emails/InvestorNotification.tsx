@@ -1,5 +1,5 @@
 import {
-  Body, Container, Head, Html, Link, Preview, Section, Text
+  Body, Head, Html, Link, Preview, Text
 } from "@react-email/components";
 
 interface Props {
@@ -29,60 +29,27 @@ export default function InvestorNotification({
   dashboardUrl = "https://scopecheck.ai/dashboard",
   unsubscribeUrl = "https://scopecheck.ai/unsubscribe",
 }: Props) {
-  const font = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
-
   return (
     <Html>
       <Head />
       <Preview>New intro from {companyName} — {oneLiner}</Preview>
-      <Body style={{ backgroundColor: "#ffffff", margin: 0, padding: "32px 0" }}>
-        <Container style={{ maxWidth: "520px", margin: "0 auto", fontFamily: font }}>
-
-          <Section style={{ padding: "0 8px" }}>
-            <Text style={{ fontSize: "15px", lineHeight: "1.6", color: "#1a1a1a", margin: "0 0 20px" }}>
-              Hi {investorName},
-            </Text>
-
-            <Text style={{ fontSize: "15px", lineHeight: "1.6", color: "#1a1a1a", margin: "0 0 24px" }}>
-              <strong>{companyName}</strong> just sent you an intro via ScopeCheck.
-            </Text>
-
-            <Text style={{ fontSize: "14px", lineHeight: "1.8", color: "#333333", margin: "0 0 4px" }}>
-              <strong>Company:</strong> {companyName}
-            </Text>
-            <Text style={{ fontSize: "14px", lineHeight: "1.8", color: "#333333", margin: "0 0 4px" }}>
-              <strong>One-liner:</strong> {oneLiner}
-            </Text>
-            <Text style={{ fontSize: "14px", lineHeight: "1.8", color: "#333333", margin: "0 0 4px" }}>
-              <strong>Stage:</strong> {stage}
-            </Text>
-            <Text style={{ fontSize: "14px", lineHeight: "1.8", color: "#333333", margin: "0 0 4px" }}>
-              <strong>Sector:</strong> {sector}
-            </Text>
-            <Text style={{ fontSize: "14px", lineHeight: "1.8", color: "#333333", margin: "0 0 4px" }}>
-              <strong>Traction:</strong> {traction}
-            </Text>
-            {deckUrl && (
-              <Text style={{ fontSize: "14px", lineHeight: "1.8", color: "#333333", margin: "0 0 4px" }}>
-                <strong>Deck:</strong>{" "}
-                <Link href={deckUrl} style={{ color: "#1a73e8" }}>{deckUrl}</Link>
-              </Text>
-            )}
-
-            <Text style={{ fontSize: "14px", lineHeight: "1.8", color: "#333333", margin: "24px 0 4px" }}>
-              <Link href={passportUrl} style={{ color: "#1a73e8" }}>View passport →</Link>
-            </Text>
-            <Text style={{ fontSize: "14px", lineHeight: "1.8", color: "#333333", margin: "0 0 4px" }}>
-              <Link href={dashboardUrl} style={{ color: "#1a73e8" }}>Open pipeline →</Link>
-            </Text>
-
-            <Text style={{ fontSize: "12px", lineHeight: "1.6", color: "#999999", margin: "32px 0 0" }}>
-              scopecheck.ai ·{" "}
-              <Link href={unsubscribeUrl} style={{ color: "#999999" }}>unsubscribe</Link>
-            </Text>
-          </Section>
-
-        </Container>
+      <Body style={{ margin: 0, padding: 0 }}>
+        <Text style={{ fontFamily: "sans-serif", fontSize: "14px", lineHeight: "1.6", color: "#222" }}>
+          Hi {investorName},<br /><br />
+          <strong>{companyName}</strong> just sent you an intro via ScopeCheck.<br /><br />
+          <strong>Company:</strong> {companyName}<br />
+          <strong>One-liner:</strong> {oneLiner}<br />
+          <strong>Stage:</strong> {stage}<br />
+          <strong>Sector:</strong> {sector}<br />
+          <strong>Traction:</strong> {traction}<br />
+          {deckUrl && <><strong>Deck:</strong> <Link href={deckUrl} style={{ color: "#1a73e8" }}>{deckUrl}</Link><br /></>}
+          <br />
+          <Link href={passportUrl} style={{ color: "#1a73e8" }}>View passport →</Link><br />
+          <Link href={dashboardUrl} style={{ color: "#1a73e8" }}>Open pipeline →</Link>
+        </Text>
+        <Text style={{ fontFamily: "sans-serif", fontSize: "11px", lineHeight: "1.4", color: "#999" }}>
+          scopecheck.ai · <Link href={unsubscribeUrl} style={{ color: "#999" }}>unsubscribe</Link>
+        </Text>
       </Body>
     </Html>
   );
