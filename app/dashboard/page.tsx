@@ -17,6 +17,7 @@ interface Application {
   traction: string;
   deck_url: string;
   passport_handle: string;
+  custom_answers: Record<string, string> | null;
   received: string;
   status: Status;
 }
@@ -59,7 +60,7 @@ export default function Dashboard() {
       const userId = session.user.id;
       setUserEmail(email);
 
-      // Resolve investor handle â user_id first, email fallback
+      // Resolve investor handle — user_id first, email fallback
       let handle = "";
       const { data: invById } = await supabase
         .from("investors")
@@ -105,6 +106,7 @@ export default function Dashboard() {
             traction:  r.traction     ?? "",
             deck_url:  r.deck_url     ?? "",
             passport_handle: r.founder_handle ?? "",
+            custom_answers: r.custom_answers ?? null,
             received:  formatRelativeTime(r.created_at),
             status:    (r.status as Status) ?? "new",
           }))
@@ -168,7 +170,7 @@ export default function Dashboard() {
               href={`/i/${investorHandle}`}
               style={{ background: "var(--bg2)", color: "var(--white-mid)", border: "1px solid var(--border2)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "5px 10px", textDecoration: "none", whiteSpace: "nowrap" }}
             >
-              my scope â
+              my scope ↗
             </Link>
           )}
           <button
@@ -258,6 +260,12 @@ export default function Dashboard() {
                         <p style={{ fontSize: "11px", color: "var(--white-mid)", margin: 0 }}>{app.founder}</p>
                       </div>
                     )}
+                    {app.custom_answers && Object.entries(app.custom_answers).map(([key, value]) => (
+                      <div key={key} style={{ marginBottom: "10px" }}>
+                        <div style={{ fontSize: "9px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: "3px" }}>{key}</div>
+                        <p style={{ fontSize: "11px", color: "var(--white-mid)", margin: 0 }}>{value}</p>
+                      </div>
+                    ))}
                     <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "10px" }}>
                       {app.deck_url && (
                         <a
@@ -267,7 +275,7 @@ export default function Dashboard() {
                           onClick={(e) => e.stopPropagation()}
                           style={{ flex: 1, textAlign: "center", background: "var(--bg3)", color: "var(--white-mid)", border: "1px solid var(--border2)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "7px 10px", textDecoration: "none", whiteSpace: "nowrap" }}
                         >
-                          view deck â
+                          view deck ↗
                         </a>
                       )}
                       <Link
@@ -275,26 +283,26 @@ export default function Dashboard() {
                         onClick={(e) => e.stopPropagation()}
                         style={{ flex: 1, textAlign: "center", background: "var(--bg3)", color: "var(--white-mid)", border: "1px solid var(--border2)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "7px 10px", textDecoration: "none", whiteSpace: "nowrap" }}
                       >
-                        passport â
+                        passport →
                       </Link>
                       {/* Bidirectional movement */}
                       {col.key !== "new" && (
                         <button
                           onClick={(e) => { e.stopPropagation(); move(app.id, "new"); }}
                           style={{ background: "transparent", border: "1px solid var(--border2)", color: "var(--white-dim)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "7px 10px", cursor: "pointer" }}
-                        >â new</button>
+                        >← new</button>
                       )}
                       {col.key !== "considering" && (
                         <button
                           onClick={(e) => { e.stopPropagation(); move(app.id, "considering"); }}
                           style={{ background: "var(--rasp)", color: "#fff", border: "1px solid var(--rasp)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", fontWeight: 700, padding: "7px 10px", cursor: "pointer" }}
-                        >ð consider</button>
+                        >👍 consider</button>
                       )}
                       {col.key !== "passed" && (
                         <button
                           onClick={(e) => { e.stopPropagation(); move(app.id, "passed"); }}
                           style={{ background: "transparent", border: "1px solid rgba(239,68,68,0.3)", color: "var(--white-mid)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "7px 10px", cursor: "pointer" }}
-                        >ð pass</button>
+                        >👎 pass</button>
                       )}
                     </div>
                   </div>
