@@ -22,6 +22,7 @@ const BLANK_INTRO = {
   traction: "",
   deck_url: "",
   passport_handle: "",
+  custom_answers: {} as Record<string, string>,
 };
 
 export default function InvestorProfilePage({
@@ -176,6 +177,7 @@ export default function InvestorProfilePage({
         deckUrl:        form.deck_url || null,
         passportHandle,
         founderEmail:   session?.email,
+        customAnswers:  Object.keys(form.custom_answers).length > 0 ? form.custom_answers : null,
       }),
     }).catch(console.error);
 
@@ -417,6 +419,48 @@ export default function InvestorProfilePage({
                     </div>
                   </div>
                 </div>
+
+                {/* Custom questions from investor */}
+                {((inv.custom_fields as { id: string; label: string; type: string; options?: string[]; required: boolean }[]) || []).length > 0 && (
+                  <div style={{ borderTop: "1px solid var(--border)", paddingTop: "16px", marginBottom: "16px" }}>
+                    <div style={{ fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: "12px" }}>
+                      // additional questions from {(inv.name as string)?.split(" ")[0]}
+                    </div>
+                    {((inv.custom_fields as { id: string; label: string; type: string; options?: string[]; required: boolean }[]) || []).map((cf) => (
+                      <div key={cf.id} style={{ marginBottom: "12px" }}>
+                        <label style={labelStyle}>{cf.label}{cf.required ? " *" : ""}</label>
+                        {cf.type === "textarea" ? (
+                          <textarea
+                            required={cf.required}
+                            style={{ ...inputStyle, resize: "vertical" }}
+                            rows={3}
+                            value={form.custom_answers[cf.label] || ""}
+                            onChange={e => setForm(f => ({ ...f, custom_answers: { ...f.custom_answers, [cf.label]: e.target.value } }))}
+                          />
+                        ) : cf.type === "select" ? (
+                          <select
+                            required={cf.required}
+                            style={{ ...inputStyle, appearance: "none" as const }}
+                            value={form.custom_answers[cf.label] || ""}
+                            onChange={e => setForm(f => ({ ...f, custom_answers: { ...f.custom_answers, [cf.label]: e.target.value } }))}
+                          >
+                            <option value="">select</option>
+                            {(cf.options || []).filter(Boolean).map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                          </select>
+                        ) : (
+                          <input
+                            required={cf.required}
+                            type={cf.type === "url" ? "url" : cf.type === "number" ? "number" : "text"}
+                            style={inputStyle}
+                            value={form.custom_answers[cf.label] || ""}
+                            onChange={e => setForm(f => ({ ...f, custom_answers: { ...f.custom_answers, [cf.label]: e.target.value } }))}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 {introError && (
                   <div style={{ background: "rgba(212,40,106,0.08)", border: "1px solid var(--rasp-border)", padding: "10px 14px", fontSize: "12px", color: "var(--rasp)", marginBottom: "12px" }}>{introError}</div>
                 )}
