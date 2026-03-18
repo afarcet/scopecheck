@@ -7,6 +7,21 @@ import { CopyButton } from "@/components/CopyButton";
 const STAGES = ["Pre-seed", "Seed", "Early-A", "Series A", "Series B+"];
 const SECTORS = ["Applied AI", "ClimateTech", "FinTech", "HealthTech", "DeepTech", "SaaS", "Consumer", "Web3", "Other"];
 const GEOS = ["Europe", "UK", "US", "Israel", "Africa", "LATAM", "Asia", "Global"];
+const FIELD_TYPES = [
+  { value: "text", label: "Short text" },
+  { value: "textarea", label: "Long text" },
+  { value: "select", label: "Dropdown" },
+  { value: "url", label: "URL" },
+  { value: "number", label: "Number" },
+];
+
+interface CustomField {
+  id: string;
+  label: string;
+  type: "text" | "textarea" | "select" | "url" | "number";
+  options?: string[];
+  required: boolean;
+}
 
 export default function ScopePage() {
   const router = useRouter();
@@ -14,6 +29,7 @@ export default function ScopePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [user, setUser] = useState<{ id: string; email: string; name: string } | null>(null);
+  const [isEdit, setIsEdit] = useState(false);
 
   const [form, setForm] = useState({
     handle: "",
@@ -27,6 +43,7 @@ export default function ScopePage() {
     geographies: [] as string[],
     wont_invest_in: "",
     how_we_work: "",
+    custom_fields: [] as CustomField[],
   });
 
   const handleGoogleSignIn = async () => {
@@ -48,10 +65,10 @@ export default function ScopePage() {
   useEffect(() => {
     const handleSession = async (session: { user: { id: string; email?: string; user_metadata?: Record<string, string> } } | null) => {
       if (!session?.user) return;
-      // Check if investor profile already exists → pre-fill form for editing
       const { data: existing } = await supabase.from("investors").select("*").eq("user_id", session.user.id).maybeSingle();
       setUser({ id: session.user.id, email: session.user.email!, name: session.user.user_metadata?.full_name || "" });
       if (existing) {
+        setIsEdit(true);
         setForm({
           handle: existing.handle || "",
           name: existing.name || "",
@@ -64,6 +81,7 @@ export default function ScopePage() {
           geographies: existing.geographies || [],
           wont_invest_in: existing.wont_invest_in || "",
           how_we_work: existing.how_we_work || "",
+          custom_fields: (existing.custom_fields as CustomField[]) || [],
         });
       } else {
         setForm(f => ({
@@ -87,25 +105,40 @@ export default function ScopePage() {
   const toggleArray = (arr: string[], val: string) =>
     arr.includes(val) ? arr.filter(v => v !== val) : [...arr, val];
 
+  // Custom fields management
+  const addCustomField = () => {
+    setForm(f => ({
+      ...f,
+      custom_fields: [
+        ...f.custom_fields,
+        { id: crypto.randomUUID(), label: "", type: "text", required: false },
+      ],
+    }));
+  };
+
+  const updateCustomField = (id: string, updates: Partial<CustomField>) => {
+    setForm(f => ({
+      ...f,
+      custom_fields: f.custom_fields.map(cf =>
+        cf.id === id ? { ...cf, ...updates } : cf
+      ),
+    }));
+  };
+
+  const removeCustomField = (id: string) => {
+    setForm(f => ({
+      ...f,
+      custom_fields: f.custom_fields.filter(cf => cf.id !== id),
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
     setLoading(true);
     setError("");
 
-    const { data: existing } = await supabase
-      .from("investors")
-      .select("handle")
-      .eq("handle", form.handle)
-      .single();
-
-    if (existing) {
-      setError(`Handle "${form.handle}" is taken — try another.`);
-      setLoading(false);
-      return;
-    }
-
-    const { error: insertError } = await supabase.from("investors").insert({
+    const payload = {
       user_id: user.id,
       handle: form.handle,
       name: form.name,
@@ -119,13 +152,43 @@ export default function ScopePage() {
       geographies: form.geographies,
       wont_invest_in: form.wont_invest_in || null,
       how_we_work: form.how_we_work || null,
-      status: "active",
-    });
+      custom_fields: form.custom_fields.length > 0 ? form.custom_fields : null,
+      status: "active" as const,
+    };
 
-    if (insertError) {
-      setError(insertError.message);
-      setLoading(false);
-      return;
+    if (isEdit) {
+      // Update existing investor
+      const { error: updateError } = await supabase
+        .from("investors")
+        .update(payload)
+        .eq("user_id", user.id);
+
+      if (updateError) {
+        setError(updateError.message);
+        setLoading(false);
+        return;
+      }
+    } else {
+      // Check handle availability for new investors
+      const { data: existing } = await supabase
+        .from("investors")
+        .select("handle")
+        .eq("handle", form.handle)
+        .single();
+
+      if (existing) {
+        setError(`Handle "${form.handle}" is taken — try another.`);
+        setLoading(false);
+        return;
+      }
+
+      const { error: insertError } = await supabase.from("investors").insert(payload);
+
+      if (insertError) {
+        setError(insertError.message);
+        setLoading(false);
+        return;
+      }
     }
 
     setStep("done");
@@ -155,7 +218,7 @@ export default function ScopePage() {
       <nav style={{ borderBottom: "1px solid var(--border)", padding: "10px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <a href="/" style={{ color: "var(--rasp)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.04em", textDecoration: "none" }}>&gt; scopecheck.ai</a>
         <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-          <span style={{ fontSize: "10px", color: "var(--white-mid)", letterSpacing: "0.1em" }}>// investor scope setup</span>
+          <span style={{ fontSize: "10px", color: "var(--white-mid)", letterSpacing: "0.1em" }}>// investor scope {isEdit ? "editor" : "setup"}</span>
           {user && (
             <button onClick={handleSignOut} style={{ fontSize: "10px", color: "var(--white-dim)", letterSpacing: "0.08em", background: "none", border: "none", cursor: "pointer", fontFamily: "'JetBrains Mono', monospace" }}>
               sign out
@@ -197,7 +260,7 @@ export default function ScopePage() {
 
         {step === "form" && (
           <form onSubmit={handleSubmit} style={{ animation: "fadeUp 0.3s ease both" }}>
-            <div style={{ fontSize: "10px", letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--rasp)", marginBottom: "12px" }}>// step 2 of 2</div>
+            <div style={{ fontSize: "10px", letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--rasp)", marginBottom: "12px" }}>// {isEdit ? "edit your scope" : "step 2 of 2"}</div>
             <h1 style={{ fontSize: "28px", fontWeight: 700, marginBottom: "6px", letterSpacing: "-0.02em" }}>
               Your criteria.<br /><span style={{ color: "var(--rasp)" }}>Your scope check.</span>
             </h1>
@@ -211,6 +274,7 @@ export default function ScopePage() {
                   <div style={{ display: "flex", alignItems: "center" }}>
                     <span style={{ background: "var(--bg3)", border: "1px solid var(--border2)", borderRight: "none", padding: "9px 10px", fontSize: "11px", color: "var(--rasp)", whiteSpace: "nowrap" }}>scopecheck.ai/i/</span>
                     <input required style={{ ...inputStyle, borderLeft: "none" }} value={form.handle}
+                      disabled={isEdit}
                       onChange={e => setForm(f => ({ ...f, handle: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "") }))}
                       placeholder="alexvc" />
                   </div>
@@ -292,6 +356,76 @@ export default function ScopePage() {
                   rows={3} style={{ resize: "vertical" }} />
               </div>
 
+              {/* Custom questions section */}
+              <div style={{ borderTop: "1px solid var(--border)", paddingTop: "20px", marginTop: "4px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
+                  <div>
+                    <label style={{ ...labelStyle, marginBottom: "2px" }}>custom questions</label>
+                    <p style={{ fontSize: "10px", color: "var(--white-dimmer)", margin: 0 }}>
+                      Ask founders specific questions beyond the standard fields.
+                    </p>
+                  </div>
+                  {form.custom_fields.length < 5 && (
+                    <button type="button" onClick={addCustomField}
+                      style={{ background: "var(--bg3)", color: "var(--rasp)", border: "1px solid var(--border2)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "5px 10px", cursor: "pointer", whiteSpace: "nowrap" }}>
+                      + add question
+                    </button>
+                  )}
+                </div>
+
+                {form.custom_fields.map((cf, i) => (
+                  <div key={cf.id} style={{ background: "var(--bg2)", border: "1px solid var(--border2)", padding: "14px", marginBottom: "8px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                      <span style={{ fontSize: "9px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--white-dim)" }}>
+                        question {i + 1}
+                      </span>
+                      <button type="button" onClick={() => removeCustomField(cf.id)}
+                        style={{ background: "none", border: "none", color: "var(--white-dim)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", cursor: "pointer", padding: "2px 6px" }}>
+                        × remove
+                      </button>
+                    </div>
+
+                    <div style={{ marginBottom: "8px" }}>
+                      <input style={inputStyle} value={cf.label}
+                        onChange={e => updateCustomField(cf.id, { label: e.target.value })}
+                        placeholder="e.g. What's your IP moat?" />
+                    </div>
+
+                    <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
+                      <select style={{ ...inputStyle, width: "auto", minWidth: "120px" }} value={cf.type}
+                        onChange={e => updateCustomField(cf.id, { type: e.target.value as CustomField["type"], options: e.target.value === "select" ? [""] : undefined })}>
+                        {FIELD_TYPES.map(ft => (
+                          <option key={ft.value} value={ft.value}>{ft.label}</option>
+                        ))}
+                      </select>
+
+                      <label style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "10px", color: "var(--white-mid)", cursor: "pointer" }}>
+                        <input type="checkbox" checked={cf.required}
+                          onChange={e => updateCustomField(cf.id, { required: e.target.checked })}
+                          style={{ accentColor: "var(--rasp)" }} />
+                        required
+                      </label>
+                    </div>
+
+                    {cf.type === "select" && (
+                      <div style={{ marginTop: "10px" }}>
+                        <label style={{ ...labelStyle, fontSize: "9px" }}>dropdown options (one per line)</label>
+                        <textarea style={{ ...inputStyle, resize: "vertical" }} rows={3}
+                          value={(cf.options || []).join("\n")}
+                          onChange={e => updateCustomField(cf.id, { options: e.target.value.split("\n") })}
+                          placeholder={"Option 1\nOption 2\nOption 3"} />
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                {form.custom_fields.length === 0 && (
+                  <div style={{ textAlign: "center", padding: "16px", color: "var(--white-dimmer)", fontSize: "11px", border: "1px dashed var(--border2)" }}>
+                    // no custom questions yet — founders will answer the standard fields only
+                  </div>
+                )}
+              </div>
+
               {error && (
                 <div style={{ background: "rgba(212,40,106,0.08)", border: "1px solid var(--rasp-border)", padding: "10px 14px", fontSize: "12px", color: "var(--rasp)" }}>
                   {error}
@@ -300,11 +434,11 @@ export default function ScopePage() {
 
               <button type="submit" disabled={loading || !form.handle || !form.name || form.stages.length === 0}
                 style={{ background: "var(--rasp)", color: "#fff", border: "none", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", fontWeight: 700, letterSpacing: "0.06em", padding: "13px", cursor: "pointer", opacity: loading || !form.handle || !form.name || form.stages.length === 0 ? 0.5 : 1 }}>
-                {loading ? "creating your scope..." : "$ create my investor scope →"}
+                {loading ? (isEdit ? "saving..." : "creating your scope...") : isEdit ? "$ save changes →" : "$ create my investor scope →"}
               </button>
 
               <p style={{ fontSize: "11px", color: "var(--white-dimmer)", textAlign: "center" }}>
-                You can edit everything after. This takes 30 seconds.
+                {isEdit ? "Changes save instantly." : "You can edit everything after. This takes 30 seconds."}
               </p>
             </div>
           </form>
@@ -313,7 +447,7 @@ export default function ScopePage() {
         {step === "done" && (
           <div style={{ textAlign: "center", padding: "60px 0", animation: "fadeUp 0.3s ease both" }}>
             <div style={{ fontSize: "32px", marginBottom: "16px", color: "var(--rasp)" }}>✓</div>
-            <h2 style={{ fontSize: "22px", fontWeight: 700, marginBottom: "8px" }}>Scope created.</h2>
+            <h2 style={{ fontSize: "22px", fontWeight: 700, marginBottom: "8px" }}>{isEdit ? "Scope updated." : "Scope created."}</h2>
             <p style={{ fontSize: "12px", color: "var(--white-mid)", marginBottom: "16px" }}>
               Your scope is live at:
             </p>
