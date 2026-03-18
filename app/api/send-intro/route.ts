@@ -26,6 +26,7 @@ export async function POST(req: NextRequest) {
       deckUrl,
       passportHandle,
       founderEmail,
+      customAnswers,
     } = body;
 
     // Fetch investor details
@@ -51,6 +52,7 @@ export async function POST(req: NextRequest) {
       sector:          sector ?? null,
       traction:        traction ?? null,
       deck_url:        deckUrl ?? null,
+      custom_answers:  customAnswers ?? null,
       status:          "new",
     });
 
