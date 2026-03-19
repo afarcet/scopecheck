@@ -67,6 +67,7 @@ export default function PassportPage() {
           round_size: existing.round_size?.toString() || "",
           min_ticket: existing.min_ticket?.toString() || "",
           committed: existing.committed?.toString() || "",
+          traction_summary: existing.traction_summary || "",
           founder_background: existing.founder_background || "",
           deck_url: existing.deck_url || "",
           linkedin_url: existing.linkedin_url || "",
