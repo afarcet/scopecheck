@@ -1,3 +1,26 @@
+"use client";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import { CopyButton } from "@/components/CopyButton";
+
+const STAGES = ["Pre-seed", "Seed", "Early-A", "Series A", "Series B+"];
+const SECTORS = ["Applied AI", "ClimateTech", "FinTech", "HealthTech", "DeepTech", "SaaS", "Consumer", "Web3", "Other"];
+const GEOS = ["Europe", "UK", "US", "Israel", "Africa", "LATAM", "Asia", "Global"];
+const FIELD_TYPES = [
+  { value: "text", label: "Short text" },
+  { value: "textarea", label: "Long text" },
+  { value: "select", label: "Dropdown" },
+  { value: "url", label: "URL" },
+  { value: "number", label: "Number" },
+];
+
+interface CustomField {
+  id: string;
+  label: string;
+  type: "text" | "textarea" | "select" | "url" | "number";
+  options?: string[];
+  required: boolean;
 }
 
 export default function ScopePage() {
@@ -20,7 +43,6 @@ export default function ScopePage() {
     geographies: [] as string[],
     wont_invest_in: "",
     how_we_work: "",
-    requires_lead: false,
     custom_fields: [] as CustomField[],
   });
 
@@ -59,7 +81,6 @@ export default function ScopePage() {
           geographies: existing.geographies || [],
           wont_invest_in: existing.wont_invest_in || "",
           how_we_work: existing.how_we_work || "",
-          requires_lead: existing.requires_lead || false,
           custom_fields: (existing.custom_fields as CustomField[]) || [],
         });
       } else {
@@ -131,7 +152,6 @@ export default function ScopePage() {
       geographies: form.geographies,
       wont_invest_in: form.wont_invest_in || null,
       how_we_work: form.how_we_work || null,
-      requires_lead: form.requires_lead,
       custom_fields: form.custom_fields.length > 0 ? form.custom_fields : null,
       status: "active" as const,
     };
@@ -336,41 +356,6 @@ export default function ScopePage() {
                   rows={3} style={{ resize: "vertical" }} />
               </div>
 
-              <div style={{ borderTop: "1px solid var(--border)", paddingTop: "16px", marginTop: "4px" }}>
-                <div style={{ marginBottom: "12px" }}>
-                  <label style={labelStyle}>require lead investor</label>
-                  <p style={{ fontSize: "10px", color: "var(--white-dimmer)", margin: "0 0 10px 0", lineHeight: 1.4 }}>
-                    Only show intros from founders who have a confirmed lead investor.
-                  </p>
-                  <div style={{ display: "flex", gap: "6px" }}>
-                    <button type="button"
-                      style={{
-                        fontSize: "11px", padding: "6px 12px",
-                        border: `1px solid ${form.requires_lead ? "var(--rasp)" : "var(--border2)"}`,
-                        background: form.requires_lead ? "var(--rasp-dim)" : "transparent",
-                        color: form.requires_lead ? "var(--rasp)" : "var(--white-mid)",
-                        cursor: "pointer", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.04em",
-                        transition: "all 0.15s",
-                      } as React.CSSProperties}
-                      onClick={() => setForm(f => ({ ...f, requires_lead: true }))}>
-                      Yes
-                    </button>
-                    <button type="button"
-                      style={{
-                        fontSize: "11px", padding: "6px 12px",
-                        border: `1px solid ${!form.requires_lead ? "var(--rasp)" : "var(--border2)"}`,
-                        background: !form.requires_lead ? "var(--rasp-dim)" : "transparent",
-                        color: !form.requires_lead ? "var(--rasp)" : "var(--white-mid)",
-                        cursor: "pointer", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.04em",
-                        transition: "all 0.15s",
-                      } as React.CSSProperties}
-                      onClick={() => setForm(f => ({ ...f, requires_lead: false }))}>
-                      No
-                    </button>
-                  </div>
-                </div>
-              </div>
-
               {/* Custom questions section */}
               <div style={{ borderTop: "1px solid var(--border)", paddingTop: "20px", marginTop: "4px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
@@ -426,13 +411,9 @@ export default function ScopePage() {
                       <div style={{ marginTop: "10px" }}>
                         <label style={{ ...labelStyle, fontSize: "9px" }}>dropdown options (one per line)</label>
                         <textarea style={{ ...inputStyle, resize: "vertical" }} rows={3}
-                          value={(cf.options || []).join("
-")}
-                          onChange={e => updateCustomField(cf.id, { options: e.target.value.split("
-") })}
-                          placeholder={"Option 1
-Option 2
-Option 3"} />
+                          value={(cf.options || []).join("\n")}
+                          onChange={e => updateCustomField(cf.id, { options: e.target.value.split("\n") })}
+                          placeholder={"Option 1\nOption 2\nOption 3"} />
                       </div>
                     )}
                   </div>
