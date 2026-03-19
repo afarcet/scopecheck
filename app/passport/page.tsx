@@ -32,10 +32,6 @@ export default function PassportPage() {
     what_we_want: "",
     has_lead: false,
     lead_details: "",
-    traction_summary: "",
-    deck_url: "",
-    data_room_url: "",
-    what_we_want: "",
   });
 
   const handleSignOut = async () => {
@@ -71,7 +67,6 @@ export default function PassportPage() {
           round_size: existing.round_size?.toString() || "",
           min_ticket: existing.min_ticket?.toString() || "",
           committed: existing.committed?.toString() || "",
-          traction_summary: existing.traction_summary || "",
           founder_background: existing.founder_background || "",
           deck_url: existing.deck_url || "",
           linkedin_url: existing.linkedin_url || "",
@@ -79,10 +74,6 @@ export default function PassportPage() {
           what_we_want: existing.what_we_want || "",
           has_lead: existing.has_lead || false,
           lead_details: existing.lead_details || "",
-          traction_summary: existing.traction_summary || "",
-          deck_url: existing.deck_url || "",
-          data_room_url: existing.data_room_url || "",
-          what_we_want: existing.what_we_want || "",
         });
       } else {
         setForm(f => ({ ...f, name: su.user_metadata?.full_name || "" }));
@@ -137,7 +128,6 @@ export default function PassportPage() {
       min_ticket: minTicket,
       committed: committed,
       available: roundSize ? roundSize - committed : null,
-      traction_summary: form.traction_summary || null,
       founder_background: form.founder_background || null,
       deck_url: form.deck_url || null,
       linkedin_url: form.linkedin_url || null,
