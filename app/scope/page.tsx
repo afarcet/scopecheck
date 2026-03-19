@@ -189,6 +189,199 @@ export default function ScopePage() {
         setLoading(false);
         return;
       }
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import { CopyButton } from "@/components/CopyButton";
+
+const STAGES = ["Pre-seed", "Seed", "Early-A", "Series A", "Series B+"];
+const SECTORS = ["Applied AI", "ClimateTech", "FinTech", "HealthTech", "DeepTech", "SaaS", "Consumer", "Web3", "Other"];
+const GEOS = ["Europe", "UK", "US", "Israel", "Africa", "LATAM", "Asia", "Global"];
+const FIELD_TYPES = [
+  { value: "text", label: "Short text" },
+  { value: "textarea", label: "Long text" },
+  { value: "select", label: "Dropdown" },
+  { value: "url", label: "URL" },
+  { value: "number", label: "Number" },
+];
+
+interface CustomField {
+  id: string;
+  label: string;
+  type: "text" | "textarea" | "select" | "url" | "number";
+  options?: string[];
+  required: boolean;
+}
+
+export default function ScopePage() {
+  const router = useRouter();
+  const [step, setStep] = useState<"auth" | "form" | "done">("auth");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [user, setUser] = useState<{ id: string; email: string; name: string } | null>(null);
+  const [isEdit, setIsEdit] = useState(false);
+
+  const [form, setForm] = useState({
+    handle: "",
+    name: "",
+    firm: "",
+    location: "",
+    ticket_min: "",
+    ticket_max: "",
+    stages: [] as string[],
+    sectors: [] as string[],
+    geographies: [] as string[],
+    wont_invest_in: "",
+    how_we_work: "",
+    requires_lead: false,
+    custom_fields: [] as CustomField[],
+  });
+
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/scope` },
+    });
+    if (error) setError(error.message);
+    setLoading(false);
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setStep("auth");
+  };
+
+  useEffect(() => {
+    const handleSession = async (session: { user: { id: string; email?: string; user_metadata?: Record<string, string> } } | null) => {
+      if (!session?.user) return;
+      const { data: existing } = await supabase.from("investors").select("*").eq("user_id", session.user.id).maybeSingle();
+      setUser({ id: session.user.id, email: session.user.email!, name: session.user.user_metadata?.full_name || "" });
+      if (existing) {
+        setIsEdit(true);
+        setForm({
+          handle: existing.handle || "",
+          name: existing.name || "",
+          firm: existing.firm || "",
+          location: existing.location || "",
+          ticket_min: existing.ticket_min?.toString() || "",
+          ticket_max: existing.ticket_max?.toString() || "",
+          stages: existing.stages || [],
+          sectors: existing.sectors || [],
+          geographies: existing.geographies || [],
+          wont_invest_in: existing.wont_invest_in || "",
+          how_we_work: existing.how_we_work || "",
+          requires_lead: existing.requires_lead || false,
+          custom_fields: (existing.custom_fields as CustomField[]) || [],
+        });
+      } else {
+        setForm(f => ({
+          ...f,
+          name: session.user.user_metadata?.full_name || "",
+          handle: (session.user.email?.split("@")[0] || "").toLowerCase().replace(/[^a-z0-9]/g, ""),
+        }));
+      }
+      setStep("form");
+    };
+
+    supabase.auth.getSession().then(({ data: { session } }) => handleSession(session?.user ? session : null));
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      handleSession(session?.user ? session : null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const toggleArray = (arr: string[], val: string) =>
+    arr.includes(val) ? arr.filter(v => v !== val) : [...arr, val];
+
+  // Custom fields management
+  const addCustomField = () => {
+    setForm(f => ({
+      ...f,
+      custom_fields: [
+        ...f.custom_fields,
+        { id: crypto.randomUUID(), label: "", type: "text", required: false },
+      ],
+    }));
+  };
+
+  const updateCustomField = (id: string, updates: Partial<CustomField>) => {
+    setForm(f => ({
+      ...f,
+      custom_fields: f.custom_fields.map(cf =>
+        cf.id === id ? { ...cf, ...updates } : cf
+      ),
+    }));
+  };
+
+  const removeCustomField = (id: string) => {
+    setForm(f => ({
+      ...f,
+      custom_fields: f.custom_fields.filter(cf => cf.id !== id),
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    setLoading(true);
+    setError("");
+
+    const payload = {
+      user_id: user.id,
+      handle: form.handle,
+      name: form.name,
+      email: user.email,
+      firm: form.firm || null,
+      location: form.location || null,
+      ticket_min: form.ticket_min ? parseInt(form.ticket_min) : null,
+      ticket_max: form.ticket_max ? parseInt(form.ticket_max) : null,
+      stages: form.stages,
+      sectors: form.sectors,
+      geographies: form.geographies,
+      wont_invest_in: form.wont_invest_in || null,
+      how_we_work: form.how_we_work || null,
+      requires_lead: form.requires_lead,
+      custom_fields: form.custom_fields.length > 0 ? form.custom_fields : null,
+      status: "active" as const,
+    };
+
+    if (isEdit) {
+      // Update existing investor
+      const { error: updateError } = await supabase
+        .from("investors")
+        .update(payload)
+        .eq("user_id", user.id);
+
+      if (updateError) {
+        setError(updateError.message);
+        setLoading(false);
+        return;
+      }
+    } else {
+      // Check handle availability for new investors
+      const { data: existing } = await supabase
+        .from("investors")
+        .select("handle")
+        .eq("handle", form.handle)
+        .single();
+
+      if (existing) {
+        setError(`Handle "${form.handle}" is taken — try another.`);
+        setLoading(false);
+        return;
+      }
+
+      const { error: insertError } = await supabase.from("investors").insert(payload);
+
+      if (insertError) {
+        setError(insertError.message);
+        setLoading(false);
+        return;
+      }
     }
 
     setStep("done");
@@ -356,6 +549,41 @@ export default function ScopePage() {
                   rows={3} style={{ resize: "vertical" }} />
               </div>
 
+              <div style={{ borderTop: "1px solid var(--border)", paddingTop: "16px", marginTop: "4px" }}>
+                <div style={{ marginBottom: "12px" }}>
+                  <label style={labelStyle}>require lead investor</label>
+                  <p style={{ fontSize: "10px", color: "var(--white-dimmer)", margin: "0 0 10px 0", lineHeight: 1.4 }}>
+                    Only show intros from founders who have a confirmed lead investor.
+                  </p>
+                  <div style={{ display: "flex", gap: "6px" }}>
+                    <button type="button"
+                      style={{
+                        fontSize: "11px", padding: "6px 12px",
+                        border: `1px solid ${form.requires_lead ? "var(--rasp)" : "var(--border2)"}`,
+                        background: form.requires_lead ? "var(--rasp-dim)" : "transparent",
+                        color: form.requires_lead ? "var(--rasp)" : "var(--white-mid)",
+                        cursor: "pointer", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.04em",
+                        transition: "all 0.15s",
+                      } as React.CSSProperties}
+                      onClick={() => setForm(f => ({ ...f, requires_lead: true }))}>
+                      Yes
+                    </button>
+                    <button type="button"
+                      style={{
+                        fontSize: "11px", padding: "6px 12px",
+                        border: `1px solid ${!form.requires_lead ? "var(--rasp)" : "var(--border2)"}`,
+                        background: !form.requires_lead ? "var(--rasp-dim)" : "transparent",
+                        color: !form.requires_lead ? "var(--rasp)" : "var(--white-mid)",
+                        cursor: "pointer", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.04em",
+                        transition: "all 0.15s",
+                      } as React.CSSProperties}
+                      onClick={() => setForm(f => ({ ...f, requires_lead: false }))}>
+                      No
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               {/* Custom questions section */}
               <div style={{ borderTop: "1px solid var(--border)", paddingTop: "20px", marginTop: "4px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
@@ -411,9 +639,13 @@ export default function ScopePage() {
                       <div style={{ marginTop: "10px" }}>
                         <label style={{ ...labelStyle, fontSize: "9px" }}>dropdown options (one per line)</label>
                         <textarea style={{ ...inputStyle, resize: "vertical" }} rows={3}
-                          value={(cf.options || []).join("\n")}
-                          onChange={e => updateCustomField(cf.id, { options: e.target.value.split("\n") })}
-                          placeholder={"Option 1\nOption 2\nOption 3"} />
+                          value={(cf.options || []).join("
+")}
+                          onChange={e => updateCustomField(cf.id, { options: e.target.value.split("
+") })}
+                          placeholder={"Option 1
+Option 2
+Option 3"} />
                       </div>
                     )}
                   </div>
