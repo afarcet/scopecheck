@@ -159,6 +159,213 @@ export default function PassportPage() {
       <div style={{ maxWidth: "560px", margin: "0 auto", padding: "48px 24px 80px" }}>
 
         {step === "auth" && (
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import { CopyButton } from "@/components/CopyButton";
+import { STAGES, SECTORS, COUNTRIES } from "@/lib/constants";
+
+export default function PassportPage() {
+  const router = useRouter();
+  const [step, setStep] = useState<"auth" | "form" | "done">("auth");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [user, setUser] = useState<{ id: string; email: string; name: string } | null>(null);
+  const [isEdit, setIsEdit] = useState(false);
+
+  const [form, setForm] = useState({
+    handle: "",
+    name: "",
+    company_name: "",
+    one_liner: "",
+    stage: "",
+    sectors: [] as string[],
+    country: "",
+    round_size: "",
+    min_ticket: "",
+    committed: "",
+    traction_summary: "",
+    founder_background: "",
+    deck_url: "",
+    linkedin_url: "",
+    data_room_url: "",
+    what_we_want: "",
+    has_lead: false,
+    lead_details: "",
+  });
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setStep("auth");
+  };
+
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/passport` },
+    });
+    if (error) setError(error.message);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    const handleSession = async (su: { id: string; email?: string; user_metadata?: Record<string, string> } | null) => {
+      if (!su) return;
+      const { data: existing } = await supabase.from("founders").select("*").eq("user_id", su.id).maybeSingle();
+      setUser({ id: su.id, email: su.email!, name: su.user_metadata?.full_name || "" });
+      if (existing) {
+        setIsEdit(true);
+        setForm({
+          handle: existing.handle || "",
+          name: existing.name || su.user_metadata?.full_name || "",
+          company_name: existing.company_name || existing.company || "",
+          one_liner: existing.one_liner || "",
+          stage: existing.stage || "",
+          sectors: Array.isArray(existing.sectors) ? existing.sectors : [],
+          country: existing.country || "",
+          round_size: existing.round_size?.toString() || "",
+          min_ticket: existing.min_ticket?.toString() || "",
+          committed: existing.committed?.toString() || "",
+          traction_summary: existing.traction_summary || "",
+          founder_background: existing.founder_background || "",
+          deck_url: existing.deck_url || "",
+          linkedin_url: existing.linkedin_url || "",
+          data_room_url: existing.data_room_url || "",
+          what_we_want: existing.what_we_want || "",
+          has_lead: existing.has_lead || false,
+          lead_details: existing.lead_details || "",
+        });
+      } else {
+        setForm(f => ({ ...f, name: su.user_metadata?.full_name || "" }));
+      }
+      setStep("form");
+    };
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) handleSession(session.user as { id: string; email?: string; user_metadata?: Record<string, string> });
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) handleSession(session.user as { id: string; email?: string; user_metadata?: Record<string, string> });
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    setLoading(true);
+    setError("");
+
+    const roundSize = parseInt(form.round_size) || null;
+    const minTicket = parseInt(form.min_ticket) || null;
+    const committed = parseInt(form.committed) || 0;
+
+    const payload = {
+      user_id: user.id,
+      handle: form.handle,
+      name: user.name || form.name,
+      email: user.email,
+      company_name: form.company_name,
+      one_liner: form.one_liner || null,
+      stage: form.stage || null,
+      sectors: form.sectors.length > 0 ? form.sectors : null,
+      country: form.country || null,
+      round_size: roundSize,
+      min_ticket: minTicket,
+      committed: committed,
+      available: roundSize ? roundSize - committed : null,
+      traction_summary: form.traction_summary || null,
+      founder_background: form.founder_background || null,
+      deck_url: form.deck_url || null,
+      linkedin_url: form.linkedin_url || null,
+      data_room_url: form.data_room_url || null,
+      what_we_want: form.what_we_want || null,
+      has_lead: form.has_lead,
+      lead_details: form.lead_details || null,
+    };
+
+    if (isEdit) {
+      // Update existing founder
+      const { error: updateError } = await supabase
+        .from("founders")
+        .update(payload)
+        .eq("user_id", user.id);
+
+      if (updateError) {
+        setError(updateError.message);
+        setLoading(false);
+        return;
+      }
+    } else {
+      // Check handle availability for new founders
+      const { data: existing } = await supabase
+        .from("founders")
+        .select("handle")
+        .eq("handle", form.handle)
+        .single();
+
+      if (existing) {
+        setError(`Handle "${form.handle}" is taken — try another.`);
+        setLoading(false);
+        return;
+      }
+
+      const { error: insertError } = await supabase.from("founders").insert(payload);
+
+      if (insertError) {
+        setError(insertError.message);
+        setLoading(false);
+        return;
+      }
+    }
+
+    setStep("done");
+    setTimeout(() => router.push(`/f/${form.handle}`), 1500);
+  };
+
+  const labelStyle = {
+    fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase" as const,
+    color: "var(--white-mid)", display: "block", marginBottom: "5px",
+  };
+
+  const inputStyle = {
+    background: "var(--bg3)", border: "1px solid var(--border2)", color: "var(--white)",
+    fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", padding: "9px 12px",
+    width: "100%", outline: "none",
+  } as React.CSSProperties;
+
+  const chipStyle = (active: boolean, color = "var(--amber)") => ({
+    fontSize: "11px", padding: "4px 10px",
+    border: `1px solid ${active ? color : "var(--border2)"}`,
+    background: active ? "rgba(240,165,0,0.12)" : "transparent",
+    color: active ? color : "var(--white-mid)",
+    cursor: "pointer", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.04em",
+    transition: "all 0.15s",
+  } as React.CSSProperties);
+
+  const toggleButtonStyle = (active: boolean, color = "var(--amber)") => ({
+    fontSize: "11px", padding: "6px 12px",
+    border: `1px solid ${active ? color : "var(--border2)"}`,
+    background: active ? "rgba(240,165,0,0.12)" : "transparent",
+    color: active ? color : "var(--white-mid)",
+    cursor: "pointer", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.04em",
+    transition: "all 0.15s",
+  } as React.CSSProperties);
+
+  return (
+    <main style={{ minHeight: "100vh", background: "var(--bg)" }}>
+      <nav style={{ borderBottom: "1px solid var(--border)", padding: "10px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <a href="/" style={{ color: "var(--rasp)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.04em", textDecoration: "none" }}>&gt; scopecheck.ai</a>
+        <span style={{ fontSize: "10px", color: "var(--white-mid)", letterSpacing: "0.1em" }}>// founder passport</span>
+      </nav>
+
+      <div style={{ maxWidth: "560px", margin: "0 auto", padding: "48px 24px 80px" }}>
+
+        {step === "auth" && (
           <div style={{ animation: "fadeUp 0.3s ease both" }}>
             <div style={{ fontSize: "10px", letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--amber)", marginBottom: "12px" }}>// step 1 of 2</div>
             <h1 style={{ fontSize: "28px", fontWeight: 700, marginBottom: "10px", letterSpacing: "-0.02em" }}>
@@ -214,6 +421,7 @@ export default function PassportPage() {
                   <div style={{ display: "flex", alignItems: "center" }}>
                     <span style={{ background: "var(--bg3)", border: "1px solid var(--border2)", borderRight: "none", padding: "9px 8px", fontSize: "10px", color: "var(--amber)", whiteSpace: "nowrap" }}>f/</span>
                     <input required className="input" style={{ borderLeft: "none" }} value={form.handle}
+                      disabled={isEdit}
                       onChange={e => setForm(f => ({ ...f, handle: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "") }))}
                       placeholder="carbonade" />
                   </div>
@@ -241,39 +449,51 @@ export default function PassportPage() {
                 </div>
               </div>
 
-              {/* Sector */}
+              {/* Sectors - multi-select */}
               <div>
-                <label style={labelStyle}>sector *</label>
+                <label style={labelStyle}>sectors (max 3) *</label>
                 <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
                   {SECTORS.map(s => (
-                    <button key={s} type="button" style={chipStyle(form.sector === s)}
-                      onClick={() => setForm(f => ({ ...f, sector: s }))}>
+                    <button key={s} type="button"
+                      style={chipStyle(form.sectors.includes(s))}
+                      onClick={() => {
+                        if (form.sectors.includes(s)) {
+                          setForm(f => ({ ...f, sectors: f.sectors.filter(x => x !== s) }));
+                        } else if (form.sectors.length < 3) {
+                          setForm(f => ({ ...f, sectors: [...f.sectors, s] }));
+                        }
+                      }}>
                       {s}
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Geography */}
+              {/* Country */}
               <div>
-                <label style={labelStyle}>based in</label>
-                <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-                  {GEOS.map(g => (
-                    <button key={g} type="button" style={chipStyle(form.geography === g)}
-                      onClick={() => setForm(f => ({ ...f, geography: g }))}>
-                      {g}
-                    </button>
+                <label style={labelStyle}>country *</label>
+                <select className="input" style={inputStyle} value={form.country}
+                  onChange={e => setForm(f => ({ ...f, country: e.target.value }))}>
+                  <option value="">Select a country</option>
+                  {COUNTRIES.map(c => (
+                    <option key={c} value={c}>{c}</option>
                   ))}
-                </div>
+                </select>
               </div>
 
               {/* Round */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px" }}>
                 <div>
                   <label style={labelStyle}>total round size (€K)</label>
                   <input className="input" type="number" value={form.round_size}
                     onChange={e => setForm(f => ({ ...f, round_size: e.target.value }))}
                     placeholder="e.g. 2000" />
+                </div>
+                <div>
+                  <label style={labelStyle}>min ticket (€K)</label>
+                  <input className="input" type="number" value={form.min_ticket}
+                    onChange={e => setForm(f => ({ ...f, min_ticket: e.target.value }))}
+                    placeholder="e.g. 50" />
                 </div>
                 <div>
                   <label style={labelStyle}>committed so far (€K)</label>
@@ -292,6 +512,15 @@ export default function PassportPage() {
                   rows={2} style={{ resize: "vertical" }} />
               </div>
 
+              {/* Founder background */}
+              <div>
+                <label style={labelStyle}>founder / team background</label>
+                <textarea className="input" value={form.founder_background}
+                  onChange={e => setForm(f => ({ ...f, founder_background: e.target.value }))}
+                  placeholder="Worked at Google and McKinsey · Founded two B2B SaaS companies · PhD in Materials Science"
+                  rows={2} style={{ resize: "vertical" }} />
+              </div>
+
               {/* Links */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
                 <div>
@@ -301,11 +530,46 @@ export default function PassportPage() {
                     placeholder="https://deck.link/..." />
                 </div>
                 <div>
-                  <label style={labelStyle}>data room URL</label>
-                  <input className="input" type="url" value={form.data_room_url}
-                    onChange={e => setForm(f => ({ ...f, data_room_url: e.target.value }))}
-                    placeholder="https://..." />
+                  <label style={labelStyle}>linkedin URL</label>
+                  <input className="input" type="url" value={form.linkedin_url}
+                    onChange={e => setForm(f => ({ ...f, linkedin_url: e.target.value }))}
+                    placeholder="https://linkedin.com/in/..." />
                 </div>
+              </div>
+
+              {/* Data room */}
+              <div>
+                <label style={labelStyle}>data room URL</label>
+                <input className="input" type="url" value={form.data_room_url}
+                  onChange={e => setForm(f => ({ ...f, data_room_url: e.target.value }))}
+                  placeholder="https://..." />
+              </div>
+
+              {/* Lead investor section */}
+              <div style={{ borderTop: "1px solid var(--border)", paddingTop: "16px", marginTop: "4px" }}>
+                <div style={{ marginBottom: "12px" }}>
+                  <label style={labelStyle}>lead investor confirmed?</label>
+                  <div style={{ display: "flex", gap: "6px" }}>
+                    <button type="button"
+                      style={toggleButtonStyle(form.has_lead)}
+                      onClick={() => setForm(f => ({ ...f, has_lead: true }))}>
+                      Yes
+                    </button>
+                    <button type="button"
+                      style={toggleButtonStyle(!form.has_lead)}
+                      onClick={() => setForm(f => ({ ...f, has_lead: false, lead_details: "" }))}>
+                      No
+                    </button>
+                  </div>
+                </div>
+                {form.has_lead && (
+                  <div>
+                    <label style={labelStyle}>lead details</label>
+                    <input className="input" value={form.lead_details}
+                      onChange={e => setForm(f => ({ ...f, lead_details: e.target.value }))}
+                      placeholder="e.g. Acme VC leading €1M, decision by March 15" />
+                  </div>
+                )}
               </div>
 
               {/* What we want */}
@@ -323,13 +587,13 @@ export default function PassportPage() {
                 </div>
               )}
 
-              <button type="submit" disabled={loading || !form.handle || !form.company_name || !form.stage}
-                style={{ background: "var(--amber)", color: "#000", border: "none", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", fontWeight: 700, letterSpacing: "0.06em", padding: "13px", cursor: "pointer", opacity: loading || !form.handle || !form.company_name || !form.stage ? 0.5 : 1 }}>
-                {loading ? "creating your startup passport..." : "$ create my startup passport →"}
+              <button type="submit" disabled={loading || !form.handle || !form.company_name || !form.stage || form.sectors.length === 0 || !form.country}
+                style={{ background: "var(--amber)", color: "#000", border: "none", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", fontWeight: 700, letterSpacing: "0.06em", padding: "13px", cursor: "pointer", opacity: loading || !form.handle || !form.company_name || !form.stage || form.sectors.length === 0 || !form.country ? 0.5 : 1 }}>
+                {loading ? (isEdit ? "saving..." : "creating your startup passport...") : isEdit ? "$ save changes →" : "$ create my startup passport →"}
               </button>
 
               <p style={{ fontSize: "11px", color: "var(--white-dimmer)", textAlign: "center" }}>
-                You can update this anytime as your round progresses.
+                {isEdit ? "Changes save instantly." : "You can update this anytime as your round progresses."}
               </p>
             </div>
           </form>
@@ -338,7 +602,7 @@ export default function PassportPage() {
         {step === "done" && (
           <div style={{ textAlign: "center", padding: "60px 0", animation: "fadeUp 0.3s ease both" }}>
             <div style={{ fontSize: "32px", marginBottom: "16px", color: "var(--amber)" }}>✓</div>
-            <h2 style={{ fontSize: "22px", fontWeight: 700, marginBottom: "8px" }}>Startup passport created.</h2>
+            <h2 style={{ fontSize: "22px", fontWeight: 700, marginBottom: "8px" }}>{isEdit ? "Passport updated." : "Startup passport created."}</h2>
             <p style={{ fontSize: "12px", color: "var(--white-mid)", marginBottom: "16px" }}>
               Your passport is live at:
             </p>
@@ -354,4 +618,4 @@ export default function PassportPage() {
       </div>
     </main>
   );
-}
+    }
