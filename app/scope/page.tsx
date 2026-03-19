@@ -43,6 +43,7 @@ export default function ScopePage() {
     geographies: [] as string[],
     wont_invest_in: "",
     how_we_work: "",
+    requires_lead: false,
     custom_fields: [] as CustomField[],
   });
 
@@ -81,6 +82,7 @@ export default function ScopePage() {
           geographies: existing.geographies || [],
           wont_invest_in: existing.wont_invest_in || "",
           how_we_work: existing.how_we_work || "",
+          requires_lead: existing.requires_lead || false,
           custom_fields: (existing.custom_fields as CustomField[]) || [],
         });
       } else {
@@ -152,6 +154,7 @@ export default function ScopePage() {
       geographies: form.geographies,
       wont_invest_in: form.wont_invest_in || null,
       how_we_work: form.how_we_work || null,
+      requires_lead: form.requires_lead,
       custom_fields: form.custom_fields.length > 0 ? form.custom_fields : null,
       status: "active" as const,
     };
@@ -354,6 +357,42 @@ export default function ScopePage() {
                   onChange={e => setForm(f => ({ ...f, how_we_work: e.target.value }))}
                   placeholder="We co-invest via SPV alongside lead investors. We decide within 2 weeks."
                   rows={3} style={{ resize: "vertical" }} />
+              </div>
+
+
+              <div style={{ borderTop: "1px solid var(--border)", paddingTop: "16px", marginTop: "4px" }}>
+                <div style={{ marginBottom: "12px" }}>
+                  <label style={labelStyle}>require lead investor</label>
+                  <p style={{ fontSize: "10px", color: "var(--white-dimmer)", margin: "0 0 10px 0", lineHeight: 1.4 }}>
+                    Only show intros from founders who have a confirmed lead investor.
+                  </p>
+                  <div style={{ display: "flex", gap: "6px" }}>
+                    <button type="button"
+                      style={{
+                        fontSize: "11px", padding: "6px 12px",
+                        border: `1px solid ${form.requires_lead ? "var(--rasp)" : "var(--border2)"}`,
+                        background: form.requires_lead ? "var(--rasp-dim)" : "transparent",
+                        color: form.requires_lead ? "var(--rasp)" : "var(--white-mid)",
+                        cursor: "pointer", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.04em",
+                        transition: "all 0.15s",
+                      } as React.CSSProperties}
+                      onClick={() => setForm(f => ({ ...f, requires_lead: true }))}>
+                      Yes
+                    </button>
+                    <button type="button"
+                      style={{
+                        fontSize: "11px", padding: "6px 12px",
+                        border: `1px solid ${!form.requires_lead ? "var(--rasp)" : "var(--border2)"}`,
+                        background: !form.requires_lead ? "var(--rasp-dim)" : "transparent",
+                        color: !form.requires_lead ? "var(--rasp)" : "var(--white-mid)",
+                        cursor: "pointer", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.04em",
+                        transition: "all 0.15s",
+                      } as React.CSSProperties}
+                      onClick={() => setForm(f => ({ ...f, requires_lead: false }))}>
+                      No
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {/* Custom questions section */}
