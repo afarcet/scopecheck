@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { CopyButton } from "@/components/CopyButton";
@@ -15,6 +15,33 @@ const FIELD_TYPES = [
   { value: "number", label: "Number" },
 ];
 
+// Standard criteria that can be gates or preferences
+const STANDARD_CRITERIA = [
+  { key: "stages", label: "Stages" },
+  { key: "sectors", label: "Sectors" },
+  { key: "geographies", label: "Geographies" },
+  { key: "ticket_size", label: "Ticket size" },
+  { key: "requires_lead", label: "Requires lead" },
+] as const;
+
+type CriterionKey = typeof STANDARD_CRITERIA[number]["key"];
+type CriterionMode = "gate" | "preference";
+
+interface CriterionConfig {
+  mode: CriterionMode;
+  weight: number;
+}
+
+interface CustomFieldScoringConfig {
+  included: boolean;
+  weight: number;
+}
+
+interface ScopeFitConfig {
+  criteria: Record<CriterionKey, CriterionConfig>;
+  custom_fields: Record<string, CustomFieldScoringConfig>;
+}
+
 interface CustomField {
   id: string;
   label: string;
@@ -22,6 +49,17 @@ interface CustomField {
   options?: string[];
   required: boolean;
 }
+
+const DEFAULT_SCOPE_FIT_CONFIG: ScopeFitConfig = {
+  criteria: {
+    stages: { mode: "preference", weight: 20 },
+    sectors: { mode: "preference", weight: 20 },
+    geographies: { mode: "preference", weight: 20 },
+    ticket_size: { mode: "preference", weight: 20 },
+    requires_lead: { mode: "preference", weight: 20 },
+  },
+  custom_fields: {},
+};
 
 export default function ScopePage() {
   const router = useRouter();
@@ -46,6 +84,28 @@ export default function ScopePage() {
     requires_lead: false,
     custom_fields: [] as CustomField[],
   });
+
+  const [scopeFit, setScopeFit] = useState<ScopeFitConfig>(DEFAULT_SCOPE_FIT_CONFIG);
+
+  // Derived: list of all preference criteria (standard + custom) for weight allocation
+  const preferenceItems = (() => {
+    const items: { key: string; label: string; weight: number; isCustom: boolean }[] = [];
+    for (const c of STANDARD_CRITERIA) {
+      if (scopeFit.criteria[c.key].mode === "preference") {
+        items.push({ key: c.key, label: c.label, weight: scopeFit.criteria[c.key].weight, isCustom: false });
+      }
+    }
+    for (const cf of form.custom_fields) {
+      const cfg = scopeFit.custom_fields[cf.id];
+      if (cfg?.included) {
+        items.push({ key: cf.id, label: cf.label || `Question ${form.custom_fields.indexOf(cf) + 1}`, weight: cfg.weight, isCustom: true });
+      }
+    }
+    return items;
+  })();
+
+  const totalWeight = preferenceItems.reduce((sum, item) => sum + item.weight, 0);
+  const gateCount = STANDARD_CRITERIA.filter(c => scopeFit.criteria[c.key].mode === "gate").length;
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
@@ -85,6 +145,14 @@ export default function ScopePage() {
           requires_lead: existing.requires_lead || false,
           custom_fields: (existing.custom_fields as CustomField[]) || [],
         });
+        // Load scope fit config if it exists
+        if (existing.scope_fit_config) {
+          const loaded = existing.scope_fit_config as ScopeFitConfig;
+          setScopeFit({
+            criteria: { ...DEFAULT_SCOPE_FIT_CONFIG.criteria, ...loaded.criteria },
+            custom_fields: loaded.custom_fields || {},
+          });
+        }
       } else {
         setForm(f => ({
           ...f,
@@ -106,6 +174,71 @@ export default function ScopePage() {
 
   const toggleArray = (arr: string[], val: string) =>
     arr.includes(val) ? arr.filter(v => v !== val) : [...arr, val];
+
+  // Scope fit config helpers
+  const setCriterionMode = useCallback((key: CriterionKey, mode: CriterionMode) => {
+    setScopeFit(prev => ({
+      ...prev,
+      criteria: {
+        ...prev.criteria,
+        [key]: { ...prev.criteria[key], mode, weight: mode === "gate" ? 0 : prev.criteria[key].weight },
+      },
+    }));
+  }, []);
+
+  const setCriterionWeight = useCallback((key: string, weight: number, isCustom: boolean) => {
+    if (isCustom) {
+      setScopeFit(prev => ({
+        ...prev,
+        custom_fields: {
+          ...prev.custom_fields,
+          [key]: { ...prev.custom_fields[key], weight },
+        },
+      }));
+    } else {
+      setScopeFit(prev => ({
+        ...prev,
+        criteria: {
+          ...prev.criteria,
+          [key]: { ...prev.criteria[key as CriterionKey], weight },
+        },
+      }));
+    }
+  }, []);
+
+  const setCustomFieldIncluded = useCallback((id: string, included: boolean) => {
+    setScopeFit(prev => ({
+      ...prev,
+      custom_fields: {
+        ...prev.custom_fields,
+        [id]: { included, weight: included ? (prev.custom_fields[id]?.weight || 0) : 0 },
+      },
+    }));
+  }, []);
+
+  const autoDistributeWeights = useCallback(() => {
+    const prefCriteria = STANDARD_CRITERIA.filter(c => scopeFit.criteria[c.key].mode === "preference");
+    const includedCustom = form.custom_fields.filter(cf => scopeFit.custom_fields[cf.id]?.included);
+    const totalItems = prefCriteria.length + includedCustom.length;
+    if (totalItems === 0) return;
+
+    const perItem = Math.floor(100 / totalItems);
+    const remainder = 100 - perItem * totalItems;
+
+    setScopeFit(prev => {
+      const next = { ...prev, criteria: { ...prev.criteria }, custom_fields: { ...prev.custom_fields } };
+      let idx = 0;
+      for (const c of prefCriteria) {
+        next.criteria[c.key] = { ...next.criteria[c.key], weight: perItem + (idx < remainder ? 1 : 0) };
+        idx++;
+      }
+      for (const cf of includedCustom) {
+        next.custom_fields[cf.id] = { ...next.custom_fields[cf.id], weight: perItem + (idx < remainder ? 1 : 0) };
+        idx++;
+      }
+      return next;
+    });
+  }, [scopeFit.criteria, scopeFit.custom_fields, form.custom_fields]);
 
   // Custom fields management
   const addCustomField = () => {
@@ -132,11 +265,24 @@ export default function ScopePage() {
       ...f,
       custom_fields: f.custom_fields.filter(cf => cf.id !== id),
     }));
+    // Also remove from scope fit config
+    setScopeFit(prev => {
+      const next = { ...prev, custom_fields: { ...prev.custom_fields } };
+      delete next.custom_fields[id];
+      return next;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+
+    // Validate weight total if there are any preference items
+    if (preferenceItems.length > 0 && totalWeight !== 100) {
+      setError(`Preference weights must add up to 100. Currently: ${totalWeight}.`);
+      return;
+    }
+
     setLoading(true);
     setError("");
 
@@ -156,11 +302,11 @@ export default function ScopePage() {
       how_we_work: form.how_we_work || null,
       requires_lead: form.requires_lead,
       custom_fields: form.custom_fields.length > 0 ? form.custom_fields : null,
+      scope_fit_config: scopeFit,
       status: "active" as const,
     };
 
     if (isEdit) {
-      // Update existing investor
       const { error: updateError } = await supabase
         .from("investors")
         .update(payload)
@@ -172,7 +318,6 @@ export default function ScopePage() {
         return;
       }
     } else {
-      // Check handle availability for new investors
       const { data: existing } = await supabase
         .from("investors")
         .select("handle")
@@ -215,6 +360,36 @@ export default function ScopePage() {
     cursor: "pointer", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.04em",
     transition: "all 0.15s",
   } as React.CSSProperties);
+
+  // Gate/Preference toggle component
+  const ModeToggle = ({ criterionKey }: { criterionKey: CriterionKey }) => {
+    const mode = scopeFit.criteria[criterionKey].mode;
+    const toggleStyle = (active: boolean, isGate: boolean) => ({
+      fontSize: "9px",
+      letterSpacing: "0.1em",
+      textTransform: "uppercase" as const,
+      padding: "3px 8px",
+      border: `1px solid ${active ? (isGate ? "#e05555" : "var(--rasp)") : "var(--border2)"}`,
+      background: active ? (isGate ? "rgba(224,85,85,0.12)" : "var(--rasp-dim)") : "transparent",
+      color: active ? (isGate ? "#e05555" : "var(--rasp)") : "var(--white-dimmer)",
+      cursor: "pointer",
+      fontFamily: "'JetBrains Mono', monospace",
+      transition: "all 0.15s",
+    } as React.CSSProperties);
+
+    return (
+      <div style={{ display: "flex", gap: "4px", marginTop: "6px" }}>
+        <button type="button" style={toggleStyle(mode === "gate", true)}
+          onClick={() => setCriterionMode(criterionKey, "gate")}>
+          gate
+        </button>
+        <button type="button" style={toggleStyle(mode === "preference", false)}
+          onClick={() => setCriterionMode(criterionKey, "preference")}>
+          pref
+        </button>
+      </div>
+    );
+  };
 
   return (
     <main style={{ minHeight: "100vh", background: "var(--bg)" }}>
@@ -299,8 +474,12 @@ export default function ScopePage() {
                 </div>
               </div>
 
+              {/* Ticket size with mode toggle */}
               <div>
-                <label style={labelStyle}>ticket size (€K)</label>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <label style={labelStyle}>ticket size (€K)</label>
+                  <ModeToggle criterionKey="ticket_size" />
+                </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: "8px", alignItems: "center" }}>
                   <input className="input" type="number" value={form.ticket_min} onChange={e => setForm(f => ({ ...f, ticket_min: e.target.value }))} placeholder="min e.g. 50" />
                   <span style={{ color: "var(--white-dim)", fontSize: "12px" }}>→</span>
@@ -308,8 +487,12 @@ export default function ScopePage() {
                 </div>
               </div>
 
+              {/* Stages with mode toggle */}
               <div>
-                <label style={labelStyle}>stages *</label>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <label style={labelStyle}>stages *</label>
+                  <ModeToggle criterionKey="stages" />
+                </div>
                 <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
                   {STAGES.map(s => (
                     <button key={s} type="button" style={chipStyle(form.stages.includes(s))}
@@ -320,8 +503,12 @@ export default function ScopePage() {
                 </div>
               </div>
 
+              {/* Sectors with mode toggle */}
               <div>
-                <label style={labelStyle}>sectors *</label>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <label style={labelStyle}>sectors *</label>
+                  <ModeToggle criterionKey="sectors" />
+                </div>
                 <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
                   {SECTORS.map(s => (
                     <button key={s} type="button" style={chipStyle(form.sectors.includes(s))}
@@ -332,8 +519,12 @@ export default function ScopePage() {
                 </div>
               </div>
 
+              {/* Geographies with mode toggle */}
               <div>
-                <label style={labelStyle}>geographies *</label>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <label style={labelStyle}>geographies *</label>
+                  <ModeToggle criterionKey="geographies" />
+                </div>
                 <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
                   {GEOS.map(g => (
                     <button key={g} type="button" style={chipStyle(form.geographies.includes(g))}
@@ -359,10 +550,13 @@ export default function ScopePage() {
                   rows={3} style={{ resize: "vertical" }} />
               </div>
 
-
+              {/* Requires lead with mode toggle */}
               <div style={{ borderTop: "1px solid var(--border)", paddingTop: "16px", marginTop: "4px" }}>
                 <div style={{ marginBottom: "12px" }}>
-                  <label style={labelStyle}>require lead investor</label>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                    <label style={labelStyle}>require lead investor</label>
+                    <ModeToggle criterionKey="requires_lead" />
+                  </div>
                   <p style={{ fontSize: "10px", color: "var(--white-dimmer)", margin: "0 0 10px 0", lineHeight: 1.4 }}>
                     Only show intros from founders who have a confirmed lead investor.
                   </p>
@@ -444,6 +638,13 @@ export default function ScopePage() {
                           style={{ accentColor: "var(--rasp)" }} />
                         required
                       </label>
+
+                      <label style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "10px", color: "var(--white-mid)", cursor: "pointer", marginLeft: "4px" }}>
+                        <input type="checkbox" checked={scopeFit.custom_fields[cf.id]?.included || false}
+                          onChange={e => setCustomFieldIncluded(cf.id, e.target.checked)}
+                          style={{ accentColor: "var(--rasp)" }} />
+                        score this
+                      </label>
                     </div>
 
                     {cf.type === "select" && (
@@ -465,14 +666,117 @@ export default function ScopePage() {
                 )}
               </div>
 
+              {/* ============================================ */}
+              {/* SCOPE FIT WEIGHTS — distribute 100 points    */}
+              {/* ============================================ */}
+              <div style={{ borderTop: "1px solid var(--border)", paddingTop: "20px", marginTop: "4px" }}>
+                <div style={{ marginBottom: "16px" }}>
+                  <label style={{ ...labelStyle, marginBottom: "2px" }}>scope fit weights</label>
+                  <p style={{ fontSize: "10px", color: "var(--white-dimmer)", margin: "0 0 4px 0", lineHeight: 1.5 }}>
+                    Distribute 100 points across your preferences. Gates are pass/fail and don&apos;t need points.
+                  </p>
+                  {gateCount > 0 && (
+                    <p style={{ fontSize: "10px", color: "#e05555", margin: "4px 0 0 0" }}>
+                      {gateCount} gate{gateCount > 1 ? "s" : ""} active — founders who fail {gateCount > 1 ? "any" : "it"} will be marked out of scope.
+                    </p>
+                  )}
+                </div>
+
+                {preferenceItems.length === 0 ? (
+                  <div style={{ textAlign: "center", padding: "16px", color: "var(--white-dimmer)", fontSize: "11px", border: "1px dashed var(--border2)" }}>
+                    // all criteria are gates — no weighted preferences to configure
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "12px" }}>
+                      {preferenceItems.map(item => (
+                        <div key={item.key} style={{
+                          display: "grid", gridTemplateColumns: "120px 1fr 50px", gap: "10px", alignItems: "center",
+                          background: "var(--bg2)", border: "1px solid var(--border2)", padding: "10px 12px",
+                        }}>
+                          <span style={{ fontSize: "10px", letterSpacing: "0.06em", color: "var(--white-mid)", textTransform: "uppercase" }}>
+                            {item.label}
+                          </span>
+                          <div style={{ position: "relative", height: "20px", display: "flex", alignItems: "center" }}>
+                            <div style={{
+                              position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)",
+                              width: "100%", height: "4px", background: "var(--bg3)", borderRadius: "2px",
+                            }} />
+                            <div style={{
+                              position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)",
+                              width: `${item.weight}%`, height: "4px", background: "var(--rasp)", borderRadius: "2px",
+                              transition: "width 0.15s",
+                            }} />
+                            <input
+                              type="range" min="0" max="100" value={item.weight}
+                              onChange={e => setCriterionWeight(item.key, parseInt(e.target.value), item.isCustom)}
+                              style={{
+                                position: "absolute", left: 0, width: "100%", height: "20px",
+                                opacity: 0, cursor: "pointer", margin: 0,
+                              }}
+                            />
+                          </div>
+                          <input
+                            type="number" min="0" max="100" value={item.weight}
+                            onChange={e => {
+                              const val = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
+                              setCriterionWeight(item.key, val, item.isCustom);
+                            }}
+                            style={{
+                              ...inputStyle, width: "50px", textAlign: "center" as const, padding: "4px 6px",
+                              fontSize: "11px", fontWeight: 700,
+                              color: totalWeight === 100 ? "var(--rasp)" : "var(--white)",
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Total bar */}
+                    <div style={{
+                      display: "flex", justifyContent: "space-between", alignItems: "center",
+                      padding: "10px 12px", background: totalWeight === 100 ? "rgba(212,40,106,0.06)" : "rgba(224,85,85,0.06)",
+                      border: `1px solid ${totalWeight === 100 ? "var(--rasp)" : "#e05555"}`,
+                    }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <span style={{
+                          fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase",
+                          color: totalWeight === 100 ? "var(--rasp)" : "#e05555",
+                        }}>
+                          total
+                        </span>
+                        <span style={{
+                          fontSize: "16px", fontWeight: 700,
+                          color: totalWeight === 100 ? "var(--rasp)" : "#e05555",
+                          fontFamily: "'JetBrains Mono', monospace",
+                        }}>
+                          {totalWeight}/100
+                        </span>
+                        {totalWeight === 100 && (
+                          <span style={{ fontSize: "11px", color: "var(--rasp)" }}>✓</span>
+                        )}
+                      </div>
+                      <button type="button" onClick={autoDistributeWeights}
+                        style={{
+                          background: "none", border: "1px solid var(--border2)", color: "var(--white-dim)",
+                          fontFamily: "'JetBrains Mono', monospace", fontSize: "9px", padding: "4px 8px",
+                          cursor: "pointer", letterSpacing: "0.08em", textTransform: "uppercase",
+                        }}>
+                        auto-distribute
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+
               {error && (
                 <div style={{ background: "rgba(212,40,106,0.08)", border: "1px solid var(--rasp-border)", padding: "10px 14px", fontSize: "12px", color: "var(--rasp)" }}>
                   {error}
                 </div>
               )}
 
-              <button type="submit" disabled={loading || !form.handle || !form.name || form.stages.length === 0}
-                style={{ background: "var(--rasp)", color: "#fff", border: "none", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", fontWeight: 700, letterSpacing: "0.06em", padding: "13px", cursor: "pointer", opacity: loading || !form.handle || !form.name || form.stages.length === 0 ? 0.5 : 1 }}>
+              <button type="submit" disabled={loading || !form.handle || !form.name || form.stages.length === 0 || (preferenceItems.length > 0 && totalWeight !== 100)}
+                style={{ background: "var(--rasp)", color: "#fff", border: "none", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", fontWeight: 700, letterSpacing: "0.06em", padding: "13px", cursor: "pointer", opacity: loading || !form.handle || !form.name || form.stages.length === 0 || (preferenceItems.length > 0 && totalWeight !== 100) ? 0.5 : 1 }}>
                 {loading ? (isEdit ? "saving..." : "creating your scope...") : isEdit ? "$ save changes →" : "$ create my investor scope →"}
               </button>
 
