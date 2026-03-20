@@ -56,6 +56,7 @@ export default function PassportPage() {
       const { data: existing } = await supabase.from("founders").select("*").eq("user_id", su.id).maybeSingle();
       setUser({ id: su.id, email: su.email!, name: su.user_metadata?.full_name || "" });
       if (existing) {
+        setIsEdit(true);
         setForm({
           handle: existing.handle || "",
           name: existing.name || su.user_metadata?.full_name || "",
