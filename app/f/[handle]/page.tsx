@@ -30,7 +30,9 @@ export default async function FounderPassportPage({
   const roundSize = founder.round_size || 0;
   const committed = founder.committed || 0;
   const pct = roundSize > 0 ? Math.round((committed / roundSize) * 100) : 0;
+  const minTicket = founder.min_ticket || 0;
   const available = founder.available || (roundSize - committed);
+  const sectors = Array.isArray(founder.sectors) ? founder.sectors : (founder.sector ? [founder.sector] : []);
 
   return (
     <main style={{ minHeight: '100vh', background: 'var(--bg)' }}>
@@ -58,7 +60,7 @@ export default async function FounderPassportPage({
                 <p style={{ fontSize: '13px', color: 'var(--white-mid)', lineHeight: 1.6 }}>{founder.one_liner}</p>
               )}
               <p style={{ fontSize: '11px', color: 'var(--white-dimmer)', marginTop: '6px' }}>
-                {[founder.sector, founder.geography].filter(Boolean).join(' · ')}
+                {[sectors.join(' · '), founder.country || founder.geography].filter(Boolean).join(' · ')}
               </p>
             </div>
 
@@ -74,35 +76,62 @@ export default async function FounderPassportPage({
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px' }}>
                   <span style={{ color: 'var(--white-mid)' }}>target: <span style={{ color: 'var(--white)' }}>€{roundSize.toLocaleString()}K</span></span>
+                  {minTicket > 0 && (
+                    <span style={{ color: 'var(--white-mid)' }}>min ticket: <span style={{ color: 'var(--white)' }}>€{minTicket.toLocaleString()}K</span></span>
+                  )}
                   <span style={{ color: 'var(--white-mid)' }}>available: <span style={{ color: 'var(--amber)' }}>€{available.toLocaleString()}K</span></span>
                 </div>
+              </div>
+            )}
+
+            {/* Lead investor status */}
+            {founder.has_lead && (
+              <div style={{ border: '1px solid rgba(240,165,0,0.3)', background: 'rgba(240,165,0,0.06)', padding: '10px 14px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '11px', color: 'var(--amber)', fontWeight: 700 }}>✓ Lead investor confirmed</span>
+                {founder.lead_details && (
+                  <span style={{ fontSize: '11px', color: 'var(--white-mid)' }}>— {founder.lead_details}</span>
+                )}
               </div>
             )}
 
             {/* Criteria table */}
             <div style={{ border: '1px solid var(--border2)', marginBottom: '16px' }}>
               {founder.traction_summary && (
-                <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr', borderBottom: '1px solid var(--border)' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', borderBottom: '1px solid var(--border)' }}>
                   <div style={{ padding: '9px 14px', background: 'var(--bg3)', fontSize: '10px', color: 'var(--white-mid)', borderRight: '1px solid var(--border)', letterSpacing: '0.06em' }}>traction</div>
                   <div style={{ padding: '9px 14px', fontSize: '12px', color: 'var(--white)' }}>{founder.traction_summary}</div>
                 </div>
               )}
+              {founder.founder_background && (
+                <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', borderBottom: '1px solid var(--border)' }}>
+                  <div style={{ padding: '9px 14px', background: 'var(--bg3)', fontSize: '10px', color: 'var(--white-mid)', borderRight: '1px solid var(--border)', letterSpacing: '0.06em' }}>team</div>
+                  <div style={{ padding: '9px 14px', fontSize: '12px', color: 'var(--white)' }}>{founder.founder_background}</div>
+                </div>
+              )}
               {founder.what_we_want && (
-                <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr', borderBottom: '1px solid var(--border)' }}>
-                  <div style={{ padding: '9px 14px', background: 'var(--bg3)', fontSize: '10px', color: 'var(--white-mid)', borderRight: '1px solid var(--border)', letterSpacing: '0.06em' }}>want</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', borderBottom: '1px solid var(--border)' }}>
+                  <div style={{ padding: '9px 14px', background: 'var(--bg3)', fontSize: '10px', color: 'var(--white-mid)', borderRight: '1px solid var(--border)', letterSpacing: '0.06em' }}>looking_for</div>
                   <div style={{ padding: '9px 14px', fontSize: '12px', color: 'var(--white-mid)', fontStyle: 'italic' }}>{founder.what_we_want}</div>
                 </div>
               )}
               {founder.deck_url && (
-                <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr', borderBottom: founder.data_room_url ? '1px solid var(--border)' : 'none' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', borderBottom: founder.data_room_url ? '1px solid var(--border)' : 'none' }}>
                   <div style={{ padding: '9px 14px', background: 'var(--bg3)', fontSize: '10px', color: 'var(--white-mid)', borderRight: '1px solid var(--border)', letterSpacing: '0.06em' }}>deck</div>
                   <div style={{ padding: '9px 14px', fontSize: '12px' }}>
                     <a href={founder.deck_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)', textDecoration: 'none' }}>view deck →</a>
                   </div>
                 </div>
               )}
+              {founder.linkedin_url && (
+                <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', borderBottom: founder.data_room_url ? '1px solid var(--border)' : 'none' }}>
+                  <div style={{ padding: '9px 14px', background: 'var(--bg3)', fontSize: '10px', color: 'var(--white-mid)', borderRight: '1px solid var(--border)', letterSpacing: '0.06em' }}>linkedin</div>
+                  <div style={{ padding: '9px 14px', fontSize: '12px' }}>
+                    <a href={founder.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)', textDecoration: 'none' }}>view profile →</a>
+                  </div>
+                </div>
+              )}
               {founder.data_room_url && (
-                <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr' }}>
                   <div style={{ padding: '9px 14px', background: 'var(--bg3)', fontSize: '10px', color: 'var(--white-mid)', borderRight: '1px solid var(--border)', letterSpacing: '0.06em' }}>data_room</div>
                   <div style={{ padding: '9px 14px', fontSize: '12px' }}>
                     <a href={founder.data_room_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)', textDecoration: 'none' }}>access data room →</a>
@@ -110,6 +139,12 @@ export default async function FounderPassportPage({
                 </div>
               )}
             </div>
+
+            {founder.name && (
+              <p style={{ fontSize: '11px', color: 'var(--white-dimmer)', marginBottom: '16px' }}>
+                built by {founder.name}
+              </p>
+            )}
 
             <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
               <QRButton url={profileUrl} />
