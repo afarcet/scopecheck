@@ -314,6 +314,18 @@ export default function InvestorProfilePage({
                   <Link href="/dashboard" style={{ background: "var(--bg3)", color: "var(--white-mid)", border: "1px solid var(--border2)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "9px 12px", textDecoration: "none", whiteSpace: "nowrap" }}>
                     pipeline ↗
                   </Link>
+                  <button
+                    onClick={() => {
+                      const snippet = `<iframe src="https://scopecheck.ai/i/${handle}/embed?theme=light" width="100%" height="320" frameborder="0" style="border:none;max-width:640px;"></iframe>`;
+                      navigator.clipboard.writeText(snippet).then(() => {
+                        const btn = document.getElementById("embed-copy-btn");
+                        if (btn) { btn.textContent = "✓ copied"; setTimeout(() => { btn.textContent = "embed ↗"; }, 2000); }
+                      });
+                    }}
+                    id="embed-copy-btn"
+                    style={{ background: "var(--bg3)", color: "var(--white-mid)", border: "1px solid var(--border2)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "9px 12px", cursor: "pointer", whiteSpace: "nowrap" }}>
+                    embed ↗
+                  </button>
                   <Link href="/scope" style={{ background: "var(--rasp)", color: "#fff", border: "1px solid var(--rasp)", fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", fontWeight: 700, letterSpacing: "0.06em", padding: "9px 16px", textDecoration: "none", whiteSpace: "nowrap" }}>
                     edit scope →
                   </Link>
