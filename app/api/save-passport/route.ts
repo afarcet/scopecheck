@@ -47,12 +47,28 @@ export async function POST(req: NextRequest) {
       .from("founders")
       .select("handle")
       .eq("handle", handle)
-      .single();
+      .maybeSingle();
 
     if (existing) {
       // Try with a random 3-char suffix
       const suffix = Math.random().toString(36).substring(2, 5);
       handle = `${handle}${suffix}`;
+    }
+
+    // Also check if this email already has a passport — don't create duplicates
+    const { data: existingByEmail } = await supabase
+      .from("founders")
+      .select("handle")
+      .eq("email", founderEmail)
+      .maybeSingle();
+
+    if (existingByEmail) {
+      // Passport already exists for this email — return it directly
+      const existingUrl = `https://scopecheck.ai/f/${existingByEmail.handle}`;
+      return NextResponse.json(
+        { ok: true, handle: existingByEmail.handle, passportUrl: existingUrl, alreadyExists: true },
+        { headers: corsHeaders }
+      );
     }
 
     // Create the founder / passport record (no user_id — they can claim later)
@@ -72,7 +88,7 @@ export async function POST(req: NextRequest) {
     if (insertError) {
       console.error("save-passport insert error:", insertError);
       return NextResponse.json(
-        { error: "Could not create passport" },
+        { error: `Could not create passport: ${insertError.message}` },
         { status: 500, headers: corsHeaders }
       );
     }
