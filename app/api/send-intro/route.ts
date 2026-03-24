@@ -5,6 +5,16 @@ import { render } from "@react-email/render";
 import InvestorNotification from "@/emails/InvestorNotification";
 import FounderConfirmation from "@/emails/FounderConfirmation";
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
+
 export async function POST(req: NextRequest) {
   // Instantiate clients inside handler — avoids build-time env var errors
   const resend = new Resend(process.env.RESEND_API_KEY);
@@ -44,7 +54,7 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (!investor) {
-      return NextResponse.json({ error: "Investor not found" }, { status: 404 });
+      return NextResponse.json({ error: "Investor not found" }, { status: 404, headers: corsHeaders });
     }
 
     // Persist intro to Supabase — this is the durable record of every inbound
@@ -119,9 +129,9 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true }, { headers: corsHeaders });
   } catch (err) {
     console.error("send-intro error:", err);
-    return NextResponse.json({ error: "Failed to send emails" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to send emails" }, { status: 500, headers: corsHeaders });
   }
 }

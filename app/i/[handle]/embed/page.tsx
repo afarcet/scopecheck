@@ -53,7 +53,7 @@ export default function EmbedScopePage({
     setError("");
 
     try {
-      const res = await fetch("https://scopecheck.ai/api/send-intro", {
+      const res = await fetch("/api/send-intro", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
