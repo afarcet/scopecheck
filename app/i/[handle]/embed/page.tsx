@@ -21,6 +21,9 @@ export default function EmbedScopePage({
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
+  const [savingPassport, setSavingPassport] = useState(false);
+  const [passportSaved, setPassportSaved] = useState(false);
+  const [passportUrl, setPassportUrl] = useState("");
   const [form, setForm] = useState({
     founder_name: "",
     founder_email: "",
@@ -79,6 +82,35 @@ export default function EmbedScopePage({
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setSending(false);
+    }
+  };
+
+  const handleSavePassport = async () => {
+    if (!form.founder_email) return;
+    setSavingPassport(true);
+    try {
+      const res = await fetch("/api/save-passport", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          founderName: form.founder_name,
+          founderEmail: form.founder_email,
+          companyName: form.company_name,
+          oneLiner: form.one_liner,
+          stage: form.stage || undefined,
+          sector: form.sector || undefined,
+          traction: form.traction || undefined,
+          deckUrl: form.deck_url || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to save");
+      setPassportSaved(true);
+      setPassportUrl(data.passportUrl);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setSavingPassport(false);
     }
   };
 
@@ -382,19 +414,64 @@ export default function EmbedScopePage({
             <p style={{ fontSize: "12px", color: c.white, marginBottom: "4px" }}>
               {name} has been notified.
             </p>
-            <p style={{ fontSize: "10px", color: c.dim, lineHeight: 1.6, marginBottom: "8px" }}>
-              Want a reusable startup passport?{" "}
-              <a href="https://scopecheck.ai/passport" target="_blank" rel="noopener noreferrer"
-                style={{ color: c.amber, textDecoration: "none" }}>
-                Create one free &rarr;
-              </a>
-            </p>
-            <span style={{ fontSize: "9px", color: c.dimmer, letterSpacing: "0.06em" }}>
-              powered by{" "}
-              <a href="https://scopecheck.ai" target="_blank" rel="noopener noreferrer" style={{ color: c.rasp, textDecoration: "none" }}>
-                scopecheck.ai
-              </a>
-            </span>
+
+            {!passportSaved ? (
+              <div style={{ marginTop: "10px", marginBottom: "8px" }}>
+                <p style={{ fontSize: "10px", color: c.dim, lineHeight: 1.6, marginBottom: "8px" }}>
+                  Save your details as a reusable startup passport — share it with any investor, anywhere.
+                </p>
+                {error && (
+                  <div style={{ background: "rgba(212,40,106,0.08)", border: `1px solid ${c.rasp}`, padding: "6px 10px", fontSize: "11px", color: c.rasp, marginBottom: "8px", textAlign: "left" }}>
+                    {error}
+                  </div>
+                )}
+                {form.founder_email ? (
+                  <button
+                    onClick={handleSavePassport}
+                    disabled={savingPassport}
+                    style={{
+                      background: c.amber, color: "#000", border: "none", fontFamily: mono,
+                      fontSize: "11px", fontWeight: 700, letterSpacing: "0.06em",
+                      padding: "9px 16px", cursor: "pointer",
+                      opacity: savingPassport ? 0.5 : 1,
+                    }}
+                  >
+                    {savingPassport ? "saving..." : "$ save my passport →"}
+                  </button>
+                ) : (
+                  <a href="https://scopecheck.ai/passport" target="_blank" rel="noopener noreferrer"
+                    style={{
+                      display: "inline-block", background: c.amber, color: "#000", fontFamily: mono,
+                      fontSize: "11px", fontWeight: 700, letterSpacing: "0.06em",
+                      padding: "9px 16px", textDecoration: "none",
+                    }}>
+                    $ create passport &rarr;
+                  </a>
+                )}
+              </div>
+            ) : (
+              <div style={{ marginTop: "10px", marginBottom: "8px" }}>
+                <div style={{ fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase", color: c.amber, marginBottom: "6px" }}>
+                  // passport saved ✓
+                </div>
+                <p style={{ fontSize: "11px", color: c.white, lineHeight: 1.6, marginBottom: "4px" }}>
+                  Check your email — we sent you the link.
+                </p>
+                <a href={passportUrl} target="_blank" rel="noopener noreferrer"
+                  style={{ fontSize: "11px", color: c.amber, textDecoration: "none" }}>
+                  {passportUrl}
+                </a>
+              </div>
+            )}
+
+            <div style={{ marginTop: "10px" }}>
+              <span style={{ fontSize: "9px", color: c.dimmer, letterSpacing: "0.06em" }}>
+                powered by{" "}
+                <a href="https://scopecheck.ai" target="_blank" rel="noopener noreferrer" style={{ color: c.rasp, textDecoration: "none" }}>
+                  scopecheck.ai
+                </a>
+              </span>
+            </div>
           </div>
         )}
       </div>
