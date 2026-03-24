@@ -23,8 +23,32 @@ export function useSession() {
       supabase.from("founders").select("handle").eq("user_id", uid).maybeSingle(),
     ]);
 
+    // If no founder record is linked yet, try to claim an unclaimed passport by email
+    let claimedFounder = founder;
+    if (!founder) {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          const res = await fetch("/api/claim-passport", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({ userId: uid, email }),
+          });
+          const result = await res.json();
+          if (result.claimed) {
+            claimedFounder = { handle: result.handle };
+          }
+        }
+      } catch {
+        // Silent fail — claiming is best-effort
+      }
+    }
+
     const role: UserRole =
-      inv && founder ? "both" : inv ? "investor" : founder ? "founder" : null;
+      inv && claimedFounder ? "both" : inv ? "investor" : claimedFounder ? "founder" : null;
 
     setUser({
       id: uid,
@@ -32,7 +56,7 @@ export function useSession() {
       name,
       role,
       investorHandle: inv?.handle || null,
-      founderHandle: founder?.handle || null,
+      founderHandle: claimedFounder?.handle || null,
     });
     setLoading(false);
   };
