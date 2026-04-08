@@ -95,6 +95,7 @@ export async function POST(req: NextRequest) {
         sector,
         traction,
         deckUrl,
+        founderEmail,
         passportUrl,
         dashboardUrl,
         unsubscribeUrl,
@@ -104,6 +105,7 @@ export async function POST(req: NextRequest) {
     await resend.emails.send({
       from:    "ScopeCheck <onboarding@resend.dev>",
       to:      investor.email,
+      ...(founderEmail ? { replyTo: founderEmail } : {}),
       subject: `New intro: ${companyName} — ${oneLiner.slice(0, 60)}${oneLiner.length > 60 ? "..." : ""}`,
       html:    investorHtml,
     });
