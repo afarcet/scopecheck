@@ -11,6 +11,7 @@ interface Props {
   sector: string;
   traction: string;
   deckUrl?: string;
+  founderEmail?: string;
   passportUrl: string;
   dashboardUrl: string;
   unsubscribeUrl: string;
@@ -25,6 +26,7 @@ export default function InvestorNotification({
   sector = "ClimateTech",
   traction = "€180K ARR · 3 enterprise pilots",
   deckUrl,
+  founderEmail,
   passportUrl = "https://scopecheck.ai/f/carbonade",
   dashboardUrl = "https://scopecheck.ai/dashboard",
   unsubscribeUrl = "https://scopecheck.ai/unsubscribe",
@@ -43,6 +45,7 @@ export default function InvestorNotification({
           <strong>Sector:</strong> {sector}<br />
           <strong>Traction:</strong> {traction}<br />
           {deckUrl && <><strong>Deck:</strong> <Link href={deckUrl} style={{ color: "#1a73e8" }}>{deckUrl}</Link><br /></>}
+          {founderEmail && <><strong>Founder email:</strong> <Link href={`mailto:${founderEmail}`} style={{ color: "#1a73e8" }}>{founderEmail}</Link><br /></>}
           <br />
           <Link href={passportUrl} style={{ color: "#1a73e8" }}>View passport →</Link><br />
           <Link href={dashboardUrl} style={{ color: "#1a73e8" }}>Open pipeline →</Link>
