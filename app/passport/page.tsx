@@ -253,10 +253,10 @@ export default function PassportPage() {
                     placeholder="Carbonade" />
                 </div>
                 <div>
-                  <label style={labelStyle}>passport handle *</label>
+                  <label style={labelStyle}>passport handle</label>
                   <div style={{ display: "flex", alignItems: "center" }}>
                     <span style={{ background: "var(--bg3)", border: "1px solid var(--border2)", borderRight: "none", padding: "9px 8px", fontSize: "10px", color: "var(--amber)", whiteSpace: "nowrap" }}>f/</span>
-                    <input required className="input" style={{ borderLeft: "none" }} value={form.handle}
+                    <input className="input" style={{ borderLeft: "none" }} value={form.handle}
                       disabled={isEdit}
                       onChange={e => setForm(f => ({ ...f, handle: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "") }))}
                       placeholder="carbonade" />
