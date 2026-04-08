@@ -9,30 +9,20 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-// Core fields every investor requires
-const CORE_FIELDS = [
-  { key: "founder_name", label: "Your name", type: "text", placeholder: "Harry Founder", required: true },
-  { key: "founder_email", label: "Your email", type: "email", placeholder: "you@company.com", required: true },
-  { key: "company_name", label: "Company name", type: "text", placeholder: "Acme Climate", required: true },
-  { key: "one_liner", label: "One-liner", type: "text", placeholder: "We decarbonise industrial heating using AI-optimised heat pumps.", required: true },
-  { key: "stage", label: "Current stage", type: "select", options: ["Pre-seed", "Seed", "Series A", "Series B+"], required: true },
-  { key: "sector", label: "Primary sector", type: "text", placeholder: "ClimateTech - industrial decarbonisation", required: true },
-  { key: "geography", label: "Based in / operating in", type: "text", placeholder: "Berlin, Germany" },
-  { key: "round_size", label: "Total round size (EUR)", type: "text", placeholder: "2,000,000" },
-  { key: "committed", label: "Amount already committed (EUR)", type: "text", placeholder: "800,000" },
-  { key: "available", label: "Amount still available (EUR)", type: "text", placeholder: "1,200,000" },
-  { key: "traction", label: "Traction summary", type: "textarea", placeholder: "EUR 180K ARR, 3 paying enterprise pilots, LOI from major utility...", required: true },
-  { key: "deck_url", label: "Pitch deck link", type: "url", placeholder: "https://..." },
-  { key: "data_room_url", label: "Data room (optional)", type: "url", placeholder: "https://fulldeal.ai/..." },
-  { key: "lead_investor", label: "Lead investor", type: "text", placeholder: "XYZ Ventures (leading at EUR 1.5M)" },
-  { key: "why_us", label: "Why are you reaching out to us specifically?", type: "textarea", placeholder: "Your focus on ClimateTech and European market aligns perfectly with..." },
-];
+type CustomField = {
+  id: string;
+  label: string;
+  type: string;
+  options?: string[];
+  required: boolean;
+};
 
 export default function ApplyPage({ params }: { params: Promise<{ handle: string }> }) {
   const { handle } = use(params);
   const [investor, setInvestor] = useState<Record<string, unknown> | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [form, setForm] = useState<Record<string, string>>({});
+  const [customAnswers, setCustomAnswers] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -58,7 +48,7 @@ export default function ApplyPage({ params }: { params: Promise<{ handle: string
     setLoading(true);
     setError("");
 
-    const passportHandle = (form.company_name || "startup")
+    const passportHandle = (form.passport_handle || form.company_name || "startup")
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "");
@@ -78,6 +68,7 @@ export default function ApplyPage({ params }: { params: Promise<{ handle: string
           traction: form.traction,
           deckUrl: form.deck_url || null,
           passportHandle,
+          customAnswers: Object.keys(customAnswers).length > 0 ? customAnswers : null,
         }),
       });
 
@@ -117,6 +108,7 @@ export default function ApplyPage({ params }: { params: Promise<{ handle: string
   const invStages = (inv.stages as string[]) || [];
   const invTicketMin = inv.ticket_min as number;
   const invTicketMax = inv.ticket_max as number;
+  const customFields = (inv.custom_fields as CustomField[]) || [];
 
   if (submitted) {
     return (
@@ -166,41 +158,131 @@ export default function ApplyPage({ params }: { params: Promise<{ handle: string
         </div>
 
         <form onSubmit={handleSubmit}>
-          {CORE_FIELDS.map((field) => (
-            <div key={field.key} style={{ marginBottom: "1.2rem" }}>
-              <label className="label">{field.label}</label>
-              {field.type === "textarea" ? (
-                <textarea
-                  className="input"
-                  placeholder={field.placeholder}
-                  value={form[field.key] || ""}
-                  onChange={(e) => handleChange(field.key, e.target.value)}
-                  rows={3}
-                  style={{ resize: "vertical" }}
-                  required={"required" in field && field.required}
-                />
-              ) : field.type === "select" ? (
-                <select
-                  className="input"
-                  value={form[field.key] || ""}
-                  onChange={(e) => handleChange(field.key, e.target.value)}
-                  required={"required" in field && field.required}
-                >
-                  <option value="">Select...</option>
-                  {field.options?.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
-                </select>
-              ) : (
-                <input
-                  type={field.type}
-                  className="input"
-                  placeholder={field.placeholder}
-                  value={form[field.key] || ""}
-                  onChange={(e) => handleChange(field.key, e.target.value)}
-                  required={"required" in field && field.required}
-                />
-              )}
+          {/* Founder details */}
+          <div style={{ marginBottom: "1.2rem" }}>
+            <label className="label">Your name *</label>
+            <input type="text" className="input" placeholder="Harry Founder" value={form.founder_name || ""} onChange={(e) => handleChange("founder_name", e.target.value)} required />
+          </div>
+          <div style={{ marginBottom: "1.2rem" }}>
+            <label className="label">Your email *</label>
+            <input type="email" className="input" placeholder="you@company.com" value={form.founder_email || ""} onChange={(e) => handleChange("founder_email", e.target.value)} required />
+          </div>
+
+          {/* Company details */}
+          <div style={{ marginBottom: "1.2rem" }}>
+            <label className="label">Company name *</label>
+            <input type="text" className="input" placeholder="Acme Climate" value={form.company_name || ""} onChange={(e) => handleChange("company_name", e.target.value)} required />
+          </div>
+          <div style={{ marginBottom: "1.2rem" }}>
+            <label className="label">One-liner *</label>
+            <input type="text" className="input" placeholder="We decarbonise industrial heating using AI-optimised heat pumps." value={form.one_liner || ""} onChange={(e) => handleChange("one_liner", e.target.value)} required />
+          </div>
+
+          {/* Stage, sector, geography row */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem", marginBottom: "1.2rem" }}>
+            <div>
+              <label className="label">Stage *</label>
+              <select className="input" value={form.stage || ""} onChange={(e) => handleChange("stage", e.target.value)} required>
+                <option value="">Select...</option>
+                {["Pre-seed", "Seed", "Early-A", "Series A", "Series B+"].map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
             </div>
-          ))}
+            <div>
+              <label className="label">Sector *</label>
+              <input type="text" className="input" placeholder="ClimateTech" value={form.sector || ""} onChange={(e) => handleChange("sector", e.target.value)} required />
+            </div>
+            <div>
+              <label className="label">Based in</label>
+              <input type="text" className="input" placeholder="Berlin, DE" value={form.geography || ""} onChange={(e) => handleChange("geography", e.target.value)} />
+            </div>
+          </div>
+
+          {/* Round details row */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1.2rem" }}>
+            <div>
+              <label className="label">Round size ({"€"})</label>
+              <input type="text" className="input" placeholder="2,000,000" value={form.round_size || ""} onChange={(e) => handleChange("round_size", e.target.value)} />
+            </div>
+            <div>
+              <label className="label">Committed so far ({"€"})</label>
+              <input type="text" className="input" placeholder="800,000" value={form.committed || ""} onChange={(e) => handleChange("committed", e.target.value)} />
+            </div>
+          </div>
+
+          {/* Traction */}
+          <div style={{ marginBottom: "1.2rem" }}>
+            <label className="label">Traction *</label>
+            <textarea className="input" placeholder={"€180K ARR · 3 enterprise pilots"} value={form.traction || ""} onChange={(e) => handleChange("traction", e.target.value)} rows={3} style={{ resize: "vertical" }} required />
+          </div>
+
+          {/* Deck + passport handle row */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1.2rem" }}>
+            <div>
+              <label className="label">Deck link</label>
+              <input type="url" className="input" placeholder="https://..." value={form.deck_url || ""} onChange={(e) => handleChange("deck_url", e.target.value)} />
+            </div>
+            <div>
+              <label className="label">Passport handle</label>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <span style={{ background: "rgba(245,158,11,0.06)", border: "1px solid var(--navy-border)", borderRight: "none", padding: "0.55rem 0.5rem", fontSize: "0.75rem", color: "var(--amber)", whiteSpace: "nowrap" }}>f/</span>
+                <input type="text" className="input" style={{ borderLeft: "none" }} placeholder="yourcompany" value={form.passport_handle || ""} onChange={(e) => handleChange("passport_handle", e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))} />
+              </div>
+            </div>
+          </div>
+
+          {/* Optional extras: lead investor + data room */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1.2rem" }}>
+            <div>
+              <label className="label">Lead investor</label>
+              <input type="text" className="input" placeholder="XYZ Ventures" value={form.lead_investor || ""} onChange={(e) => handleChange("lead_investor", e.target.value)} />
+            </div>
+            <div>
+              <label className="label">Data room</label>
+              <input type="url" className="input" placeholder="https://..." value={form.data_room_url || ""} onChange={(e) => handleChange("data_room_url", e.target.value)} />
+            </div>
+          </div>
+
+          {/* Custom questions from investor */}
+          {customFields.length > 0 && (
+            <div style={{ borderTop: "1px solid var(--navy-border)", paddingTop: "1.2rem", marginTop: "0.5rem", marginBottom: "1.2rem" }}>
+              <p className="font-mono-dm" style={{ fontSize: "0.68rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: "1rem" }}>
+                Additional questions from {invName.split(" ")[0]}
+              </p>
+              {customFields.map((cf) => (
+                <div key={cf.id} style={{ marginBottom: "1.2rem" }}>
+                  <label className="label">{cf.label}{cf.required ? " *" : ""}</label>
+                  {cf.type === "textarea" ? (
+                    <textarea
+                      className="input"
+                      rows={3}
+                      style={{ resize: "vertical" }}
+                      required={cf.required}
+                      value={customAnswers[cf.label] || ""}
+                      onChange={(e) => setCustomAnswers((prev) => ({ ...prev, [cf.label]: e.target.value }))}
+                    />
+                  ) : cf.type === "select" ? (
+                    <select
+                      className="input"
+                      required={cf.required}
+                      value={customAnswers[cf.label] || ""}
+                      onChange={(e) => setCustomAnswers((prev) => ({ ...prev, [cf.label]: e.target.value }))}
+                    >
+                      <option value="">Select...</option>
+                      {(cf.options || []).filter(Boolean).map((opt) => <option key={opt} value={opt}>{opt}</option>)}
+                    </select>
+                  ) : (
+                    <input
+                      type={cf.type === "url" ? "url" : cf.type === "number" ? "number" : "text"}
+                      className="input"
+                      required={cf.required}
+                      value={customAnswers[cf.label] || ""}
+                      onChange={(e) => setCustomAnswers((prev) => ({ ...prev, [cf.label]: e.target.value }))}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
 
           {error && (
             <div style={{ background: "rgba(212,40,106,0.08)", border: "1px solid rgba(212,40,106,0.3)", padding: "0.8rem 1rem", marginBottom: "1rem", fontSize: "0.85rem", color: "var(--rasp, #d4286a)" }}>
