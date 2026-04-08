@@ -16,6 +16,7 @@ const MOCK_INVESTOR = {
 // Core fields every investor requires
 const CORE_FIELDS = [
   { key: "founder_name", label: "Your name", type: "text", placeholder: "Harry Founder" },
+  { key: "founder_email", label: "Your email", type: "email", placeholder: "you@company.com", required: true },
   { key: "company_name", label: "Company name", type: "text", placeholder: "Acme Climate" },
   { key: "one_liner", label: "One-liner", type: "text", placeholder: "We decarbonise industrial heating using AI-optimised heat pumps." },
   { key: "stage", label: "Current stage", type: "select", options: ["Pre-seed", "Seed", "Series A", "Series B+"] },
@@ -128,6 +129,7 @@ export default function ApplyPage({ params }: { params: Promise<{ handle: string
                   placeholder={field.placeholder}
                   value={form[field.key] || ""}
                   onChange={(e) => handleChange(field.key, e.target.value)}
+                  required={"required" in field && field.required}
                 />
               )}
             </div>
