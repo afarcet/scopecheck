@@ -5,9 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-/* ââââââââââââââââââââââââââââââââââââââââââââââ
+/* ----------------------------------------------
    Types
-   ââââââââââââââââââââââââââââââââââââââââââââââ */
+   ---------------------------------------------- */
 
 type PipelineColumn = "new" | "shortlisted" | "considering" | "watching" | "passed";
 type Source = "inbound" | "scouted" | "referral" | "manual";
@@ -40,9 +40,9 @@ interface UnifiedCard {
   raw_state: string;
 }
 
-/* ââââââââââââââââââââââââââââââââââââââââââââââ
+/* ----------------------------------------------
    Helpers
-   ââââââââââââââââââââââââââââââââââââââââââââââ */
+   ---------------------------------------------- */
 
 function formatRelativeTime(ts: string): string {
   const diff = Date.now() - new Date(ts).getTime();
@@ -57,19 +57,19 @@ function formatRelativeTime(ts: string): string {
 
 function formatRoundSize(thousands: number | null, currency: string): string {
   if (!thousands) return "";
-  const symbol = currency === "USD" ? "$" : currency === "GBP" ? "Â£" : "â¬";
+  const symbol = currency === "USD" ? "$" : currency === "GBP" ? "Â£" : "-¬";
   if (thousands >= 1000) return `${symbol}${(thousands / 1000).toFixed(thousands % 1000 === 0 ? 0 : 1)}M`;
   return `${symbol}${thousands}k`;
 }
 
-/** Map intros.status â pipeline column */
+/** Map intros.status - pipeline column */
 function introStatusToColumn(status: string): PipelineColumn {
   if (status === "considering") return "considering";
   if (status === "passed") return "passed";
   return "new";
 }
 
-/** Map pipeline.state â pipeline column */
+/** Map pipeline.state - pipeline column */
 function pipelineStateToColumn(state: string): PipelineColumn {
   switch (state) {
     case "new":
@@ -93,7 +93,7 @@ function pipelineStateToColumn(state: string): PipelineColumn {
   }
 }
 
-/** Reverse: column â target state for each table */
+/** Reverse: column - target state for each table */
 function columnToIntroStatus(col: PipelineColumn): string {
   if (col === "considering") return "considering";
   if (col === "passed") return "passed";
@@ -109,9 +109,9 @@ function columnToPipelineState(col: PipelineColumn): string {
   }
 }
 
-/* ââââââââââââââââââââââââââââââââââââââââââââââ
+/* ----------------------------------------------
    Column config
-   ââââââââââââââââââââââââââââââââââââââââââââââ */
+   ---------------------------------------------- */
 
 const COLUMNS: { key: PipelineColumn; label: string; color: string; empty: string }[] = [
   { key: "new",          label: "New",          color: "var(--amber)",  empty: "// no new deals" },
@@ -121,9 +121,9 @@ const COLUMNS: { key: PipelineColumn; label: string; color: string; empty: strin
   { key: "passed",       label: "Passed",        color: "var(--slate, #64748b)", empty: "// no passed deals" },
 ];
 
-/* ââââââââââââââââââââââââââââââââââââââââââââââ
+/* ----------------------------------------------
    Source tag colors
-   ââââââââââââââââââââââââââââââââââââââââââââââ */
+   ---------------------------------------------- */
 
 const SOURCE_STYLES: Record<Source, { bg: string; color: string; border: string }> = {
   inbound:  { bg: "var(--rasp-dim)",  color: "var(--rasp)",  border: "var(--rasp-border)" },
@@ -132,9 +132,9 @@ const SOURCE_STYLES: Record<Source, { bg: string; color: string; border: string 
   manual:   { bg: "rgba(100,116,139,0.12)", color: "#94a3b8", border: "rgba(100,116,139,0.35)" },
 };
 
-/* ââââââââââââââââââââââââââââââââââââââââââââââ
+/* ----------------------------------------------
    Component
-   ââââââââââââââââââââââââââââââââââââââââââââââ */
+   ---------------------------------------------- */
 
 export default function Dashboard() {
   const router = useRouter();
@@ -188,7 +188,7 @@ export default function Dashboard() {
         return;
       }
 
-      // ââ Fetch both tables in parallel ââ
+      // -- Fetch both tables in parallel --
       const [introsResult, pipelineResult] = await Promise.all([
         supabase
           .from("intros")
@@ -270,7 +270,7 @@ export default function Dashboard() {
     });
   }, [router]);
 
-  /* ââ Move card to a different column ââ */
+  /* -- Move card to a different column -- */
   const moveCard = async (id: string, targetCol: PipelineColumn) => {
     setCards((prev) =>
       prev.map((c) => (c.id === id ? { ...c, column: targetCol } : c))
@@ -291,7 +291,7 @@ export default function Dashboard() {
     }
   };
 
-  /* ââ Set decision on pipeline card ââ */
+  /* -- Set decision on pipeline card -- */
   const setDecision = async (id: string, decision: Decision) => {
     setCards((prev) =>
       prev.map((c) => (c.id === id ? { ...c, alex_decision: decision } : c))
@@ -312,7 +312,7 @@ export default function Dashboard() {
     }
   };
 
-  /* ââ Save note ââ */
+  /* -- Save note -- */
   const saveNote = async (id: string, text: string) => {
     setCards((prev) =>
       prev.map((c) => (c.id === id ? { ...c, alex_reasoning: text } : c))
@@ -329,7 +329,7 @@ export default function Dashboard() {
     // (intros table doesn't have investor_notes directly, skip for now)
   };
 
-  /* ââ Sorted + filtered cards per column ââ */
+  /* -- Sorted + filtered cards per column -- */
   const byColumn = useMemo(() => {
     const result: Record<PipelineColumn, UnifiedCard[]> = {
       new: [], shortlisted: [], considering: [], watching: [], passed: [],
@@ -353,7 +353,7 @@ export default function Dashboard() {
     return result;
   }, [cards]);
 
-  /* ââ Loading state ââ */
+  /* -- Loading state -- */
   if (!authChecked || loading) {
     return (
       <main style={{ minHeight: "100vh", background: "var(--bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -365,7 +365,7 @@ export default function Dashboard() {
   return (
     <main style={{ minHeight: "100vh", background: "var(--bg)" }}>
 
-      {/* ââ NAV ââ */}
+      {/* -- NAV -- */}
       <nav style={{
         borderBottom: "1px solid var(--border)",
         padding: "10px 20px",
@@ -398,7 +398,7 @@ export default function Dashboard() {
               href={`/i/${investorHandle}`}
               style={{ background: "var(--bg2)", color: "var(--white-mid)", border: "1px solid var(--border2)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "5px 10px", textDecoration: "none", whiteSpace: "nowrap" }}
             >
-              my scope â
+              my scope {"\u2197"}
             </Link>
           )}
           <button
@@ -413,7 +413,7 @@ export default function Dashboard() {
         </div>
       </nav>
 
-      {/* ââ COLUMN SUMMARY BAR ââ */}
+      {/* -- COLUMN SUMMARY BAR -- */}
       <div style={{ borderBottom: "1px solid var(--border)", padding: "8px 20px", display: "flex", gap: "24px", background: "var(--bg2)", overflowX: "auto" }}>
         {COLUMNS.map((col) => (
           <div key={col.key} style={{ display: "flex", alignItems: "center", gap: "6px", whiteSpace: "nowrap" }}>
@@ -427,7 +427,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ââ KANBAN BOARD ââ */}
+      {/* -- KANBAN BOARD -- */}
       <div style={{ display: "grid", gridTemplateColumns: `repeat(${COLUMNS.length}, 1fr)`, minHeight: "calc(100vh - 100px)", overflowX: "auto" }}>
         {COLUMNS.map((col, ci) => (
           <div
@@ -535,7 +535,7 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  {/* ââ EXPANDED DETAIL ââ */}
+                  {/* -- EXPANDED DETAIL -- */}
                   {isExpanded && (
                     <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid var(--border)" }}>
 
@@ -640,7 +640,7 @@ export default function Dashboard() {
                             onClick={(e) => e.stopPropagation()}
                             style={{ flex: 1, textAlign: "center", background: "var(--bg3)", color: "var(--white-mid)", border: "1px solid var(--border2)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "7px 10px", textDecoration: "none", whiteSpace: "nowrap" }}
                           >
-                            view deck â
+                            view deck {"\u2197"}
                           </a>
                         )}
                         {card.passport_handle && (
@@ -649,7 +649,7 @@ export default function Dashboard() {
                             onClick={(e) => e.stopPropagation()}
                             style={{ flex: 1, textAlign: "center", background: "var(--bg3)", color: "var(--white-mid)", border: "1px solid var(--border2)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "7px 10px", textDecoration: "none", whiteSpace: "nowrap" }}
                           >
-                            passport â
+                            passport {"\u2192"}
                           </Link>
                         )}
                       </div>
@@ -673,7 +673,7 @@ export default function Dashboard() {
                               letterSpacing: "0.04em",
                             }}
                           >
-                            â {target.label}
+                            - {target.label}
                           </button>
                         ))}
                       </div>
