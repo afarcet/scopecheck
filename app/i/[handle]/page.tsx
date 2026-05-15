@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import { QRButton } from "./qr-button";
-import { CopyRow } from "A/components/CopyButton";
+import { CopyRow } from "@/components/CopyButton";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,7 +12,7 @@ const supabase = createClient(
 
 const BLANK_INTRO = {
   first_name: "",
-  last_name: "",
+    last_name: "",
   company_name: "",
   one_liner: "",
   stage: "",
@@ -20,15 +20,8 @@ const BLANK_INTRO = {
   geography: "",
   round_size: "",
   committed: "",
-  min_ticket: "",
   traction: "",
-  founder_background: "",
   deck_url: "",
-  linkedin_url: "",
-  data_room_url: "",
-  what_we_want: "",
-  has_lead: false as boolean,
-  lead_details: "",
   passport_handle: "",
   custom_answers: {} as Record<string, string>,
 };
@@ -102,25 +95,18 @@ export default function InvestorProfilePage({
     if (founderData) {
       setForm({
         first_name: (founderData.name || "").split(" ")[0],
-        last_name: (founderData.name || "").split(" ").slice(1).join(" ")               ?? "",
-        company_name:       founderData.company_name       ?? "",
-        one_liner:          founderData.one_liner           ?? "",
-        stage:              founderData.stage               ?? "",
-        sector:             founderData.sector              ?? "",
-        geography:          founderData.geography           ?? "",
-        round_size:         founderData.round_size          ? String(founderData.round_size) : "",
-        committed:          founderData.committed           ? String(founderData.committed)  : "",
-        min_ticket:         founderData.min_ticket          ? String(founderData.min_ticket) : "",
-        traction:           founderData.traction_summary    ?? "",
-        founder_background: founderData.founder_background  ?? "",
-        deck_url:           founderData.deck_url            ?? "",
-        linkedin_url:       founderData.linkedin_url        ?? "",
-        data_room_url:      founderData.data_room_url       ?? "",
-        what_we_want:       founderData.what_we_want        ?? "",
-        has_lead:           founderData.has_lead            ?? false,
-        lead_details:       founderData.lead_details        ?? "",
-        passport_handle:    founderData.handle              ?? "",
-        custom_answers:     (founderData.custom_answers as Record<string, string>) ?? {},
+        last_name: (founderData.name || "").split(" ").slice(1).join(" "),
+        company_name:    founderData.company_name  ?? "",
+        one_liner:       founderData.one_liner      ?? "",
+        stage:           founderData.stage          ?? "",
+        sector:          founderData.sector         ?? "",
+        geography:       founderData.geography      ?? "",
+        round_size:      founderData.round_size     ? String(founderData.round_size) : "",
+        committed:       founderData.committed      ? String(founderData.committed)  : "",
+        traction:        founderData.traction_summary ?? "",
+        deck_url:        founderData.deck_url       ?? "",
+        passport_handle: founderData.handle         ?? "",
+        custom_answers:  (founderData.custom_answers as Record<string, string>) ?? {},
       });
     }
   };
@@ -156,26 +142,19 @@ export default function InvestorProfilePage({
 
     // FIX 1: upsert with onConflict user_id — requires unique constraint (migration_v14.sql)
     const { error: founderErr } = await supabase.from("founders").upsert({
-      user_id:            session.id,
-      handle:             passportHandle,
-      name: `${form.first_name} ${form.last_name}`.trim(),
-      email:              session.email,
-      company_name:       form.company_name,
-      one_liner:          form.one_liner,
-      stage:              form.stage,
-      sector:             form.sector,
-      geography:          form.geography,
-      round_size:         form.round_size  ? parseInt(form.round_size.replace(/[^0-9]/g, ""))  : null,
-      committed:          form.committed   ? parseInt(form.committed.replace(/[^0-9]/g, ""))   : null,
-      min_ticket:         form.min_ticket  ? parseInt(form.min_ticket.replace(/[^0-9]/g, ""))  : null,
-      traction_summary:   form.traction,
-      founder_background: form.founder_background || null,
-      deck_url:           form.deck_url    || null,
-      linkedin_url:       form.linkedin_url || null,
-      data_room_url:      form.data_room_url || null,
-      what_we_want:       form.what_we_want || null,
-      has_lead:           form.has_lead || false,
-      lead_details:       form.lead_details || null,
+      user_id:          session.id,
+      handle:           passportHandle,
+        name: `${form.first_name} ${form.last_name}`.trim(),
+      email:            session.email,
+      company_name:     form.company_name,
+      one_liner:        form.one_liner,
+      stage:            form.stage,
+      sector:           form.sector,
+      geography:        form.geography,
+      round_size:       form.round_size ? parseInt(form.round_size.replace(/[^0-9]/g, "")) : null,
+      committed:        form.committed  ? parseInt(form.committed.replace(/[^0-9]/g, ""))  : null,
+      traction_summary: form.traction,
+      deck_url:         form.deck_url || null,
     }, { onConflict: "user_id" });
 
     if (founderErr) {
@@ -191,22 +170,17 @@ export default function InvestorProfilePage({
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        investorHandle:    handle,
-        founderName: `${form.first_name} ${form.last_name}`.trim(),
-        companyName:       form.company_name,
-        oneLiner:          form.one_liner,
-        stage:             form.stage,
-        sector:            form.sector,
-        traction:          form.traction,
-        deckUrl:           form.deck_url || null,
-        minTicket:         form.min_ticket ? parseInt(form.min_ticket.replace(/[^0-9]/g, "")) : null,
-        founderBackground: form.founder_background || null,
-        linkedinUrl:       form.linkedin_url || null,
-        hasLead:           form.has_lead || false,
-        leadDetails:       form.lead_details || null,
+        investorHandle: handle,
+          founderName: `${form.first_name} ${form.last_name}`.trim(),
+        companyName:    form.company_name,
+        oneLiner:       form.one_liner,
+        stage:          form.stage,
+        sector:         form.sector,
+        traction:       form.traction,
+        deckUrl:        form.deck_url || null,
         passportHandle,
-        founderEmail:      session?.email,
-        customAnswers:     Object.keys(form.custom_answers).length > 0 ? form.custom_answers : null,
+        founderEmail:   session?.email,
+        customAnswers:  Object.keys(form.custom_answers).length > 0 ? form.custom_answers : null,
       }),
     }).catch(console.error);
 
@@ -258,7 +232,32 @@ export default function InvestorProfilePage({
 
   return (
     <main style={{ minHeight: "100vh", background: "var(--bg)" }}>
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "10px", marginBottom: "20px" }}>
+      <nav style={{ borderBottom: "1px solid var(--border)", padding: "10px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, background: "var(--bg)", zIndex: 100 }}>
+        <Link href="/" style={{ color: "var(--rasp)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.04em", textDecoration: "none" }}>&gt; scopecheck.ai</Link>
+        {/* FIX 2: role-aware nav links */}
+        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+          {(userRole === "investor" || userRole === "both") && (
+            <Link href="/dashboard" style={{ fontSize: "10px", color: "var(--white-mid)", letterSpacing: "0.1em", textDecoration: "none" }}>// pipeline</Link>
+          )}
+          {(userRole === "founder" || userRole === "both") && (
+            <Link href="/founder-dashboard" style={{ fontSize: "10px", color: "var(--amber)", letterSpacing: "0.1em", textDecoration: "none" }}>// passport</Link>
+          )}
+          <Link href="/log" style={{ fontSize: "10px", color: "var(--white-mid)", letterSpacing: "0.1em", textDecoration: "none" }}>// build log</Link>
+        </div>
+      </nav>
+
+      <div style={{ maxWidth: "720px", margin: "0 auto", padding: "32px 24px 80px" }}>
+        {/* Investor scope card */}
+        <div style={{ border: "1px solid var(--border2)", background: "var(--bg2)", marginBottom: showIntro ? "0" : "0" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderBottom: "1px solid var(--border)", background: "var(--bg3)" }}>
+            <span style={{ fontSize: "11px", color: "var(--rasp)" }}>scopecheck.ai/i/{handle}</span>
+            <span style={{ fontSize: "10px", letterSpacing: "0.08em", padding: "2px 7px", border: "1px solid var(--rasp-border)", color: "var(--rasp)", background: "var(--rasp-dim)", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+              <span style={{ animation: "blink 2s ease infinite", display: "inline-block" }}>●</span>
+              {inv.status === "active" ? "open to inbound" : "paused"}
+            </span>
+          </div>
+          <div style={{ padding: "24px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "10px", marginBottom: "20px" }}>
               <div>
                 <h1 style={{ fontSize: "26px", fontWeight: 700, letterSpacing: "-0.01em", marginBottom: "4px" }}>{inv.name as string}</h1>
                 <p style={{ fontSize: "11px", color: "var(--white-mid)" }}>
@@ -377,20 +376,20 @@ export default function InvestorProfilePage({
                   </div>
                   <button type="button" onClick={() => setShowIntro(false)} style={{ background: "none", border: "none", color: "var(--white-dim)", fontSize: "10px", cursor: "pointer", letterSpacing: "0.06em", fontFamily: "'JetBrains Mono', monospace" }}>cancel</button>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
-                    <div>
-                      <label style={labelStyle}>first name *</label>
-                      <input required style={inputStyle} value={form.first_name} onChange={e => setForm(f => ({ ...f, first_name: e.target.value }))} placeholder="Harry" />
-                    </div>
-                    <div>
-                      <label style={labelStyle}>last name *</label>
-                      <input required style={inputStyle} value={form.last_name} onChange={e => setForm(f => ({ ...f, last_name: e.target.value }))} placeholder="Founder" />
-                    </div>
-                  </div>
-                  <div style={{ marginBottom: "12px" }}>
-                    <label style={labelStyle}>company *</label>
-                    <input required style={inputStyle} value={form.company_name} onChange={e => setForm(f => ({ ...f, company_name: e.target.value }))} placeholder="Carbonade" />
-                  </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
+          <div>
+            <label style={labelStyle}>first name *</label>
+            <input required style={inputStyle} value={form.first_name} onChange={e => setForm(f => ({ ...f, first_name: e.target.value }))} placeholder="Harry" />
+          </div>
+          <div>
+            <label style={labelStyle}>last name *</label>
+            <input required style={inputStyle} value={form.last_name} onChange={e => setForm(f => ({ ...f, last_name: e.target.value }))} placeholder="Founder" />
+          </div>
+        </div>
+        <div style={{ marginBottom: "12px" }}>
+          <label style={labelStyle}>company *</label>
+          <input required style={inputStyle} value={form.company_name} onChange={e => setForm(f => ({ ...f, company_name: e.target.value }))} placeholder="Carbonade" />
+        </div>
                 <div style={{ marginBottom: "12px" }}>
                   <label style={labelStyle}>one-liner *</label>
                   <input required style={inputStyle} value={form.one_liner} onChange={e => setForm(f => ({ ...f, one_liner: e.target.value }))} placeholder="AI-optimised heat pumps for industrial decarbonisation." />
@@ -426,7 +425,7 @@ export default function InvestorProfilePage({
                   <label style={labelStyle}>traction *</label>
                   <input required style={inputStyle} value={form.traction} onChange={e => setForm(f => ({ ...f, traction: e.target.value }))} placeholder="€180K ARR · 3 enterprise pilots" />
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "20px" }}>
                   <div>
                     <label style={labelStyle}>deck link</label>
                     <input style={inputStyle} type="url" value={form.deck_url} onChange={e => setForm(f => ({ ...f, deck_url: e.target.value }))} placeholder="https://..." />
@@ -439,38 +438,10 @@ export default function InvestorProfilePage({
                     </div>
                   </div>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
-                  <div>
-                    <label style={labelStyle}>min ticket (€3)</label>
-                    <input style={inputStyle} value={form.min_ticket} onChange={e => setForm(f => ({ ...f, min_ticket: e.target.value }))} placeholder="50" />
-                  </div>
-                  <div>
-                    <label style={labelStyle}>linkedin</label>
-                    <input style={inputStyle} type="url" value={form.linkedin_url} onChange={e => setForm(f => ({ ...f, linkedin_url: e.target.value }))} placeholder="https://linkedin.com/in/..." />
-                  </div>
-                </div>
-                <div style={{ marginBottom: "12px" }}>
-                  <label style={labelStyle}>team / founder background</label>
-                  <textarea style={{ ...inputStyle, resize: "vertical" }} rows={2} value={form.founder_background} onChange={e => setForm(f => ({ ...f, founder_background: e.target.value }))} placeholder="2x founders, ex-Siemens + MIT, 15yrs in industrial automation" />
-                </div>
-                <div style={{ marginBottom: "12px" }}>
-                  <label style={labelStyle}>what are you looking for in investors?</label>
-                  <textarea style={{ ...inputStyle, resize: "vertical" }} rows={2} value={form.what_we_want} onChange={e => setForm(f => ({ ...f, what_we_want: e.target.value }))} placeholder="Sector expertise in industrial decarbonisation, intro to utilities" />
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
-                  <div>
-                    <label style={labelStyle}>data room</label>
-                    <input style={inputStyle} type="url" value={form.data_room_url} onChange={e => setForm(f => ({ ...f, data_room_url: e.target.value }))} placeholder="https://pestium.jp/..." />
-                  </div>
-                  <div>
-                    <label style={labelStyle}>lead investor</label>
-                    <input style={inputStyle} value={form.lead_details} onChange={e => setForm(f => ({ ...f, lead_details: e.target.value, has_lead: e.target.value.length > 0 }))} placeholder="XYS Ventures (€1.5M)" />
-                  </div>
-                </div>
 
                 {/* Custom questions from investor */}
-                {H(((inv.custom_fields as { id: string; label: string; type: string; options?: string[]; required: boolean }[]) || []).length > 0 && (
-                 <div style={{ borderTop: "1px solid var(--border)", paddingTop: "16px", marginBottom: "16px" }}>
+                {((inv.custom_fields as { id: string; label: string; type: string; options?: string[]; required: boolean }[]) || []).length > 0 && (
+                  <div style={{ borderTop: "1px solid var(--border)", paddingTop: "16px", marginBottom: "16px" }}>
                     <div style={{ fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: "12px" }}>
                       {"// additional questions from "}{(inv.name as string)?.split(" ")[0]}
                     </div>
