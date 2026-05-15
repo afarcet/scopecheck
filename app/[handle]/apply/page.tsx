@@ -59,7 +59,7 @@ export default function ApplyPage({ params }: { params: Promise<{ handle: string
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           investorHandle:    handle,
-          founderName:       form.founder_name,
+          founderName: `${form.first_name} ${form.last_name}`.trim(),
           founderEmail:      form.founder_email,
           companyName:       form.company_name,
           oneLiner:          form.one_liner,
@@ -164,10 +164,16 @@ export default function ApplyPage({ params }: { params: Promise<{ handle: string
 
         <form onSubmit={handleSubmit}>
           {/* Founder details */}
-          <div style={{ marginBottom: "1.2rem" }}>
-            <label className="label">Your name *</label>
-            <input type="text" className="input" placeholder="Harry Founder" value={form.founder_name || ""} onChange={(e) => handleChange("founder_name", e.target.value)} required />
-          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1.2rem" }}>
+              <div>
+                <label className="label">First name *</label>
+                <input type="text" className="input" placeholder="Harry" value={form.first_name || ""} onChange={(e) => handleChange("first_name", e.target.value)} required />
+              </div>
+              <div>
+                <label className="label">Last name *</label>
+                <input type="text" className="input" placeholder="Founder" value={form.last_name || ""} onChange={(e) => handleChange("last_name", e.target.value)} required />
+              </div>
+            </div>
           <div style={{ marginBottom: "1.2rem" }}>
             <label className="label">Your email *</label>
             <input type="email" className="input" placeholder="you@company.com" value={form.founder_email || ""} onChange={(e) => handleChange("founder_email", e.target.value)} required />
