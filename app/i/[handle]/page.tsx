@@ -231,6 +231,33 @@ export default function InvestorProfilePage({
       <p style={{ color: "var(--white-dim)", fontSize: "11px", letterSpacing: "0.06em" }}>// loading scope...</p>
     </main>
   );
+
+  const inv = investor as Record<string, unknown>;
+  const profileUrl = `https://scopecheck.ai/i/${handle}`;
+
+  const inputStyle = {
+    background: "var(--bg3)",
+    border: "1px solid var(--border2)",
+    color: "var(--white)",
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: "12px",
+    padding: "8px 12px",
+    width: "100%",
+    outline: "none",
+    boxSizing: "border-box" as const,
+  };
+
+  const labelStyle = {
+    fontSize: "10px",
+    letterSpacing: "0.14em",
+    textTransform: "uppercase" as const,
+    color: "var(--white-mid)",
+    display: "block",
+    marginBottom: "5px",
+  };
+
+  return (
+    <main style={{ minHeight: "100vh", background: "var(--bg)" }}>
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "10px", marginBottom: "20px" }}>
               <div>
                 <h1 style={{ fontSize: "26px", fontWeight: 700, letterSpacing: "-0.01em", marginBottom: "4px" }}>{inv.name as string}</h1>
@@ -506,7 +533,7 @@ export default function InvestorProfilePage({
             )}
           </div>
         )}
-      </diw>
+      </div>
     </main>
   );
 }
