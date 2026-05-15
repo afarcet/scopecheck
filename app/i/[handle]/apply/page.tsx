@@ -269,7 +269,7 @@ export default function ApplyPage({ params }: { params: Promise<{ handle: string
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1.2rem" }}>
             <div>
               <label className="label">Lead investor</label>
-              <input type="text" className="input" placeholder="XYZ Ventures ({"€"}1.5M)" value={form.lead_details || ""} onChange={(e) => handleChange("lead_details", e.target.value)} />
+              <input type="text" className="input" placeholder="XYZ Ventures (€1.5M)" value={form.lead_details || ""} onChange={(e) => handleChange("lead_details", e.target.value)} />
             </div>
             <div>
               <label className="label">Data room</label>
