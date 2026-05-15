@@ -151,7 +151,7 @@ export default function ApplyPage({ params }: { params: Promise<{ handle: string
             {invName} {"\u00B7"} {invFirm}
           </h1>
           <p style={{ fontSize: "0.85rem", color: "var(--slate)", fontWeight: 300 }}>
-            Focuses on {invSectors.join(", ")} {"\u00B7"} {invStages.join(", ")}{invTicketMin ? ` \u00B7 Ticket \u20AC${(invTicketMin / 1000).toFixed(0)}K\u2013\u20AC${(invTicketMax / 1000).toFixed(0)}K` : ""}
+            Focuses on {invSectors.join(", ")} {"\u00B7"} {invStages.join(", ")}{invTicketMin ? ` \u00B7 Ticket €${(invTicketMin / 1000).toFixed(0)}K\u2013€${(invTicketMax / 1000).toFixed(0)}K` : ""}
           </p>
         </div>
 
@@ -211,11 +211,11 @@ export default function ApplyPage({ params }: { params: Promise<{ handle: string
           {/* Round details row */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1.2rem" }}>
             <div>
-              <label className="label">Round size ({"\u20AC"})</label>
+              <label className="label">Round size ({"€"})</label>
               <input type="text" className="input" placeholder="2,000,000" value={form.round_size || ""} onChange={(e) => handleChange("round_size", e.target.value)} />
             </div>
             <div>
-              <label className="label">Committed so far ({"\u20AC"})</label>
+              <label className="label">Committed so far ({"€"})</label>
               <input type="text" className="input" placeholder="800,000" value={form.committed || ""} onChange={(e) => handleChange("committed", e.target.value)} />
             </div>
           </div>
@@ -223,7 +223,7 @@ export default function ApplyPage({ params }: { params: Promise<{ handle: string
           {/* Traction */}
           <div style={{ marginBottom: "1.2rem" }}>
             <label className="label">Traction *</label>
-            <textarea className="input" placeholder={`\u20AC180K ARR \u00B7 3 enterprise pilots`} value={form.traction || ""} onChange={(e) => handleChange("traction", e.target.value)} rows={3} style={{ resize: "vertical" }} required />
+            <textarea className="input" placeholder={`€180K ARR \u00B7 3 enterprise pilots`} value={form.traction || ""} onChange={(e) => handleChange("traction", e.target.value)} rows={3} style={{ resize: "vertical" }} required />
           </div>
 
           {/* Deck + passport handle row */}
@@ -244,7 +244,7 @@ export default function ApplyPage({ params }: { params: Promise<{ handle: string
           {/* Min ticket + LinkedIn row */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1.2rem" }}>
             <div>
-              <label className="label">Min ticket ({"\u20AC"}K)</label>
+              <label className="label">Min ticket ({"€"}K)</label>
               <input type="text" className="input" placeholder="50" value={form.min_ticket || ""} onChange={(e) => handleChange("min_ticket", e.target.value)} />
             </div>
             <div>
@@ -269,7 +269,7 @@ export default function ApplyPage({ params }: { params: Promise<{ handle: string
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1.2rem" }}>
             <div>
               <label className="label">Lead investor</label>
-              <input type="text" className="input" placeholder="XYZ Ventures ({"\u20AC"}1.5M)" value={form.lead_details || ""} onChange={(e) => handleChange("lead_details", e.target.value)} />
+              <input type="text" className="input" placeholder="XYZ Ventures ({"€"}1.5M)" value={form.lead_details || ""} onChange={(e) => handleChange("lead_details", e.target.value)} />
             </div>
             <div>
               <label className="label">Data room</label>
