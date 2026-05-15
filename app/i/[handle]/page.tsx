@@ -230,6 +230,7 @@ export default function InvestorProfilePage({
     <main style={{ minHeight: "100vh", background: "var(--bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <p style={{ color: "var(--white-dim)", fontSize: "11px", letterSpacing: "0.06em" }}>// loading scope...</p>
     </main>
+  );
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "10px", marginBottom: "20px" }}>
               <div>
                 <h1 style={{ fontSize: "26px", fontWeight: 700, letterSpacing: "-0.01em", marginBottom: "4px" }}>{inv.name as string}</h1>
