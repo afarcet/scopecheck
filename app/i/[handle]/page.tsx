@@ -11,7 +11,8 @@ const supabase = createClient(
 );
 
 const BLANK_INTRO = {
-  founder_name: "",
+  first_name: "",
+  last_name: "",
   company_name: "",
   one_liner: "",
   stage: "",
@@ -100,7 +101,8 @@ export default function InvestorProfilePage({
     // FIX 3: pre-fill form if founder record exists
     if (founderData) {
       setForm({
-        founder_name:       founderData.name               ?? "",
+        first_name: (founderData.name || "").split(" ")[0],
+        last_name: (founderData.name || "").split(" ").slice(1).join(" ")               ?? "",
         company_name:       founderData.company_name       ?? "",
         one_liner:          founderData.one_liner           ?? "",
         stage:              founderData.stage               ?? "",
@@ -156,7 +158,7 @@ export default function InvestorProfilePage({
     const { error: founderErr } = await supabase.from("founders").upsert({
       user_id:            session.id,
       handle:             passportHandle,
-      name:               form.founder_name,
+      name: `${form.first_name} ${form.last_name}`.trim(),
       email:              session.email,
       company_name:       form.company_name,
       one_liner:          form.one_liner,
@@ -190,7 +192,7 @@ export default function InvestorProfilePage({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         investorHandle:    handle,
-        founderName:       form.founder_name,
+        founderName: `${form.first_name} ${form.last_name}`.trim(),
         companyName:       form.company_name,
         oneLiner:          form.one_liner,
         stage:             form.stage,
@@ -348,15 +350,19 @@ export default function InvestorProfilePage({
                   <button type="button" onClick={() => setShowIntro(false)} style={{ background: "none", border: "none", color: "var(--white-dim)", fontSize: "10px", cursor: "pointer", letterSpacing: "0.06em", fontFamily: "'JetBrains Mono', monospace" }}>cancel</button>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
-                  <div>
-                    <label style={labelStyle}>your name *</label>
-                    <input required style={inputStyle} value={form.founder_name} onChange={e => setForm(f => ({ ...f, founder_name: e.target.value }))} placeholder="Harry Founder" />
+                    <div>
+                      <label style={labelStyle}>first name *</label>
+                      <input required style={inputStyle} value={form.first_name} onChange={e => setForm(f => ({ ...f, first_name: e.target.value }))} placeholder="Harry" />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>last name *</label>
+                      <input required style={inputStyle} value={form.last_name} onChange={e => setForm(f => ({ ...f, last_name: e.target.value }))} placeholder="Founder" />
+                    </div>
                   </div>
-                  <div>
+                  <div style={{ marginBottom: "12px" }}>
                     <label style={labelStyle}>company *</label>
                     <input required style={inputStyle} value={form.company_name} onChange={e => setForm(f => ({ ...f, company_name: e.target.value }))} placeholder="Carbonade" />
                   </div>
-                </div>
                 <div style={{ marginBottom: "12px" }}>
                   <label style={labelStyle}>one-liner *</label>
                   <input required style={inputStyle} value={form.one_liner} onChange={e => setForm(f => ({ ...f, one_liner: e.target.value }))} placeholder="AI-optimised heat pumps for industrial decarbonisation." />
@@ -469,7 +475,7 @@ export default function InvestorProfilePage({
                 )}
                 <button
                   type="submit"
-                  disabled={introLoading || !form.founder_name || !form.company_name || !form.one_liner || !form.stage || !form.traction}
+                  disabled={introLoading || !form.first_name || !form.company_name || !form.one_liner || !form.stage || !form.traction}
                   style={{ width: "100%", background: "var(--amber)", color: "#000", border: "none", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", fontWeight: 700, letterSpacing: "0.06em", padding: "12px", cursor: "pointer", opacity: introLoading ? 0.6 : 1 }}>
                   {introLoading ? "sending..." : `$ send intro to ${inv.name as string} →`}
                 </button>
