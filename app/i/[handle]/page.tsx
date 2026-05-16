@@ -112,6 +112,11 @@ export default function InvestorProfilePage({
         deck_url:        founderData.deck_url       ?? "",
         passport_handle: founderData.handle         ?? "",
         custom_answers:  (founderData.custom_answers as Record<string, string>) ?? {},
+          cofounder_count: "",
+          cofounder_history: "",
+          prior_founder: "",
+          prior_exit: "",
+          domain_experience: "",
       });
     }
   };
