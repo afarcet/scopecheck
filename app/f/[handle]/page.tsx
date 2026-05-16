@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { computeScopeSignal, signalLabel, signalExplanation } from '@/lib/scoring';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { QRButton } from './qr-button';
@@ -26,11 +27,24 @@ export default async function FounderPassportPage({
   // Get latest intro for founder signals
   const { data: latestIntro } = await supabase
     .from('intros')
-    .select('cofounder_count, cofounder_history, prior_founder, prior_exit, domain_experience')
+    .select('cofounder_count, cofounder_history, prior_founder, prior_exit, domain_experience, stage, sector, geography, round_size')
     .eq('founder_handle', handle)
     .order('created_at', { ascending: false })
     .limit(1)
     .single();
+
+  // Compute scope signal
+  const scopeResult = latestIntro ? computeScopeSignal({
+    stage: latestIntro.stage,
+    sector: latestIntro.sector,
+    geography: latestIntro.geography,
+    roundSize: latestIntro.round_size ? parseFloat(latestIntro.round_size) : undefined,
+    cofounderCount: latestIntro.cofounder_count,
+    priorFounder: latestIntro.prior_founder,
+    priorExit: latestIntro.prior_exit,
+    domainExperience: latestIntro.domain_experience,
+  }) : null;
+
 
 
   // Increment view count (fire and forget)
@@ -70,7 +84,7 @@ export default async function FounderPassportPage({
                 <p style={{ fontSize: '13px', color: 'var(--white-mid)', lineHeight: 1.6 }}>{founder.one_liner}</p>
               )}
               <p style={{ fontSize: '11px', color: 'var(--white-dimmer)', marginTop: '6px' }}>
-                {[sectors.join(' · '), founder.country || founder.geography].filter(Boolean).join(' · ')}
+                {[sectors.join(' Â· '), founder.country || founder.geography].filter(Boolean).join(' Â· ')}
               </p>
             </div>
 
@@ -85,11 +99,11 @@ export default async function FounderPassportPage({
                   <div style={{ background: 'var(--amber)', height: '100%', width: `${pct}%`, transition: 'width 0.6s ease' }} />
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px' }}>
-                  <span style={{ color: 'var(--white-mid)' }}>target: <span style={{ color: 'var(--white)' }}>€{roundSize.toLocaleString()}K</span></span>
+                  <span style={{ color: 'var(--white-mid)' }}>target: <span style={{ color: 'var(--white)' }}>â¬{roundSize.toLocaleString()}K</span></span>
                   {minTicket > 0 && (
-                    <span style={{ color: 'var(--white-mid)' }}>min ticket: <span style={{ color: 'var(--white)' }}>€{minTicket.toLocaleString()}K</span></span>
+                    <span style={{ color: 'var(--white-mid)' }}>min ticket: <span style={{ color: 'var(--white)' }}>â¬{minTicket.toLocaleString()}K</span></span>
                   )}
-                  <span style={{ color: 'var(--white-mid)' }}>available: <span style={{ color: 'var(--amber)' }}>€{available.toLocaleString()}K</span></span>
+                  <span style={{ color: 'var(--white-mid)' }}>available: <span style={{ color: 'var(--amber)' }}>â¬{available.toLocaleString()}K</span></span>
                 </div>
               </div>
             )}
@@ -97,9 +111,9 @@ export default async function FounderPassportPage({
             {/* Lead investor status */}
             {founder.has_lead && (
               <div style={{ border: '1px solid rgba(240,165,0,0.3)', background: 'rgba(240,165,0,0.06)', padding: '10px 14px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '11px', color: 'var(--amber)', fontWeight: 700 }}>✓ Lead investor confirmed</span>
+                <span style={{ fontSize: '11px', color: 'var(--amber)', fontWeight: 700 }}>â Lead investor confirmed</span>
                 {founder.lead_details && (
-                  <span style={{ fontSize: '11px', color: 'var(--white-mid)' }}>— {founder.lead_details}</span>
+                  <span style={{ fontSize: '11px', color: 'var(--white-mid)' }}>â {founder.lead_details}</span>
                 )}
               </div>
             )}
@@ -128,7 +142,7 @@ export default async function FounderPassportPage({
                 <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', borderBottom: founder.data_room_url ? '1px solid var(--border)' : 'none' }}>
                   <div style={{ padding: '9px 14px', background: 'var(--bg3)', fontSize: '10px', color: 'var(--white-mid)', borderRight: '1px solid var(--border)', letterSpacing: '0.06em' }}>deck</div>
                   <div style={{ padding: '9px 14px', fontSize: '12px' }}>
-                    <a href={founder.deck_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)', textDecoration: 'none' }}>view deck →</a>
+                    <a href={founder.deck_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)', textDecoration: 'none' }}>view deck â</a>
                   </div>
                 </div>
               )}
@@ -136,15 +150,27 @@ export default async function FounderPassportPage({
                 <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', borderBottom: founder.data_room_url ? '1px solid var(--border)' : 'none' }}>
                   <div style={{ padding: '9px 14px', background: 'var(--bg3)', fontSize: '10px', color: 'var(--white-mid)', borderRight: '1px solid var(--border)', letterSpacing: '0.06em' }}>linkedin</div>
                   <div style={{ padding: '9px 14px', fontSize: '12px' }}>
-                    <a href={founder.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)', textDecoration: 'none' }}>view profile →</a>
+                    <a href={founder.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)', textDecoration: 'none' }}>view profile â</a>
                   </div>
                 </div>
               )}
               {founder.data_room_url && (
                 <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr' }}>
                   <div style={{ padding: '9px 14px', background: 'var(--bg3)', fontSize: '10px', color: 'var(--white-mid)', borderRight: '1px solid var(--border)', letterSpacing: '0.06em' }}>data_room</div>
+            {/* SCOPE SIGNAL */}
+            {scopeResult && (
+              <div style={{ marginBottom: "24px", padding: "14px 16px", background: "var(--bg3)", border: "1px solid var(--border2)", borderRadius: "6px", borderLeft: scopeResult.signal === "strong" ? "3px solid var(--green)" : scopeResult.signal === "moderate" ? "3px solid var(--amber)" : "3px solid var(--white-dim)" }}>
+                <div style={{ fontSize: "10px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color: scopeResult.signal === "strong" ? "var(--green)" : scopeResult.signal === "moderate" ? "var(--amber)" : "var(--white-dim)", marginBottom: "6px" }}>
+                  {signalLabel(scopeResult.signal)} with Raspberry
+                </div>
+                <div style={{ fontSize: "12px", color: "var(--white-mid)", lineHeight: 1.6 }}>
+                  {signalExplanation(scopeResult.signal)}
+                </div>
+              </div>
+            )}
+
                   <div style={{ padding: '9px 14px', fontSize: '12px' }}>
-                    <a href={founder.data_room_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)', textDecoration: 'none' }}>access data room →</a>
+                    <a href={founder.data_room_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)', textDecoration: 'none' }}>access data room â</a>
                   </div>
                 </div>
               )}
@@ -197,7 +223,7 @@ export default async function FounderPassportPage({
             <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
               <QRButton url={profileUrl} />
               <Link href="/scope" style={{ fontSize: '11px', padding: '9px 14px', border: '1px solid var(--border2)', color: 'var(--white-mid)', fontFamily: "'JetBrains Mono', monospace", textDecoration: 'none', background: 'var(--bg3)' }}>
-                find investors →
+                find investors â
               </Link>
             </div>
           </div>
