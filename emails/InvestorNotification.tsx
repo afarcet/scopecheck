@@ -49,7 +49,8 @@ export default function InvestorNotification({
         <Text style={{ fontFamily: "sans-serif", fontSize: "14px", lineHeight: "1.6", color: "#222" }}>
           Hi {investorName},<br /><br />
           <strong>{companyName}</strong> just sent you an intro via ScopeCheck.<br /><br />
-          <strong>Company:</strong> {companyName}<br />
+          <strong>Founder:</strong> {founderName}<br />
+            <strong>Company:</strong> {companyName}<br />
           <strong>One-liner:</strong> {oneLiner}<br />
           <strong>Stage:</strong> {stage}<br />
           <strong>Sector:</strong> {sector}<br />
