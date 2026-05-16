@@ -28,7 +28,7 @@ export default async function FounderPassportPage({
   // Get latest intro for founder signals
   const { data: latestIntro } = await supabase
     .from('intros')
-    .select('cofounder_count, cofounder_history, prior_founder, prior_exit, domain_experience, stage, sector, geography, round_size')
+    .select('cofounder_count, cofounder_history, prior_founder, prior_exit, domain_experience, stage, sector, geography:country, round_size:min_ticket')
     .eq('founder_handle', handle)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -85,7 +85,7 @@ export default async function FounderPassportPage({
                 <p style={{ fontSize: '13px', color: 'var(--white-mid)', lineHeight: 1.6 }}>{founder.one_liner}</p>
               )}
               <p style={{ fontSize: '11px', color: 'var(--white-dimmer)', marginTop: '6px' }}>
-                {[sectors.join(' ÃÂÃÂÃÂÃÂ· '), founder.country || founder.geography].filter(Boolean).join(' ÃÂÃÂÃÂÃÂ· ')}
+                {[sectors.join(' ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ· '), founder.country || founder.geography].filter(Boolean).join(' ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ· ')}
               </p>
             </div>
 
@@ -100,11 +100,11 @@ export default async function FounderPassportPage({
                   <div style={{ background: 'var(--amber)', height: '100%', width: `${pct}%`, transition: 'width 0.6s ease' }} />
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px' }}>
-                  <span style={{ color: 'var(--white-mid)' }}>target: <span style={{ color: 'var(--white)' }}>ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¬{roundSize.toLocaleString()}K</span></span>
+                  <span style={{ color: 'var(--white-mid)' }}>target: <span style={{ color: 'var(--white)' }}>ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¬{roundSize.toLocaleString()}K</span></span>
                   {minTicket > 0 && (
-                    <span style={{ color: 'var(--white-mid)' }}>min ticket: <span style={{ color: 'var(--white)' }}>ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¬{minTicket.toLocaleString()}K</span></span>
+                    <span style={{ color: 'var(--white-mid)' }}>min ticket: <span style={{ color: 'var(--white)' }}>ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¬{minTicket.toLocaleString()}K</span></span>
                   )}
-                  <span style={{ color: 'var(--white-mid)' }}>available: <span style={{ color: 'var(--amber)' }}>ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¬{available.toLocaleString()}K</span></span>
+                  <span style={{ color: 'var(--white-mid)' }}>available: <span style={{ color: 'var(--amber)' }}>ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¬{available.toLocaleString()}K</span></span>
                 </div>
               </div>
             )}
@@ -112,9 +112,9 @@ export default async function FounderPassportPage({
             {/* Lead investor status */}
             {founder.has_lead && (
               <div style={{ border: '1px solid rgba(240,165,0,0.3)', background: 'rgba(240,165,0,0.06)', padding: '10px 14px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '11px', color: 'var(--amber)', fontWeight: 700 }}>ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Lead investor confirmed</span>
+                <span style={{ fontSize: '11px', color: 'var(--amber)', fontWeight: 700 }}>ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Lead investor confirmed</span>
                 {founder.lead_details && (
-                  <span style={{ fontSize: '11px', color: 'var(--white-mid)' }}>ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ {founder.lead_details}</span>
+                  <span style={{ fontSize: '11px', color: 'var(--white-mid)' }}>ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ {founder.lead_details}</span>
                 )}
               </div>
             )}
@@ -143,7 +143,7 @@ export default async function FounderPassportPage({
                 <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', borderBottom: founder.data_room_url ? '1px solid var(--border)' : 'none' }}>
                   <div style={{ padding: '9px 14px', background: 'var(--bg3)', fontSize: '10px', color: 'var(--white-mid)', borderRight: '1px solid var(--border)', letterSpacing: '0.06em' }}>deck</div>
                   <div style={{ padding: '9px 14px', fontSize: '12px' }}>
-                    <a href={founder.deck_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)', textDecoration: 'none' }}>view deck ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ</a>
+                    <a href={founder.deck_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)', textDecoration: 'none' }}>view deck ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ</a>
                   </div>
                 </div>
               )}
@@ -151,7 +151,7 @@ export default async function FounderPassportPage({
                 <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', borderBottom: founder.data_room_url ? '1px solid var(--border)' : 'none' }}>
                   <div style={{ padding: '9px 14px', background: 'var(--bg3)', fontSize: '10px', color: 'var(--white-mid)', borderRight: '1px solid var(--border)', letterSpacing: '0.06em' }}>linkedin</div>
                   <div style={{ padding: '9px 14px', fontSize: '12px' }}>
-                    <a href={founder.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)', textDecoration: 'none' }}>view profile ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ</a>
+                    <a href={founder.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)', textDecoration: 'none' }}>view profile ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ</a>
                   </div>
                 </div>
               )}
@@ -171,7 +171,7 @@ export default async function FounderPassportPage({
             )}
 
                   <div style={{ padding: '9px 14px', fontSize: '12px' }}>
-                    <a href={founder.data_room_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)', textDecoration: 'none' }}>access data room ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ</a>
+                    <a href={founder.data_room_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--amber)', textDecoration: 'none' }}>access data room ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ</a>
                   </div>
                 </div>
               )}
@@ -234,7 +234,7 @@ export default async function FounderPassportPage({
             <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
               <QRButton url={profileUrl} />
               <Link href="/scope" style={{ fontSize: '11px', padding: '9px 14px', border: '1px solid var(--border2)', color: 'var(--white-mid)', fontFamily: "'JetBrains Mono', monospace", textDecoration: 'none', background: 'var(--bg3)' }}>
-                find investors ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ
+                find investors ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ
               </Link>
             </div>
           </div>
