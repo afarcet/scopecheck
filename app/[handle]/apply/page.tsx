@@ -231,7 +231,7 @@ export default function ApplyPage({ params }: { params: Promise<{ handle: string
                 <select className="input" value={form.cofounder_history || ""} onChange={(e) => handleChange("cofounder_history", e.target.value)}>
                   <option value="">Select</option>
                   <option value="solo">N/A (solo)</option>
-                  <option value="<1y">&lt; 1 year</option>
+                  <option value="less1y">Less than 1 year</option>
                   <option value="1-2y">1-2 years</option>
                   <option value="3-5y">3-5 years</option>
                   <option value="5y+">5+ years</option>
