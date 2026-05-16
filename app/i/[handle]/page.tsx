@@ -427,7 +427,7 @@ export default function InvestorProfilePage({
                   </div>
                 </div>
                 {/* Founder profile */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "12px" }}>
                   <div>
                     <label style={labelStyle}>co-founders</label>
                     <select style={inputStyle} value={form.cofounder_count} onChange={(e) => setForm(f => ({ ...f, cofounder_count: e.target.value }))}><option value="">Select</option><option value="1">Solo founder</option><option value="2">2 co-founders</option><option value="3">3 co-founders</option><option value="4+">4+</option></select>
@@ -437,7 +437,7 @@ export default function InvestorProfilePage({
                     <select style={inputStyle} value={form.cofounder_history} onChange={(e) => setForm(f => ({ ...f, cofounder_history: e.target.value }))}><option value="">Select</option><option value="solo">N/A (solo)</option><option value="less1y">Less than 1 year</option><option value="1-2y">1-2 years</option><option value="3-5y">3-5 years</option><option value="5y+">5+ years</option></select>
                   </div>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem", marginBottom: "12px" }}>
                   <div>
                     <label style={labelStyle}>founded before?</label>
                     <select style={inputStyle} value={form.prior_founder} onChange={(e) => setForm(f => ({ ...f, prior_founder: e.target.value }))}><option value="">Select</option><option value="yes">Yes</option><option value="no">No</option></select>
