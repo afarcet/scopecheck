@@ -72,6 +72,11 @@ export default function ApplyPage({ params }: { params: Promise<{ handle: string
           linkedinUrl:       form.linkedin_url || null,
           hasLead:           (form.lead_details || "").length > 0,
           leadDetails:       form.lead_details || null,
+              cofounderCount:    form.cofounder_count || null,
+              cofounderHistory:  form.cofounder_history || null,
+              priorFounder:     form.prior_founder === "yes",
+              priorExit:        form.prior_exit === "yes",
+              domainExperience: form.domain_experience === "yes",
           passportHandle,
           customAnswers:     Object.keys(customAnswers).length > 0 ? customAnswers : null,
         }),
@@ -208,6 +213,57 @@ export default function ApplyPage({ params }: { params: Promise<{ handle: string
             </div>
           </div>
 
+
+            {/* Founder profile */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1.2rem" }}>
+              <div>
+                <label className="label">Co-founders</label>
+                <select className="input" value={form.cofounder_count || ""} onChange={(e) => handleChange("cofounder_count", e.target.value)}>
+                  <option value="">Select</option>
+                  <option value="1">Solo founder</option>
+                  <option value="2">2 co-founders</option>
+                  <option value="3">3 co-founders</option>
+                  <option value="4+">4+</option>
+                </select>
+              </div>
+              <div>
+                <label className="label">Known each other</label>
+                <select className="input" value={form.cofounder_history || ""} onChange={(e) => handleChange("cofounder_history", e.target.value)}>
+                  <option value="">Select</option>
+                  <option value="solo">N/A (solo)</option>
+                  <option value="<1y">&lt; 1 year</option>
+                  <option value="1-2y">1-2 years</option>
+                  <option value="3-5y">3-5 years</option>
+                  <option value="5y+">5+ years</option>
+                </select>
+              </div>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem", marginBottom: "1.2rem" }}>
+              <div>
+                <label className="label">Founded before?</label>
+                <select className="input" value={form.prior_founder || ""} onChange={(e) => handleChange("prior_founder", e.target.value)}>
+                  <option value="">Select</option>
+                  <option value="yes">Yes</option>
+                  <option value="no">No</option>
+                </select>
+              </div>
+              <div>
+                <label className="label">Any exits?</label>
+                <select className="input" value={form.prior_exit || ""} onChange={(e) => handleChange("prior_exit", e.target.value)}>
+                  <option value="">Select</option>
+                  <option value="yes">Yes</option>
+                  <option value="no">No</option>
+                </select>
+              </div>
+              <div>
+                <label className="label">Domain experience?</label>
+                <select className="input" value={form.domain_experience || ""} onChange={(e) => handleChange("domain_experience", e.target.value)}>
+                  <option value="">Select</option>
+                  <option value="yes">Yes</option>
+                  <option value="no">No</option>
+                </select>
+              </div>
+            </div>
           {/* Round details row */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1.2rem" }}>
             <div>
