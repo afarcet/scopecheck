@@ -5,9 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-/* ----------------------------------------------
+/* -ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ
    Types
-   ---------------------------------------------- */
+   -ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ */
 
 type PipelineColumn = "new" | "shortlisted" | "considering" | "watching" | "passed";
 type Source = "inbound" | "scouted" | "referral" | "manual";
@@ -40,9 +40,9 @@ interface UnifiedCard {
   raw_state: string;
 }
 
-/* ----------------------------------------------
+/* -ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ
    Helpers
-   ---------------------------------------------- */
+   -ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ */
 
 function formatRelativeTime(ts: string): string {
   const diff = Date.now() - new Date(ts).getTime();
@@ -57,19 +57,19 @@ function formatRelativeTime(ts: string): string {
 
 function formatRoundSize(thousands: number | null, currency: string): string {
   if (!thousands) return "";
-  const symbol = currency === "USD" ? "$" : currency === "GBP" ? "Â£" : "-¬";
+  const symbol = currency === "USD" ? "$" : currency === "GBP" ? "ÃÂ£" : "-ÂÂ¬";
   if (thousands >= 1000) return `${symbol}${(thousands / 1000).toFixed(thousands % 1000 === 0 ? 0 : 1)}M`;
   return `${symbol}${thousands}k`;
 }
 
-/** Map intros.status - pipeline column */
+/** Map intros.status -ÂÂ pipeline column */
 function introStatusToColumn(status: string): PipelineColumn {
   if (status === "considering") return "considering";
   if (status === "passed") return "passed";
   return "new";
 }
 
-/** Map pipeline.state - pipeline column */
+/** Map pipeline.state -ÂÂ pipeline column */
 function pipelineStateToColumn(state: string): PipelineColumn {
   switch (state) {
     case "new":
@@ -93,7 +93,7 @@ function pipelineStateToColumn(state: string): PipelineColumn {
   }
 }
 
-/** Reverse: column - target state for each table */
+/** Reverse: column -ÂÂ target state for each table */
 function columnToIntroStatus(col: PipelineColumn): string {
   if (col === "considering") return "considering";
   if (col === "passed") return "passed";
@@ -109,9 +109,9 @@ function columnToPipelineState(col: PipelineColumn): string {
   }
 }
 
-/* ----------------------------------------------
+/* -ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ
    Column config
-   ---------------------------------------------- */
+   -ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ */
 
 const COLUMNS: { key: PipelineColumn; label: string; color: string; empty: string }[] = [
   { key: "new",          label: "New",          color: "var(--amber)",  empty: "// no new deals" },
@@ -121,9 +121,9 @@ const COLUMNS: { key: PipelineColumn; label: string; color: string; empty: strin
   { key: "passed",       label: "Passed",        color: "var(--slate, #64748b)", empty: "// no passed deals" },
 ];
 
-/* ----------------------------------------------
+/* -ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ
    Source tag colors
-   ---------------------------------------------- */
+   -ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ */
 
 const SOURCE_STYLES: Record<Source, { bg: string; color: string; border: string }> = {
   inbound:  { bg: "var(--rasp-dim)",  color: "var(--rasp)",  border: "var(--rasp-border)" },
@@ -132,9 +132,9 @@ const SOURCE_STYLES: Record<Source, { bg: string; color: string; border: string 
   manual:   { bg: "rgba(100,116,139,0.12)", color: "#94a3b8", border: "rgba(100,116,139,0.35)" },
 };
 
-/* ----------------------------------------------
+/* -ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ
    Component
-   ---------------------------------------------- */
+   -ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ-ÂÂ */
 
 export default function Dashboard() {
   const router = useRouter();
@@ -149,6 +149,7 @@ export default function Dashboard() {
   // Inline note editing
   const [editingNote,    setEditingNote]    = useState<string | null>(null);
   const [noteText,       setNoteText]       = useState("");
+  const [searchQuery,    setSearchQuery]    = useState("");
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -188,7 +189,7 @@ export default function Dashboard() {
         return;
       }
 
-      // -- Fetch both tables in parallel --
+      // -ÂÂ-ÂÂ Fetch both tables in parallel -ÂÂ-ÂÂ
       const [introsResult, pipelineResult] = await Promise.all([
         supabase
           .from("intros")
@@ -270,7 +271,7 @@ export default function Dashboard() {
     });
   }, [router]);
 
-  /* -- Move card to a different column -- */
+  /* -ÂÂ-ÂÂ Move card to a different column -ÂÂ-ÂÂ */
   const moveCard = async (id: string, targetCol: PipelineColumn) => {
     setCards((prev) =>
       prev.map((c) => (c.id === id ? { ...c, column: targetCol } : c))
@@ -291,7 +292,7 @@ export default function Dashboard() {
     }
   };
 
-  /* -- Set decision on pipeline card -- */
+  /* -ÂÂ-ÂÂ Set decision on pipeline card -ÂÂ-ÂÂ */
   const setDecision = async (id: string, decision: Decision) => {
     setCards((prev) =>
       prev.map((c) => (c.id === id ? { ...c, alex_decision: decision } : c))
@@ -312,7 +313,7 @@ export default function Dashboard() {
     }
   };
 
-  /* -- Save note -- */
+  /* -ÂÂ-ÂÂ Save note -ÂÂ-ÂÂ */
   const saveNote = async (id: string, text: string) => {
     setCards((prev) =>
       prev.map((c) => (c.id === id ? { ...c, alex_reasoning: text } : c))
@@ -329,12 +330,18 @@ export default function Dashboard() {
     // (intros table doesn't have investor_notes directly, skip for now)
   };
 
-  /* -- Sorted + filtered cards per column -- */
+  /* -ÂÂ-ÂÂ Sorted + filtered cards per column -ÂÂ-ÂÂ */
   const byColumn = useMemo(() => {
     const result: Record<PipelineColumn, UnifiedCard[]> = {
       new: [], shortlisted: [], considering: [], watching: [], passed: [],
     };
-    for (const card of cards) {
+    const filtered = searchQuery
+      ? cards.filter((c) => {
+          const q = searchQuery.toLowerCase();
+          return (c.company || "").toLowerCase().includes(q) || (c.founder || "").toLowerCase().includes(q);
+        })
+      : cards;
+    for (const card of filtered) {
       result[card.column].push(card);
     }
     // Sort New: composite_score DESC, then date DESC
@@ -351,9 +358,9 @@ export default function Dashboard() {
       result[col].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     }
     return result;
-  }, [cards]);
+  }, [cards, searchQuery]);
 
-  /* -- Loading state -- */
+  /* -ÂÂ-ÂÂ Loading state -ÂÂ-ÂÂ */
   if (!authChecked || loading) {
     return (
       <main style={{ minHeight: "100vh", background: "var(--bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -365,7 +372,7 @@ export default function Dashboard() {
   return (
     <main style={{ minHeight: "100vh", background: "var(--bg)" }}>
 
-      {/* -- NAV -- */}
+      {/* -ÂÂ-ÂÂ NAV -ÂÂ-ÂÂ */}
       <nav style={{
         borderBottom: "1px solid var(--border)",
         padding: "10px 20px",
@@ -398,7 +405,7 @@ export default function Dashboard() {
               href={`/i/${investorHandle}`}
               style={{ background: "var(--bg2)", color: "var(--white-mid)", border: "1px solid var(--border2)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "5px 10px", textDecoration: "none", whiteSpace: "nowrap" }}
             >
-              my scope {"\u2197"}
+              my scope {"\u2197"}ÂÂ
             </Link>
           )}
           <button
@@ -413,7 +420,29 @@ export default function Dashboard() {
         </div>
       </nav>
 
-      {/* -- COLUMN SUMMARY BAR -- */}
+      {/* Search bar */}
+      <div style={{ padding: "10px 20px", borderBottom: "1px solid var(--border)", background: "var(--bg)" }}>
+        <input
+          type="text"
+          placeholder="Search by company or founder name..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{
+            width: "100%",
+            maxWidth: "360px",
+            padding: "8px 12px",
+            background: "var(--bg2)",
+            border: "1px solid var(--border2)",
+            borderRadius: "6px",
+            color: "var(--white)",
+            fontSize: "12px",
+            fontFamily: "'JetBrains Mono', monospace",
+            outline: "none",
+          }}
+        />
+      </div>
+
+      {/* -ÂÂ-ÂÂ COLUMN SUMMARY BAR -ÂÂ-ÂÂ */}
       <div style={{ borderBottom: "1px solid var(--border)", padding: "8px 20px", display: "flex", gap: "24px", background: "var(--bg2)", overflowX: "auto" }}>
         {COLUMNS.map((col) => (
           <div key={col.key} style={{ display: "flex", alignItems: "center", gap: "6px", whiteSpace: "nowrap" }}>
@@ -427,7 +456,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* -- KANBAN BOARD -- */}
+      {/* -ÂÂ-ÂÂ KANBAN BOARD -ÂÂ-ÂÂ */}
       <div style={{ display: "grid", gridTemplateColumns: `repeat(${COLUMNS.length}, 1fr)`, minHeight: "calc(100vh - 100px)", overflowX: "auto" }}>
         {COLUMNS.map((col, ci) => (
           <div
@@ -502,11 +531,11 @@ export default function Dashboard() {
                   {/* Row 4: Stage + Geography + Round */}
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", fontSize: "10px", color: "var(--white-dim)", marginBottom: "4px" }}>
                     {card.stage && <span style={{ color: "var(--amber)" }}>{card.stage}</span>}
-                    {card.stage && card.geography && <span>Â·</span>}
+                    {card.stage && card.geography && <span>ÃÂ·</span>}
                     {card.geography && <span>{card.geography}</span>}
                     {card.round_size && (
                       <>
-                        <span>Â·</span>
+                        <span>ÃÂ·</span>
                         <span style={{ color: "var(--white-mid)" }}>{formatRoundSize(card.round_size, card.round_currency)}</span>
                       </>
                     )}
@@ -535,7 +564,7 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  {/* -- EXPANDED DETAIL -- */}
+                  {/* -ÂÂ-ÂÂ EXPANDED DETAIL -ÂÂ-ÂÂ */}
                   {isExpanded && (
                     <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid var(--border)" }}>
 
@@ -640,7 +669,7 @@ export default function Dashboard() {
                             onClick={(e) => e.stopPropagation()}
                             style={{ flex: 1, textAlign: "center", background: "var(--bg3)", color: "var(--white-mid)", border: "1px solid var(--border2)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "7px 10px", textDecoration: "none", whiteSpace: "nowrap" }}
                           >
-                            view deck {"\u2197"}
+                            view deck {"\u2197"}ÂÂ
                           </a>
                         )}
                         {card.passport_handle && (
@@ -649,7 +678,7 @@ export default function Dashboard() {
                             onClick={(e) => e.stopPropagation()}
                             style={{ flex: 1, textAlign: "center", background: "var(--bg3)", color: "var(--white-mid)", border: "1px solid var(--border2)", fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", padding: "7px 10px", textDecoration: "none", whiteSpace: "nowrap" }}
                           >
-                            passport {"\u2192"}
+                            passport {"\u2192"}ÂÂ
                           </Link>
                         )}
                       </div>
@@ -673,7 +702,7 @@ export default function Dashboard() {
                               letterSpacing: "0.04em",
                             }}
                           >
-                            - {target.label}
+                            -ÂÂ {target.label}
                           </button>
                         ))}
                       </div>
