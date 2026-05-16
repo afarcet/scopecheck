@@ -44,6 +44,11 @@ export async function POST(req: NextRequest) {
       passportHandle,
       founderEmail,
       customAnswers,
+    cofounderCount,
+    cofounderHistory,
+    priorFounder,
+    priorExit,
+    domainExperience,
     } = body;
 
     // Fetch investor details
@@ -77,6 +82,11 @@ export async function POST(req: NextRequest) {
       traction:        traction ?? null,
       deck_url:        deckUrl ?? null,
       custom_answers:  customAnswers ?? null,
+      cofounder_count: cofounderCount ?? null,
+      cofounder_history: cofounderHistory ?? null,
+      prior_founder: priorFounder ?? null,
+      prior_exit: priorExit ?? null,
+      domain_experience: domainExperience ?? null,
       status:          "new",
     });
 
