@@ -195,7 +195,7 @@ export default function InvestorProfilePage({
         cofounderHistory:  form.cofounder_history || null,
         priorFounder:     form.prior_founder === "yes",
         priorExit:        form.prior_exit === "yes",
-        domainExperience: form.domain_experience === "yes",
+        domainExperience: form.domain_experience || null,
       }),
     }).catch(console.error);
 
@@ -447,8 +447,8 @@ export default function InvestorProfilePage({
                     <select style={inputStyle} value={form.prior_exit} onChange={(e) => setForm(f => ({ ...f, prior_exit: e.target.value }))}><option value="">Select</option><option value="yes">Yes</option><option value="no">No</option></select>
                   </div>
                   <div>
-                    <label style={labelStyle}>domain experience?</label>
-                    <select style={inputStyle} value={form.domain_experience} onChange={(e) => setForm(f => ({ ...f, domain_experience: e.target.value }))}><option value="">Select</option><option value="yes">Yes</option><option value="no">No</option></select>
+                    <label style={labelStyle}>domain experience</label>
+                    <input style={inputStyle} value={form.domain_experience} onChange={(e) => setForm(f => ({ ...f, domain_experience: e.target.value }))} placeholder="e.g. 8 years in fintech" />
                   </div>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
