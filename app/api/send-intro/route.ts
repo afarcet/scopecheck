@@ -17,7 +17,7 @@ export async function OPTIONS() {
 }
 
 export async function POST(req: NextRequest) {
-  // Instantiate clients inside handler â avoids build-time env var errors
+  // Instantiate clients inside handler Ã¢ÂÂ avoids build-time env var errors
   const resend = new Resend(process.env.RESEND_API_KEY);
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Investor not found" }, { status: 404, headers: corsHeaders });
     }
 
-    // Persist intro to Supabase â this is the durable record of every inbound
+    // Persist intro to Supabase Ã¢ÂÂ this is the durable record of every inbound
     await supabase.from("intros").insert({
       investor_handle: investorHandle,
       founder_handle:  passportHandle,
@@ -122,7 +122,7 @@ export async function POST(req: NextRequest) {
       from:    "ScopeCheck <onboarding@resend.dev>",
       to:      investor.email,
       ...(founderEmail ? { replyTo: founderEmail } : {}),
-      subject: `New intro: ${companyName} â ${oneLiner.slice(0, 60)}${oneLiner.length > 60 ? "..." : ""}`,
+      subject: `New intro: ${companyName} Ã¢ÂÂ ${oneLiner.slice(0, 60)}${oneLiner.length > 60 ? "..." : ""}`,
       html:    investorHtml,
     });
 
@@ -142,7 +142,7 @@ export async function POST(req: NextRequest) {
       await resend.emails.send({
         from:    "ScopeCheck <onboarding@resend.dev>",
         to:      founderEmail,
-        subject: `Intro sent to ${investor.name} Â· Your passport is ready`,
+        subject: `Intro sent to ${investor.name} ÃÂ· Your passport is ready`,
         html:    founderHtml,
       });
     }
@@ -151,8 +151,8 @@ export async function POST(req: NextRequest) {
     const scopeResult = computeScopeSignal({
       stage,
       sector,
-      geography,
-      roundSize: roundSize ? parseFloat(roundSize) : undefined,
+      geography: country,
+      roundSize: minTicket ? parseFloat(minTicket) : undefined,
       cofounderCount,
       priorFounder: priorFounder === true || priorFounder === "true",
       priorExit: priorExit === true || priorExit === "true",
