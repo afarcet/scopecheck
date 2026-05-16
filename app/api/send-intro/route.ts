@@ -109,6 +109,11 @@ export async function POST(req: NextRequest) {
         passportUrl,
         dashboardUrl,
         unsubscribeUrl,
+      cofounderCount: cofounderCount ?? undefined,
+      cofounderHistory: cofounderHistory ?? undefined,
+      priorFounder: priorFounder ?? undefined,
+      priorExit: priorExit ?? undefined,
+      domainExperience: domainExperience ?? undefined,
       })
     );
 
