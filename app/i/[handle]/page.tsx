@@ -24,6 +24,11 @@ const BLANK_INTRO = {
   deck_url: "",
   passport_handle: "",
   custom_answers: {} as Record<string, string>,
+  cofounder_count: "",
+  cofounder_history: "",
+  prior_founder: "",
+  prior_exit: "",
+  domain_experience: "",
 };
 
 export default function InvestorProfilePage({
@@ -181,6 +186,11 @@ export default function InvestorProfilePage({
         passportHandle,
         founderEmail:   session?.email,
         customAnswers:  Object.keys(form.custom_answers).length > 0 ? form.custom_answers : null,
+        cofounderCount:    form.cofounder_count || null,
+        cofounderHistory:  form.cofounder_history || null,
+        priorFounder:     form.prior_founder === "yes",
+        priorExit:        form.prior_exit === "yes",
+        domainExperience: form.domain_experience === "yes",
       }),
     }).catch(console.error);
 
@@ -409,6 +419,31 @@ export default function InvestorProfilePage({
                   <div>
                     <label style={labelStyle}>based in</label>
                     <input style={inputStyle} value={form.geography} onChange={e => setForm(f => ({ ...f, geography: e.target.value }))} placeholder="Berlin, DE" />
+                  </div>
+                </div>
+                {/* Founder profile */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                  <div>
+                    <label style={labelStyle}>co-founders</label>
+                    <select style={inputStyle} value={form.cofounder_count} onChange={(e) => setForm(f => ({ ...f, cofounder_count: e.target.value }))}><option value="">Select</option><option value="1">Solo founder</option><option value="2">2 co-founders</option><option value="3">3 co-founders</option><option value="4+">4+</option></select>
+                  </div>
+                  <div>
+                    <label style={labelStyle}>known each other</label>
+                    <select style={inputStyle} value={form.cofounder_history} onChange={(e) => setForm(f => ({ ...f, cofounder_history: e.target.value }))}><option value="">Select</option><option value="solo">N/A (solo)</option><option value="less1y">Less than 1 year</option><option value="1-2y">1-2 years</option><option value="3-5y">3-5 years</option><option value="5y+">5+ years</option></select>
+                  </div>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem" }}>
+                  <div>
+                    <label style={labelStyle}>founded before?</label>
+                    <select style={inputStyle} value={form.prior_founder} onChange={(e) => setForm(f => ({ ...f, prior_founder: e.target.value }))}><option value="">Select</option><option value="yes">Yes</option><option value="no">No</option></select>
+                  </div>
+                  <div>
+                    <label style={labelStyle}>any exits?</label>
+                    <select style={inputStyle} value={form.prior_exit} onChange={(e) => setForm(f => ({ ...f, prior_exit: e.target.value }))}><option value="">Select</option><option value="yes">Yes</option><option value="no">No</option></select>
+                  </div>
+                  <div>
+                    <label style={labelStyle}>domain experience?</label>
+                    <select style={inputStyle} value={form.domain_experience} onChange={(e) => setForm(f => ({ ...f, domain_experience: e.target.value }))}><option value="">Select</option><option value="yes">Yes</option><option value="no">No</option></select>
                   </div>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
