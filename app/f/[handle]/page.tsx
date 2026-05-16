@@ -23,6 +23,16 @@ export default async function FounderPassportPage({
 
   if (!founder) notFound();
 
+  // Get latest intro for founder signals
+  const { data: latestIntro } = await supabase
+    .from('intros')
+    .select('cofounder_count, cofounder_history, prior_founder, prior_exit, domain_experience')
+    .eq('founder_handle', handle)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+
+
   // Increment view count (fire and forget)
   try { await supabase.rpc('increment_view_count', { founder_id: founder.id }); } catch { /* non-blocking */ }
 
@@ -140,7 +150,45 @@ export default async function FounderPassportPage({
               )}
             </div>
 
-            {founder.name && (
+    
+        {/* Founder Profile */}
+        {latestIntro && (latestIntro.cofounder_count || latestIntro.prior_founder !== null || latestIntro.domain_experience) && (
+          <div style={{ border: '1px solid var(--border2)', marginBottom: '16px' }}>
+            <div style={{ padding: '9px 14px', background: 'var(--bg3)', fontSize: '10px', color: 'var(--accent)', letterSpacing: '0.06em', borderBottom: '1px solid var(--border)' }}>FOUNDER_PROFILE</div>
+            {latestIntro.cofounder_count && (
+              <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', borderBottom: '1px solid var(--border)' }}>
+                <div style={{ padding: '9px 14px', background: 'var(--bg3)', fontSize: '10px', color: 'var(--white-mid)', borderRight: '1px solid var(--border)', letterSpacing: '0.06em' }}>co-founders</div>
+                <div style={{ padding: '9px 14px', fontSize: '12px', color: 'var(--white-high)' }}>{latestIntro.cofounder_count === '1' ? 'Solo founder' : latestIntro.cofounder_count}</div>
+              </div>
+            )}
+            {latestIntro.cofounder_history && latestIntro.cofounder_history !== 'solo' && (
+              <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', borderBottom: '1px solid var(--border)' }}>
+                <div style={{ padding: '9px 14px', background: 'var(--bg3)', fontSize: '10px', color: 'var(--white-mid)', borderRight: '1px solid var(--border)', letterSpacing: '0.06em' }}>known each other</div>
+                <div style={{ padding: '9px 14px', fontSize: '12px', color: 'var(--white-high)' }}>{latestIntro.cofounder_history}</div>
+              </div>
+            )}
+            {latestIntro.prior_founder !== null && (
+              <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', borderBottom: '1px solid var(--border)' }}>
+                <div style={{ padding: '9px 14px', background: 'var(--bg3)', fontSize: '10px', color: 'var(--white-mid)', borderRight: '1px solid var(--border)', letterSpacing: '0.06em' }}>founded before</div>
+                <div style={{ padding: '9px 14px', fontSize: '12px', color: 'var(--white-high)' }}>{latestIntro.prior_founder ? 'Yes' : 'No'}</div>
+              </div>
+            )}
+            {latestIntro.prior_exit && (
+              <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', borderBottom: '1px solid var(--border)' }}>
+                <div style={{ padding: '9px 14px', background: 'var(--bg3)', fontSize: '10px', color: 'var(--white-mid)', borderRight: '1px solid var(--border)', letterSpacing: '0.06em' }}>prior exit</div>
+                <div style={{ padding: '9px 14px', fontSize: '12px', color: 'var(--white-high)' }}>Yes</div>
+              </div>
+            )}
+            {latestIntro.domain_experience && (
+              <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr' }}>
+                <div style={{ padding: '9px 14px', background: 'var(--bg3)', fontSize: '10px', color: 'var(--white-mid)', borderRight: '1px solid var(--border)', letterSpacing: '0.06em' }}>domain experience</div>
+                <div style={{ padding: '9px 14px', fontSize: '12px', color: 'var(--white-high)' }}>{latestIntro.domain_experience}</div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {founder.name && (
               <p style={{ fontSize: '11px', color: 'var(--white-dimmer)', marginBottom: '16px' }}>
                 built by {founder.name}
               </p>
