@@ -15,6 +15,11 @@ interface Props {
   passportUrl: string;
   dashboardUrl: string;
   unsubscribeUrl: string;
+  cofounderCount?: string;
+  cofounderHistory?: string;
+  priorFounder?: boolean;
+  priorExit?: boolean;
+  domainExperience?: boolean;
 }
 
 export default function InvestorNotification({
@@ -30,6 +35,11 @@ export default function InvestorNotification({
   passportUrl = "https://scopecheck.ai/f/carbonade",
   dashboardUrl = "https://scopecheck.ai/dashboard",
   unsubscribeUrl = "https://scopecheck.ai/unsubscribe",
+  cofounderCount,
+  cofounderHistory,
+  priorFounder,
+  priorExit,
+  domainExperience,
 }: Props) {
   return (
     <Html>
@@ -44,6 +54,11 @@ export default function InvestorNotification({
           <strong>Stage:</strong> {stage}<br />
           <strong>Sector:</strong> {sector}<br />
           <strong>Traction:</strong> {traction}<br />
+            {cofounderCount && <><strong>Co-founders:</strong> {cofounderCount === "1" ? "Solo founder" : cofounderCount}<br /></>}
+            {cofounderHistory && cofounderHistory !== "solo" && <><strong>Known each other:</strong> {cofounderHistory}<br /></>}
+            {priorFounder !== undefined && <><strong>Founded before:</strong> {priorFounder ? "Yes" : "No"}<br /></>}
+            {priorExit !== undefined && priorExit && <><strong>Prior exit:</strong> Yes<br /></>}
+            {domainExperience !== undefined && <><strong>Domain experience:</strong> {domainExperience ? "Yes" : "No"}<br /></>}
           {deckUrl && <><strong>Deck:</strong> <Link href={deckUrl} style={{ color: "#1a73e8" }}>{deckUrl}</Link><br /></>}
           {founderEmail && <><strong>Founder email:</strong> <Link href={`mailto:${founderEmail}`} style={{ color: "#1a73e8" }}>{founderEmail}</Link><br /></>}
           <br />
