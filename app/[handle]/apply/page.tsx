@@ -76,7 +76,7 @@ export default function ApplyPage({ params }: { params: Promise<{ handle: string
               cofounderHistory:  form.cofounder_history || null,
               priorFounder:     form.prior_founder === "yes",
               priorExit:        form.prior_exit === "yes",
-              domainExperience: form.domain_experience === "yes",
+              domainExperience: form.domain_experience || null,
           passportHandle,
           customAnswers:     Object.keys(customAnswers).length > 0 ? customAnswers : null,
         }),
@@ -256,12 +256,8 @@ export default function ApplyPage({ params }: { params: Promise<{ handle: string
                 </select>
               </div>
               <div>
-                <label className="label">Domain experience?</label>
-                <select className="input" value={form.domain_experience || ""} onChange={(e) => handleChange("domain_experience", e.target.value)}>
-                  <option value="">Select</option>
-                  <option value="yes">Yes</option>
-                  <option value="no">No</option>
-                </select>
+                <label className="label">Domain experience</label>
+                <input className="input" value={form.domain_experience || ""} onChange={(e) => handleChange("domain_experience", e.target.value)} placeholder="e.g. 8 years in fintech" />
               </div>
             </div>
           {/* Round details row */}
