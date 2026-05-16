@@ -19,7 +19,7 @@ interface Props {
   cofounderHistory?: string;
   priorFounder?: boolean;
   priorExit?: boolean;
-  domainExperience?: boolean;
+  domainExperience?: string;
 }
 
 export default function InvestorNotification({
@@ -58,7 +58,7 @@ export default function InvestorNotification({
             {cofounderHistory && cofounderHistory !== "solo" && <><strong>Known each other:</strong> {cofounderHistory}<br /></>}
             {priorFounder !== undefined && <><strong>Founded before:</strong> {priorFounder ? "Yes" : "No"}<br /></>}
             {priorExit !== undefined && priorExit && <><strong>Prior exit:</strong> Yes<br /></>}
-            {domainExperience !== undefined && <><strong>Domain experience:</strong> {domainExperience ? "Yes" : "No"}<br /></>}
+            {domainExperience && <><strong>Domain experience:</strong> {domainExperience}<br /></>}
           {deckUrl && <><strong>Deck:</strong> <Link href={deckUrl} style={{ color: "#1a73e8" }}>{deckUrl}</Link><br /></>}
           {founderEmail && <><strong>Founder email:</strong> <Link href={`mailto:${founderEmail}`} style={{ color: "#1a73e8" }}>{founderEmail}</Link><br /></>}
           <br />
