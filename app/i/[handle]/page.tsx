@@ -284,7 +284,7 @@ export default function InvestorProfilePage({
               <div>
                 <h1 style={{ fontSize: "26px", fontWeight: 700, letterSpacing: "-0.01em", marginBottom: "4px" }}>{inv.name as string}</h1>
                 <p style={{ fontSize: "11px", color: "var(--white-mid)" }}>
-                  {[inv.firm, inv.location].filter(Boolean).join(" Â· ")}
+                  {[inv.firm, inv.location].filter(Boolean).join(" · ")}
                 </p>
               </div>
               <div style={{ display: "flex", gap: "5px", flexWrap: "wrap" }}>
@@ -307,7 +307,7 @@ export default function InvestorProfilePage({
                   <div style={{ padding: "9px 14px", background: "var(--bg3)", fontSize: "10px", color: "var(--white-mid)", borderRight: "1px solid var(--border)", letterSpacing: "0.06em" }}>sectors</div>
                   <div style={{ padding: "9px 14px", fontSize: "12px" }}>
                     {(inv.sectors as string[]).map((s: string, i: number) => (
-                      <span key={s}><span style={{ color: "var(--rasp)" }}>{s}</span>{i < (inv.sectors as string[]).length - 1 ? " Â· " : ""}</span>
+                      <span key={s}><span style={{ color: "var(--rasp)" }}>{s}</span>{i < (inv.sectors as string[]).length - 1 ? " · " : ""}</span>
                     ))}
                   </div>
                 </div>
@@ -315,7 +315,7 @@ export default function InvestorProfilePage({
               {((inv.geographies as string[])?.length ?? 0) > 0 && (
                 <div style={{ display: "grid", gridTemplateColumns: "140px 1fr", borderBottom: "1px solid var(--border)" }}>
                   <div style={{ padding: "9px 14px", background: "var(--bg3)", fontSize: "10px", color: "var(--white-mid)", borderRight: "1px solid var(--border)", letterSpacing: "0.06em" }}>geography</div>
-                  <div style={{ padding: "9px 14px", fontSize: "12px", color: "var(--white)" }}>{(inv.geographies as string[]).join(" Â· ")}</div>
+                  <div style={{ padding: "9px 14px", fontSize: "12px", color: "var(--white)" }}>{(inv.geographies as string[]).join(" · ")}</div>
                 </div>
               )}
               {!!inv.wont_invest_in && (
@@ -471,7 +471,7 @@ export default function InvestorProfilePage({
                 </div>
                 <div style={{ marginBottom: "12px" }}>
                   <label style={labelStyle}>traction *</label>
-                  <input required style={inputStyle} value={form.traction} onChange={e => setForm(f => ({ ...f, traction: e.target.value }))} placeholder="â¬180K ARR Â· 3 enterprise pilots" />
+                  <input required style={inputStyle} value={form.traction} onChange={e => setForm(f => ({ ...f, traction: e.target.value }))} placeholder="â¬180K ARR · 3 enterprise pilots" />
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "20px" }}>
                   <div>
