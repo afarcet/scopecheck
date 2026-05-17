@@ -159,7 +159,7 @@ export default async function FounderPassportPage({
                 <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr' }}>
                   <div style={{ padding: '9px 14px', background: 'var(--bg3)', fontSize: '10px', color: 'var(--white-mid)', borderRight: '1px solid var(--border)', letterSpacing: '0.06em' }}>data_room</div>
             {/* SCOPE SIGNAL */}
-            {scopeResult && (
+            {scopeResult && scopeResult.signal !== 'low' && (
               <div style={{ marginBottom: "24px", padding: "14px 16px", background: "var(--bg3)", border: "1px solid var(--border2)", borderRadius: "6px", borderLeft: scopeResult.signal === "strong" ? "3px solid var(--green)" : scopeResult.signal === "moderate" ? "3px solid var(--amber)" : "3px solid var(--white-dim)" }}>
                 <div style={{ fontSize: "10px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color: scopeResult.signal === "strong" ? "var(--green)" : scopeResult.signal === "moderate" ? "var(--amber)" : "var(--white-dim)", marginBottom: "6px" }}>
                   {signalLabel(scopeResult.signal)} with Raspberry
@@ -180,7 +180,7 @@ export default async function FounderPassportPage({
     
         
           {/* INVESTOR MATCHES */}
-          {latestIntro && (
+          {latestIntro && scopeResult && scopeResult.signal !== 'low' && (
             <InvestorMatches
               sector={latestIntro.sector || ''}
               stage={latestIntro.stage || ''}
