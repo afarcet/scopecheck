@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createClient } from "@supabase/supabase-js";
-import { computeScopeSignal, signalLabel } from "@/lib/scoring";
 
+import { computeScopeSignal, signalLabel } from "@/lib/scoring";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -143,29 +143,19 @@ export async function POST(req: NextRequest) {
 </html>`,
     });
 
-    return NextResponse.json(
-      { ok: true, handle, passpor
-
     // Compute scope signal and notify Alex
     const scopeResult = computeScopeSignal({ stage, sector });
     const fitLabel = signalLabel(scopeResult.signal);
 
     await resend.emails.send({
-      from: "ScopeCheck <onboarding@resend.dev>",
+      from: "ScopeCheck <notifications@scopecheck.ai>",
       to: "alex@raspberry.ventures",
-      subject: `[${fitLabel}] ${companyName} — ${sector || "no sector"}`,
-      html: `<div style="font-family:sans-serif;max-width:600px">
-        <h2 style="margin:0 0 8px">${companyName}</h2>
-        <p style="margin:0 0 4px"><strong>Founder:</strong> ${founderName} (${founderEmail})</p>
-        <p style="margin:0 0 4px"><strong>Sector:</strong> ${sector || "—"}</p>
-        <p style="margin:0 0 4px"><strong>Stage:</strong> ${stage || "—"}</p>
-        <p style="margin:0 0 4px"><strong>One-liner:</strong> ${oneLiner || "—"}</p>
-        <p style="margin:0 0 4px"><strong>Traction:</strong> ${traction || "—"}</p>
-        <p style="margin:0 0 12px"><strong>Scope fit:</strong> ${fitLabel} (${scopeResult.score}/${scopeResult.maxScore})</p>
-        <a href="https://scopecheck.ai/f/${handle}" style="color:#4ade80">View passport &rarr;</a>
-      </div>`,
+      subject: `[${fitLabel}] ${companyName} - ${sector || "no sector"}`,
+      html: `<div style="font-family:sans-serif;max-width:600px"><h2 style="margin:0 0 8px">${companyName}</h2><p><strong>Founder:</strong> ${founderName} (${founderEmail})</p><p><strong>Sector:</strong> ${sector || "n/a"}</p><p><strong>Stage:</strong> ${stage || "n/a"}</p><p><strong>One-liner:</strong> ${oneLiner || "n/a"}</p><p><strong>Traction:</strong> ${traction || "n/a"}</p><p style="margin:12px 0"><strong>Scope fit:</strong> ${fitLabel} (${scopeResult.score}/${scopeResult.maxScore})</p><a href="https://scopecheck.ai/f/${handle}" style="color:#4ade80">View passport</a></div>`,
     });
-tUrl },
+
+    return NextResponse.json(
+      { ok: true, handle, passportUrl },
       { headers: corsHeaders }
     );
   } catch (err) {
