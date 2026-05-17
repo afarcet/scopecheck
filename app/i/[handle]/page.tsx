@@ -275,7 +275,7 @@ export default function InvestorProfilePage({
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderBottom: "1px solid var(--border)", background: "var(--bg3)" }}>
             <span style={{ fontSize: "11px", color: "var(--rasp)" }}>scopecheck.ai/i/{handle}</span>
             <span style={{ fontSize: "10px", letterSpacing: "0.08em", padding: "2px 7px", border: "1px solid var(--rasp-border)", color: "var(--rasp)", background: "var(--rasp-dim)", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-              <span style={{ animation: "blink 2s ease infinite", display: "inline-block" }}>â</span>
+              <span style={{ animation: "blink 2s ease infinite", display: "inline-block" }}>●</span>
               {inv.status === "active" ? "open to inbound" : "paused"}
             </span>
           </div>
